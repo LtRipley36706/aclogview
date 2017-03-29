@@ -352,7 +352,7 @@ namespace aclogview
                 TreeView treeView = new TreeView();
 
                 Dictionary<uint, CM_Physics.CreateObject> weenies = new Dictionary<uint, CM_Physics.CreateObject>();
-                List<CM_Physics.CreateObject> staticObjects = new List<CM_Physics.CreateObject>();
+                Dictionary<uint, CM_Physics.CreateObject> staticObjects = new Dictionary<uint, CM_Physics.CreateObject>();
                 Dictionary<ITEM_TYPE, List<Position>> processedPositions = new Dictionary<ITEM_TYPE, List<Position>>();
 
 
@@ -447,12 +447,12 @@ namespace aclogview
             }
         }
 
-        private void CreateStaticObjectsList(CM_Physics.CreateObject parsed, List<CM_Physics.CreateObject> staticObjects, Dictionary<uint, CM_Physics.CreateObject> weenies, Dictionary<ITEM_TYPE, List<Position>> processedPositions)
+        private void CreateStaticObjectsList(CM_Physics.CreateObject parsed, Dictionary<uint, CM_Physics.CreateObject> staticObjects, Dictionary<uint, CM_Physics.CreateObject> weenies, Dictionary<ITEM_TYPE, List<Position>> processedPositions)
         {
             try
             {
                 // don't need undefined crap or players
-                if (parsed.wdesc._type == ITEM_TYPE.TYPE_UNDEF || parsed.wdesc._wcid == 1)
+                if (parsed.wdesc._type == ITEM_TYPE.TYPE_UNDEF || parsed.wdesc._wcid == 1 || staticObjects.ContainsKey(parsed.object_id))
                     return;
 
                 if (!weenies.ContainsKey(parsed.wdesc._wcid))
@@ -463,43 +463,47 @@ namespace aclogview
 
                 bool addIt = false;
 
-                switch (parsed.wdesc._type)
-                {
-                    case ITEM_TYPE.TYPE_MISC:
-                        if (parsed.wdesc._name.m_buffer == "Door" ||
-                            parsed.wdesc._wcid == 9704 || // added per Ripley
-                            parsed.physicsdesc.setup_id == 33556205 || // town signs, maybe?
-                            parsed.wdesc._iconID == 100668115) // town signs, also maybe?
-                            addIt = true;
-                        break;
-                    case ITEM_TYPE.TYPE_CREATURE:
-                        if (parsed.wdesc._blipColor == 8) // NPC
-                            addIt = true;
-                        break;
-                    case ITEM_TYPE.TYPE_LIFESTONE:
-                    case ITEM_TYPE.TYPE_VENDOR_SHOPKEEP:
-                    case ITEM_TYPE.TYPE_VENDOR_GROCER:
-                        addIt = true;
-                        break;
-                    case ITEM_TYPE.TYPE_PORTAL:
-                        if (parsed.wdesc._blipColor != 3) // white/temporary portals
-                            addIt = true;
-                        break;
-                    case ITEM_TYPE.TYPE_CONTAINER:
-                        //if (parsed.wdesc._wcid == 11697 || // floor hooks
-                        //    parsed.wdesc._wcid == 9686 || // wall hooks
-                        //    parsed.wdesc._wcid == 11698 || // ceiling hooks
-                        //    parsed.wdesc._wcid == 9687) // house storage
-                        //    addIt = true;
-                        break;
-                    default:
-                        return;
-                }
+                //switch (parsed.wdesc._type)
+                //{
+                //    case ITEM_TYPE.TYPE_MISC:
+                //        if (parsed.wdesc._name.m_buffer == "Door" ||
+                //            parsed.wdesc._wcid == 9704 || // added per Ripley
+                //            parsed.physicsdesc.setup_id == 33556205 || // town signs, maybe?
+                //            parsed.wdesc._iconID == 100668115) // town signs, also maybe?
+                //            addIt = true;
+                //        break;
+                //    case ITEM_TYPE.TYPE_CREATURE:
+                //        if (parsed.object_id < 0x80000000) // under 0x8 is static, over is dynamic
+                //            addIt = true;
+                //        break;
+                //    case ITEM_TYPE.TYPE_LIFESTONE:
+                //    case ITEM_TYPE.TYPE_VENDOR_SHOPKEEP:
+                //    case ITEM_TYPE.TYPE_VENDOR_GROCER:
+                //        addIt = true;
+                //        break;
+                //    case ITEM_TYPE.TYPE_PORTAL:
+                //        if (parsed.object_id < 0x80000000) // under 0x8 is static, over is dynamic
+                //            addIt = true;
+                //        break;
+                //    case ITEM_TYPE.TYPE_CONTAINER:
+                //        //if (parsed.wdesc._wcid == 11697 || // floor hooks
+                //        //    parsed.wdesc._wcid == 9686 || // wall hooks
+                //        //    parsed.wdesc._wcid == 11698 || // ceiling hooks
+                //        //    parsed.wdesc._wcid == 9687) // house storage
+                //        //    addIt = true;
+                //        break;
+                //    default:
+                //        return;
+                //}
+
+                // hell, let's just get all of them under 0x8
+                if (parsed.object_id < 0x80000000) // under 0x8 is static, over is dynamic
+                    addIt = true;
 
                 // de-dupe based on position.
-                if (addIt && !PositionRecorded(processedPositions[parsed.wdesc._type], parsed.physicsdesc.pos))
+                if (addIt && !PositionRecorded(parsed, processedPositions[parsed.wdesc._type], parsed.physicsdesc.pos))
                 {
-                    staticObjects.Add(parsed);
+                    staticObjects.Add(parsed.object_id, parsed);
                     processedPositions[parsed.wdesc._type].Add(parsed.physicsdesc.pos);
                 }
             }
@@ -509,7 +513,7 @@ namespace aclogview
             }
         }
 
-        private void WriteStaticObjectData(List<CM_Physics.CreateObject> staticObjects, string outputFolder)
+        private void WriteStaticObjectData(Dictionary<uint, CM_Physics.CreateObject> staticObjects, string outputFolder)
         {
             string staticFolder = Path.Combine(outputFolder, "statics");
             if (Directory.Exists(staticFolder))
@@ -519,7 +523,7 @@ namespace aclogview
 
             Dictionary<ITEM_TYPE, int> fileCount = new Dictionary<ITEM_TYPE, int>();
 
-            foreach (var parsed in staticObjects)
+            foreach (var parsed in staticObjects.Values)
             {
                 if (!fileCount.ContainsKey(parsed.wdesc._type))
                     fileCount.Add(parsed.wdesc._type, 0);
@@ -528,17 +532,17 @@ namespace aclogview
                 {
                     string fullFile = Path.Combine(staticFolder, $"{parsed.wdesc._type}_{fileCount[parsed.wdesc._type]}.sql");
 
-                    if (File.Exists(fullFile))
-                    {
-                        FileInfo fi = new FileInfo(fullFile);
+                    //if (File.Exists(fullFile))
+                    //{
+                    //    FileInfo fi = new FileInfo(fullFile);
 
-                        // go to the next file if it's bigger than a MB
-                        if (fi.Length > (1048576))
-                        {
-                            fileCount[parsed.wdesc._type]++;
-                            fullFile = Path.Combine(staticFolder, $"{parsed.wdesc._type}_{fileCount[parsed.wdesc._type]}.sql");
-                        }
-                    }
+                    //    // go to the next file if it's bigger than a MB
+                    //    if (fi.Length > (1048576))
+                    //    {
+                    //        fileCount[parsed.wdesc._type]++;
+                    //        fullFile = Path.Combine(staticFolder, $"{parsed.wdesc._type}_{fileCount[parsed.wdesc._type]}.sql");
+                    //    }
+                    //}
 
                     using (FileStream fs = new FileStream(fullFile, FileMode.Append))
                     {
@@ -560,20 +564,20 @@ namespace aclogview
                             "`physicsTableId`, `motionTableId`, `soundTableId`, `physicsState`, `translucency`)" + Environment.NewLine + "VALUES (" +
 
                             // shove the wcid in here so we can tell the difference between weenie classes and real objects for analysis
-                            $"{parsed.object_id}, '{parsed.wdesc._name.m_buffer.Replace("'", "''")}', {(int)parsed.wdesc._type}, {parsed.objdesc.paletteID}, " +
+                            $"{parsed.object_id}, '{parsed.wdesc._name.m_buffer.Replace("'", "''")}', {(uint)parsed.wdesc._type}, {parsed.objdesc.paletteID}, " +
 
                             // wdesc data
-                            $"{(int)parsed.wdesc._ammoType}, {parsed.wdesc._blipColor}, {parsed.wdesc._bitfield}, {parsed.wdesc._burden}, {parsed.wdesc._combatUse}, {parsed.wdesc._cooldown_duration}, " +
-                            $"{parsed.wdesc._cooldown_id}, {parsed.wdesc._effects}, {parsed.wdesc._containersCapacity}, {parsed.wdesc.header}, {(int)parsed.wdesc._hook_type}, {parsed.wdesc._iconID}, {parsed.wdesc._iconOverlayID}, " +
-                            $"{parsed.wdesc._iconUnderlayID}, {parsed.wdesc._hook_item_types}, {parsed.wdesc._itemsCapacity}, {parsed.wdesc._location}, {(int)parsed.wdesc._material_type}, " +
-                            $"{parsed.wdesc._maxStackSize}, {parsed.wdesc._maxStructure}, {(int)parsed.wdesc._radar_enum}, {parsed.wdesc._pscript}, {parsed.wdesc._spellID}, {parsed.wdesc._stackSize}, " +
-                            $"{parsed.wdesc._structure}, {(int)parsed.wdesc._targetType}, {(int)parsed.wdesc._useability}, {parsed.wdesc._useRadius}, {parsed.wdesc._valid_locations}, {parsed.wdesc._value}, " +
+                            $"{(uint)parsed.wdesc._ammoType}, {parsed.wdesc._blipColor}, {parsed.wdesc._bitfield}, {parsed.wdesc._burden}, {parsed.wdesc._combatUse}, {parsed.wdesc._cooldown_duration}, " +
+                            $"{parsed.wdesc._cooldown_id}, {parsed.wdesc._effects}, {parsed.wdesc._containersCapacity}, {parsed.wdesc.header}, {(uint)parsed.wdesc._hook_type}, {parsed.wdesc._iconID}, {parsed.wdesc._iconOverlayID}, " +
+                            $"{parsed.wdesc._iconUnderlayID}, {parsed.wdesc._hook_item_types}, {parsed.wdesc._itemsCapacity}, {parsed.wdesc._location}, {(uint)parsed.wdesc._material_type}, " +
+                            $"{parsed.wdesc._maxStackSize}, {parsed.wdesc._maxStructure}, {(uint)parsed.wdesc._radar_enum}, {parsed.wdesc._pscript}, {parsed.wdesc._spellID}, {parsed.wdesc._stackSize}, " +
+                            $"{parsed.wdesc._structure}, {(uint)parsed.wdesc._targetType}, {(uint)parsed.wdesc._useability}, {parsed.wdesc._useRadius}, {parsed.wdesc._valid_locations}, {parsed.wdesc._value}, " +
                             $"{parsed.wdesc._workmanship}, " +
 
                             // physics data.  note, model table is mis-parsed as setup_id.  the setup_id is actually "mtable", which is presumably motion table id.
-                            $"{parsed.physicsdesc.animframe_id}, {(int)parsed.physicsdesc.default_script}, {parsed.physicsdesc.default_script_intensity}, {parsed.physicsdesc.elasticity}, " +
+                            $"{parsed.physicsdesc.animframe_id}, {(uint)parsed.physicsdesc.default_script}, {parsed.physicsdesc.default_script_intensity}, {parsed.physicsdesc.elasticity}, " +
                             $"{parsed.physicsdesc.friction}, {parsed.physicsdesc.location_id}, {parsed.physicsdesc.setup_id}, {parsed.physicsdesc.object_scale}, {parsed.physicsdesc.bitfield}, " +
-                            $"{parsed.physicsdesc.phstable_id}, {parsed.physicsdesc.mtable_id}, {parsed.physicsdesc.stable_id}, {parsed.physicsdesc.state}, {parsed.physicsdesc.translucency});" + Environment.NewLine;
+                            $"{parsed.physicsdesc.phstable_id}, {parsed.physicsdesc.mtable_id}, {parsed.physicsdesc.stable_id}, {(uint)parsed.physicsdesc.state}, {parsed.physicsdesc.translucency});" + Environment.NewLine;
 
                             // creates the weenieClass record
                             writer.WriteLine(line);
@@ -709,20 +713,20 @@ namespace aclogview
                         "`physicsTableId`, `motionTableId`, `soundTableId`, `physicsState`, `translucency`)" + Environment.NewLine + "VALUES (" +
 
                         // shove the wcid in here so we can tell the difference between weenie classes and real objects for analysis
-                        $"{parsed.wdesc._wcid}, '{parsed.wdesc._name.m_buffer.Replace("'", "''")}', {(int)parsed.wdesc._type}, {parsed.objdesc.paletteID}, " +
+                        $"{parsed.wdesc._wcid}, '{parsed.wdesc._name.m_buffer.Replace("'", "''")}', {(uint)parsed.wdesc._type}, {parsed.objdesc.paletteID}, " +
 
                         // wdesc data
-                        $"{(int)parsed.wdesc._ammoType}, {parsed.wdesc._blipColor}, {parsed.wdesc._bitfield}, {parsed.wdesc._burden}, {parsed.wdesc._combatUse}, {parsed.wdesc._cooldown_duration}, " +
-                        $"{parsed.wdesc._cooldown_id}, {parsed.wdesc._effects}, {parsed.wdesc._containersCapacity}, {parsed.wdesc.header}, {(int)parsed.wdesc._hook_type}, {parsed.wdesc._iconID}, {parsed.wdesc._iconOverlayID}, " +
-                        $"{parsed.wdesc._iconUnderlayID}, {parsed.wdesc._hook_item_types}, {parsed.wdesc._itemsCapacity}, {parsed.wdesc._location}, {(int)parsed.wdesc._material_type}, " +
-                        $"{parsed.wdesc._maxStackSize}, {parsed.wdesc._maxStructure}, {(int)parsed.wdesc._radar_enum}, {parsed.wdesc._pscript}, {parsed.wdesc._spellID}, {parsed.wdesc._stackSize}, " +
-                        $"{parsed.wdesc._structure}, {(int)parsed.wdesc._targetType}, {(int)parsed.wdesc._useability}, {parsed.wdesc._useRadius}, {parsed.wdesc._valid_locations}, {parsed.wdesc._value}, " +
+                        $"{(uint)parsed.wdesc._ammoType}, {parsed.wdesc._blipColor}, {parsed.wdesc._bitfield}, {parsed.wdesc._burden}, {parsed.wdesc._combatUse}, {parsed.wdesc._cooldown_duration}, " +
+                        $"{parsed.wdesc._cooldown_id}, {parsed.wdesc._effects}, {parsed.wdesc._containersCapacity}, {parsed.wdesc.header}, {(uint)parsed.wdesc._hook_type}, {parsed.wdesc._iconID}, {parsed.wdesc._iconOverlayID}, " +
+                        $"{parsed.wdesc._iconUnderlayID}, {parsed.wdesc._hook_item_types}, {parsed.wdesc._itemsCapacity}, {parsed.wdesc._location}, {(uint)parsed.wdesc._material_type}, " +
+                        $"{parsed.wdesc._maxStackSize}, {parsed.wdesc._maxStructure}, {(uint)parsed.wdesc._radar_enum}, {parsed.wdesc._pscript}, {parsed.wdesc._spellID}, {parsed.wdesc._stackSize}, " +
+                        $"{parsed.wdesc._structure}, {(uint)parsed.wdesc._targetType}, {(uint)parsed.wdesc._useability}, {parsed.wdesc._useRadius}, {parsed.wdesc._valid_locations}, {parsed.wdesc._value}, " +
                         $"{parsed.wdesc._workmanship}, " +
 
                         // physics data.  note, model table is mis-parsed as setup_id.  the setup_id is actually "mtable", which is presumably motion table id.
-                        $"{parsed.physicsdesc.animframe_id}, {(int)parsed.physicsdesc.default_script}, {parsed.physicsdesc.default_script_intensity}, {parsed.physicsdesc.elasticity}, " +
+                        $"{parsed.physicsdesc.animframe_id}, {(uint)parsed.physicsdesc.default_script}, {parsed.physicsdesc.default_script_intensity}, {parsed.physicsdesc.elasticity}, " +
                         $"{parsed.physicsdesc.friction}, {parsed.physicsdesc.location_id}, {parsed.physicsdesc.setup_id}, {parsed.physicsdesc.object_scale}, {parsed.physicsdesc.bitfield}, " +
-                        $"{parsed.physicsdesc.phstable_id}, {parsed.physicsdesc.mtable_id}, {parsed.physicsdesc.stable_id}, {parsed.physicsdesc.state}, {parsed.physicsdesc.translucency});" + Environment.NewLine;
+                        $"{parsed.physicsdesc.phstable_id}, {parsed.physicsdesc.mtable_id}, {parsed.physicsdesc.stable_id}, {(uint)parsed.physicsdesc.state}, {parsed.physicsdesc.translucency});" + Environment.NewLine;
 
                         // creates the base ace object record
                         writer.WriteLine(line);
@@ -801,15 +805,20 @@ namespace aclogview
             }
         }
 
-        private bool PositionRecorded(List<Position> positions, Position newPosition)
+        private bool PositionRecorded(CM_Physics.CreateObject parsed, List<Position> positions, Position newPosition)
         {
             if (newPosition?.frame?.m_fOrigin == null)
                 return true; // can't dedupe this
 
+            float margin = 0.02f;
+
+            if (parsed.wdesc._name.m_buffer.Contains("Town Crier"))
+                margin = 10.0f;
+
             return positions.Any(p => p.objcell_id == newPosition.objcell_id
-                                && Math.Abs(p.frame.m_fOrigin.x - newPosition.frame.m_fOrigin.x) < 0.02
-                                && Math.Abs(p.frame.m_fOrigin.y - newPosition.frame.m_fOrigin.y) < 0.02
-                                && Math.Abs(p.frame.m_fOrigin.z - newPosition.frame.m_fOrigin.z) < 0.02);
+                                && Math.Abs(p.frame.m_fOrigin.x - newPosition.frame.m_fOrigin.x) < margin
+                                && Math.Abs(p.frame.m_fOrigin.y - newPosition.frame.m_fOrigin.y) < margin
+                                && Math.Abs(p.frame.m_fOrigin.z - newPosition.frame.m_fOrigin.z) < margin);
         }
 
         private void WriteUniqueTypes(CM_Physics.CreateObject parsed, StreamWriter writer, List<ITEM_TYPE> itemTypesToParse, Dictionary<ITEM_TYPE, List<string>> itemTypeKeys)
