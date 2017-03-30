@@ -465,8 +465,8 @@ namespace aclogview
 
                 bool addIt = false;
 
-                //switch (parsed.wdesc._type)
-                //{
+                switch (parsed.wdesc._type)
+                {
                 //    case ITEM_TYPE.TYPE_WRITABLE:
                 //        if (
                 //            parsed.wdesc._wcid == 9002 // W_MONUMENTTHISTLEDOWN_CLASS
@@ -511,100 +511,118 @@ namespace aclogview
                 //        )
                 //        addIt = true;
                 //    break;
-                ////case ITEM_TYPE.TYPE_CREATURE:
-                ////    if (parsed.wdesc._blipColor == 8) // NPC
-                ////        addIt = true;
-                ////    break;
-                ////case ITEM_TYPE.TYPE_LIFESTONE:
-                ////case ITEM_TYPE.TYPE_VENDOR_SHOPKEEP:
-                ////case ITEM_TYPE.TYPE_VENDOR_GROCER:
-                ////    addIt = true;
-                ////    break;
-                //case ITEM_TYPE.TYPE_PORTAL: // HOUSE PORTALS
-                //    //    if (parsed.wdesc._blipColor != 3) // white/temporary portals
-                //    //        addIt = true;
-                //    //    break;
-                //    if (
-                //        parsed.wdesc._wcid == 9620  || // W_PORTALHOUSE_CLASS
-                //        parsed.wdesc._wcid == 10751 || // W_PORTALHOUSETEST_CLASS
-                //        parsed.wdesc._wcid == 11730    // W_HOUSEPORTAL_CLASS
-                //        )
-                //        addIt = true;
-                //    break;
-                //case ITEM_TYPE.TYPE_CONTAINER: // HOOKS AND STORAGE
-                //    //if (parsed.wdesc._wcid == 11697 || // floor hooks
-                //    //    parsed.wdesc._wcid == 9686 || // wall hooks
-                //    //    parsed.wdesc._wcid == 11698 || // ceiling hooks
-                //    //    parsed.wdesc._wcid == 9687) // house storage
-                //    //    addIt = true;
-                //    if (
-                //        parsed.wdesc._wcid == 9686   || // W_HOOK_CLASS
-                //        parsed.wdesc._wcid == 11697  || // W_HOOK_FLOOR_CLASS
-                //        parsed.wdesc._wcid == 11698  || // W_HOOK_CEILING_CLASS
-                //        parsed.wdesc._wcid == 12678  || // W_HOOK_ROOF_CLASS
-                //        parsed.wdesc._wcid == 12679  || // W_HOOK_YARD_CLASS
-                //        parsed.wdesc._wcid == 9687      // W_STORAGE_CLASS
-                //        )
-                //        addIt = true;
-                //    break;
-                //case ITEM_TYPE.TYPE_UNDEF: // SLUMLORD OBJECTS
-                //                           //case ITEM_TYPE.TYPE_SELF:
-                //    if (
-                //            parsed.wdesc._wcid == 9621  || // W_SLUMLORD_CLASS
-                //            parsed.wdesc._wcid == 10752 || // W_SLUMLORDTESTCHEAP_CLASS
-                //            parsed.wdesc._wcid == 10753 || // W_SLUMLORDTESTEXPENSIVE_CLASS
-                //            parsed.wdesc._wcid == 10754 || // W_SLUMLORDTESTMODERATE_CLASS
-                //            parsed.wdesc._wcid == 11711 || // W_SLUMLORDCOTTAGECHEAP_CLASS
-                //            parsed.wdesc._wcid == 11712 || // W_SLUMLORDCOTTAGEEXPENSIVE_CLASS
-                //            parsed.wdesc._wcid == 11713 || // W_SLUMLORDCOTTAGEMODERATE_CLASS
-                //            parsed.wdesc._wcid == 11714 || // W_SLUMLORDMANSIONCHEAP_CLASS
-                //            parsed.wdesc._wcid == 11715 || // W_SLUMLORDMANSIONEXPENSIVE_CLASS
-                //            parsed.wdesc._wcid == 11716 || // W_SLUMLORDMANSIONMODERATE_CLASS
-                //            parsed.wdesc._wcid == 11717 || // W_SLUMLORDVILLACHEAP_CLASS
-                //            parsed.wdesc._wcid == 11718 || // W_SLUMLORDVILLAEXPENSIVE_CLASS
-                //            parsed.wdesc._wcid == 11719 || // W_SLUMLORDVILLAMODERATE_CLASS
-                //            parsed.wdesc._wcid == 11977 || // W_SLUMLORDCOTTAGES349_579_CLASS
-                //            parsed.wdesc._wcid == 11978 || // W_SLUMLORDVILLA851_925_CLASS
-                //            parsed.wdesc._wcid == 11979 || // W_SLUMLORDCOTTAGE580_800_CLASS
-                //            parsed.wdesc._wcid == 11980 || // W_SLUMLORDVILLA926_970_CLASS
-                //            parsed.wdesc._wcid == 11980 || // W_SLUMLORDVILLA926_970_CLASS
-                //            parsed.wdesc._wcid == 12461 || // W_SLUMLORDCOTTAGE1001_1075_CLASS
-                //            parsed.wdesc._wcid == 12462 || // W_SLUMLORDCOTTAGE1076_1150_CLASS
-                //            parsed.wdesc._wcid == 13078 || // W_SLUMLORDCOTTAGE1151_1275_CLASS
-                //            parsed.wdesc._wcid == 13079 || // W_SLUMLORDCOTTAGE1276_1400_CLASS
-                //            parsed.wdesc._wcid == 13080 || // W_SLUMLORDVILLA1401_1440_CLASS
-                //            parsed.wdesc._wcid == 13081 || // W_SLUMLORDMANSION1441_1450_CLASS
-                //            parsed.wdesc._wcid == 14243 || // W_SLUMLORDCOTTAGE1451_1650_CLASS
-                //            parsed.wdesc._wcid == 14244 || // W_SLUMLORDCOTTAGE1651_1850_CLASS
-                //            parsed.wdesc._wcid == 14245 || // W_SLUMLORDVILLA1851_1940_CLASS
-                //            parsed.wdesc._wcid == 14246 || // W_SLUMLORDMANSION1941_1950_CLASS
-                //            parsed.wdesc._wcid == 14247 || // W_SLUMLORDCOTTAGE1951_2150_CLASS
-                //            parsed.wdesc._wcid == 14248 || // W_SLUMLORDCOTTAGE2151_2350_CLASS
-                //            parsed.wdesc._wcid == 14249 || // W_SLUMLORDVILLA2351_2440_CLASS
-                //            parsed.wdesc._wcid == 14250 || // W_SLUMLORDMANSION2441_2450_CLASS
-                //            parsed.wdesc._wcid == 14934 || // W_SLUMLORDCOTTAGE2451_2525_CLASS
-                //            parsed.wdesc._wcid == 14935 || // W_SLUMLORDCOTTAGE2526_2600_CLASS
-                //            parsed.wdesc._wcid == 14936 || // W_SLUMLORDVILLA2601_2640_CLASS
-                //            parsed.wdesc._wcid == 14937 || // W_SLUMLORDMANSION2641_2650_CLASS
-                //                                           // parsed.wdesc._wcid == 15273 || // W_SLUMLORDFAKENUHMUDIRA_CLASS
-                //            parsed.wdesc._wcid == 15608 || // W_SLUMLORDAPARTMENT_CLASS
-                //            parsed.wdesc._wcid == 15609 || // W_SLUMLORDCOTTAGE2651_2725_CLASS
-                //            parsed.wdesc._wcid == 15610 || // W_SLUMLORDCOTTAGE2726_2800_CLASS
-                //            parsed.wdesc._wcid == 15611 || // W_SLUMLORDVILLA2801_2850_CLASS
-                //            parsed.wdesc._wcid == 19074 || // W_SLUMLORDCOTTAGE3851_3925_CLASS
-                //            parsed.wdesc._wcid == 19075 || // W_SLUMLORDCOTTAGE3926_4000_CLASS
-                //            parsed.wdesc._wcid == 19076 || // W_SLUMLORDVILLA4001_4050_CLASS
-                //            parsed.wdesc._wcid == 20850 || // W_SLUMLORDCOTTAGE6051_6125_CLASS
-                //            parsed.wdesc._wcid == 20851 || // W_SLUMLORDCOTTAGE6126_6200_CLASS
-                //            parsed.wdesc._wcid == 20852 || // W_SLUMLORDVILLA6201_6240_CLASS
-                //            parsed.wdesc._wcid == 20853    // W_SLUMLORDMANSION6241_6250_CLASS
-                //                                           // parsed.wdesc._wcid == 22118 || // W_SLUMLORDHAUNTEDMANSION_CLASS
-                //            )
-                //        addIt = true;
-                //        break;
-                //    default:
-                //        return;
-                //}
+                case ITEM_TYPE.TYPE_CREATURE:
+                        //    if (parsed.wdesc._blipColor == 8) // NPC
+                        if (
+                            parsed.wdesc._wcid == 5772 || // W_TOWNCRIERALUVIANFEMALE_CLASS
+                            parsed.wdesc._wcid == 5773 || // W_TOWNCRIERALUVIANMALE_CLASS
+                            parsed.wdesc._wcid == 5774 || // W_TOWNCRIERGHARUNDIMFEMALE_CLASS
+                            parsed.wdesc._wcid == 5775 || // W_TOWNCRIERGHARUNDIMMALE_CLASS
+                            parsed.wdesc._wcid == 5776 || // W_TOWNCRIERSHOFEMALE_CLASS
+                            parsed.wdesc._wcid == 5777 || // W_TOWNCRIERSHOMALE_CLASS
+                            parsed.wdesc._wcid == 8132 || // W_CLUETOWNCRIER_CLASS
+                            parsed.wdesc._wcid == 9223 || // W_AYANBAQURTOWNCRIERDUNGEON_CLASS
+                            parsed.wdesc._wcid == 11938 || // W_TOWNCRIERAHURENGA_XP_CLASS
+                            parsed.wdesc._wcid == 11939 || // W_TOWNCRIERMARAE_XP_CLASS
+                            parsed.wdesc._wcid == 11940 || // W_TOWNCRIERTIMARU_XP_CLASS
+                            parsed.wdesc._wcid == 13242 || // W_ACADEMYCRIER_CLASS
+                            parsed.wdesc._wcid == 21339 || // W_TOWNCRIERSHOMALEYANSHIDESTROYED_CLASS
+                            parsed.wdesc._wcid == 22643 || // W_TOWNCRIEROOLUTANGA_CLASS
+                            parsed.wdesc._wcid == 30063 || // W_TOWNCRIERVIAFEMALE_CLASS
+                            parsed.wdesc._wcid == 30064    // W_TOWNCRIERVIAMALE_CLASS
+                            )
+                            addIt = true;
+                        ////    break;
+                        ////case ITEM_TYPE.TYPE_LIFESTONE:
+                        ////case ITEM_TYPE.TYPE_VENDOR_SHOPKEEP:
+                        ////case ITEM_TYPE.TYPE_VENDOR_GROCER:
+                        ////    addIt = true;
+                        ////    break;
+                        //case ITEM_TYPE.TYPE_PORTAL: // HOUSE PORTALS
+                        //    //    if (parsed.wdesc._blipColor != 3) // white/temporary portals
+                        //    //        addIt = true;
+                        //    //    break;
+                        //    if (
+                        //        parsed.wdesc._wcid == 9620  || // W_PORTALHOUSE_CLASS
+                        //        parsed.wdesc._wcid == 10751 || // W_PORTALHOUSETEST_CLASS
+                        //        parsed.wdesc._wcid == 11730    // W_HOUSEPORTAL_CLASS
+                        //        )
+                        //        addIt = true;
+                        //    break;
+                        //case ITEM_TYPE.TYPE_CONTAINER: // HOOKS AND STORAGE
+                        //    //if (parsed.wdesc._wcid == 11697 || // floor hooks
+                        //    //    parsed.wdesc._wcid == 9686 || // wall hooks
+                        //    //    parsed.wdesc._wcid == 11698 || // ceiling hooks
+                        //    //    parsed.wdesc._wcid == 9687) // house storage
+                        //    //    addIt = true;
+                        //    if (
+                        //        parsed.wdesc._wcid == 9686   || // W_HOOK_CLASS
+                        //        parsed.wdesc._wcid == 11697  || // W_HOOK_FLOOR_CLASS
+                        //        parsed.wdesc._wcid == 11698  || // W_HOOK_CEILING_CLASS
+                        //        parsed.wdesc._wcid == 12678  || // W_HOOK_ROOF_CLASS
+                        //        parsed.wdesc._wcid == 12679  || // W_HOOK_YARD_CLASS
+                        //        parsed.wdesc._wcid == 9687      // W_STORAGE_CLASS
+                        //        )
+                        //        addIt = true;
+                        //    break;
+                        //case ITEM_TYPE.TYPE_UNDEF: // SLUMLORD OBJECTS
+                        //                           //case ITEM_TYPE.TYPE_SELF:
+                        //    if (
+                        //            parsed.wdesc._wcid == 9621  || // W_SLUMLORD_CLASS
+                        //            parsed.wdesc._wcid == 10752 || // W_SLUMLORDTESTCHEAP_CLASS
+                        //            parsed.wdesc._wcid == 10753 || // W_SLUMLORDTESTEXPENSIVE_CLASS
+                        //            parsed.wdesc._wcid == 10754 || // W_SLUMLORDTESTMODERATE_CLASS
+                        //            parsed.wdesc._wcid == 11711 || // W_SLUMLORDCOTTAGECHEAP_CLASS
+                        //            parsed.wdesc._wcid == 11712 || // W_SLUMLORDCOTTAGEEXPENSIVE_CLASS
+                        //            parsed.wdesc._wcid == 11713 || // W_SLUMLORDCOTTAGEMODERATE_CLASS
+                        //            parsed.wdesc._wcid == 11714 || // W_SLUMLORDMANSIONCHEAP_CLASS
+                        //            parsed.wdesc._wcid == 11715 || // W_SLUMLORDMANSIONEXPENSIVE_CLASS
+                        //            parsed.wdesc._wcid == 11716 || // W_SLUMLORDMANSIONMODERATE_CLASS
+                        //            parsed.wdesc._wcid == 11717 || // W_SLUMLORDVILLACHEAP_CLASS
+                        //            parsed.wdesc._wcid == 11718 || // W_SLUMLORDVILLAEXPENSIVE_CLASS
+                        //            parsed.wdesc._wcid == 11719 || // W_SLUMLORDVILLAMODERATE_CLASS
+                        //            parsed.wdesc._wcid == 11977 || // W_SLUMLORDCOTTAGES349_579_CLASS
+                        //            parsed.wdesc._wcid == 11978 || // W_SLUMLORDVILLA851_925_CLASS
+                        //            parsed.wdesc._wcid == 11979 || // W_SLUMLORDCOTTAGE580_800_CLASS
+                        //            parsed.wdesc._wcid == 11980 || // W_SLUMLORDVILLA926_970_CLASS
+                        //            parsed.wdesc._wcid == 11980 || // W_SLUMLORDVILLA926_970_CLASS
+                        //            parsed.wdesc._wcid == 12461 || // W_SLUMLORDCOTTAGE1001_1075_CLASS
+                        //            parsed.wdesc._wcid == 12462 || // W_SLUMLORDCOTTAGE1076_1150_CLASS
+                        //            parsed.wdesc._wcid == 13078 || // W_SLUMLORDCOTTAGE1151_1275_CLASS
+                        //            parsed.wdesc._wcid == 13079 || // W_SLUMLORDCOTTAGE1276_1400_CLASS
+                        //            parsed.wdesc._wcid == 13080 || // W_SLUMLORDVILLA1401_1440_CLASS
+                        //            parsed.wdesc._wcid == 13081 || // W_SLUMLORDMANSION1441_1450_CLASS
+                        //            parsed.wdesc._wcid == 14243 || // W_SLUMLORDCOTTAGE1451_1650_CLASS
+                        //            parsed.wdesc._wcid == 14244 || // W_SLUMLORDCOTTAGE1651_1850_CLASS
+                        //            parsed.wdesc._wcid == 14245 || // W_SLUMLORDVILLA1851_1940_CLASS
+                        //            parsed.wdesc._wcid == 14246 || // W_SLUMLORDMANSION1941_1950_CLASS
+                        //            parsed.wdesc._wcid == 14247 || // W_SLUMLORDCOTTAGE1951_2150_CLASS
+                        //            parsed.wdesc._wcid == 14248 || // W_SLUMLORDCOTTAGE2151_2350_CLASS
+                        //            parsed.wdesc._wcid == 14249 || // W_SLUMLORDVILLA2351_2440_CLASS
+                        //            parsed.wdesc._wcid == 14250 || // W_SLUMLORDMANSION2441_2450_CLASS
+                        //            parsed.wdesc._wcid == 14934 || // W_SLUMLORDCOTTAGE2451_2525_CLASS
+                        //            parsed.wdesc._wcid == 14935 || // W_SLUMLORDCOTTAGE2526_2600_CLASS
+                        //            parsed.wdesc._wcid == 14936 || // W_SLUMLORDVILLA2601_2640_CLASS
+                        //            parsed.wdesc._wcid == 14937 || // W_SLUMLORDMANSION2641_2650_CLASS
+                        //                                           // parsed.wdesc._wcid == 15273 || // W_SLUMLORDFAKENUHMUDIRA_CLASS
+                        //            parsed.wdesc._wcid == 15608 || // W_SLUMLORDAPARTMENT_CLASS
+                        //            parsed.wdesc._wcid == 15609 || // W_SLUMLORDCOTTAGE2651_2725_CLASS
+                        //            parsed.wdesc._wcid == 15610 || // W_SLUMLORDCOTTAGE2726_2800_CLASS
+                        //            parsed.wdesc._wcid == 15611 || // W_SLUMLORDVILLA2801_2850_CLASS
+                        //            parsed.wdesc._wcid == 19074 || // W_SLUMLORDCOTTAGE3851_3925_CLASS
+                        //            parsed.wdesc._wcid == 19075 || // W_SLUMLORDCOTTAGE3926_4000_CLASS
+                        //            parsed.wdesc._wcid == 19076 || // W_SLUMLORDVILLA4001_4050_CLASS
+                        //            parsed.wdesc._wcid == 20850 || // W_SLUMLORDCOTTAGE6051_6125_CLASS
+                        //            parsed.wdesc._wcid == 20851 || // W_SLUMLORDCOTTAGE6126_6200_CLASS
+                        //            parsed.wdesc._wcid == 20852 || // W_SLUMLORDVILLA6201_6240_CLASS
+                        //            parsed.wdesc._wcid == 20853    // W_SLUMLORDMANSION6241_6250_CLASS
+                        //                                           // parsed.wdesc._wcid == 22118 || // W_SLUMLORDHAUNTEDMANSION_CLASS
+                        //            )
+                        //        addIt = true;
+                        break;
+                    default:
+                        return;
+                }
 
                 //if ((parsed.physicsdesc.pos.objcell_id >> 16) == 62810)
                 if ((parsed.physicsdesc.pos.objcell_id >> 16) >= 52884 && (parsed.physicsdesc.pos.objcell_id >> 16) <= 53142)
@@ -927,10 +945,10 @@ namespace aclogview
             if (newPosition?.frame?.m_fOrigin == null)
                 return true; // can't dedupe this
 
-            float margin = 0.02f;
+            float margin = 5.02f;
 
-            if (parsed.wdesc._name.m_buffer.Contains("Town Crier"))
-                margin = 10.0f;
+            //if (parsed.wdesc._name.m_buffer.Contains("Town Crier"))
+            //    margin = 10.0f;
 
             return positions.Any(p => p.objcell_id == newPosition.objcell_id
                                 && Math.Abs(p.frame.m_fOrigin.x - newPosition.frame.m_fOrigin.x) < margin
