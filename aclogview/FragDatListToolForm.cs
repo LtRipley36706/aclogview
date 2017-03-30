@@ -533,12 +533,12 @@ namespace aclogview
                         //    parsed.wdesc._wcid == 9687) // house storage
                         //    addIt = true;
                         if (
-                            parsed.wdesc._wcid == 9686  && parsed.wdesc._name.ToString().Contains("Hook") || // W_HOOK_CLASS
-                            parsed.wdesc._wcid == 11697 && parsed.wdesc._name.ToString().Contains("Hook") || // W_HOOK_FLOOR_CLASS
-                            parsed.wdesc._wcid == 11698 && parsed.wdesc._name.ToString().Contains("Hook") || // W_HOOK_CEILING_CLASS
-                            parsed.wdesc._wcid == 12678 && parsed.wdesc._name.ToString().Contains("Hook") || // W_HOOK_ROOF_CLASS
-                            parsed.wdesc._wcid == 12679 && parsed.wdesc._name.ToString().Contains("Hook") || // W_HOOK_YARD_CLASS
-                            parsed.wdesc._wcid == 9687                                                       // W_STORAGE_CLASS
+                            parsed.wdesc._wcid == 9686   || // W_HOOK_CLASS
+                            parsed.wdesc._wcid == 11697  || // W_HOOK_FLOOR_CLASS
+                            parsed.wdesc._wcid == 11698  || // W_HOOK_CEILING_CLASS
+                            parsed.wdesc._wcid == 12678  || // W_HOOK_ROOF_CLASS
+                            parsed.wdesc._wcid == 12679  || // W_HOOK_YARD_CLASS
+                            parsed.wdesc._wcid == 9687      // W_STORAGE_CLASS
                             )
                             addIt = true;
                         break;
