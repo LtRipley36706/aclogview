@@ -161,6 +161,8 @@ namespace aclogview
         // ********************************************************************
         private readonly FragDatListFile allFragDatFile = new FragDatListFile();
         private readonly FragDatListFile createObjectFragDatFile = new FragDatListFile();
+        private readonly FragDatListFile appraisalInfoFragDatFile = new FragDatListFile();
+        private readonly FragDatListFile createObjectAppraisalInfoFragDatFile = new FragDatListFile();
 
         private void DoBuild()
         {
@@ -169,6 +171,8 @@ namespace aclogview
             // ********************************************************************
             allFragDatFile.CreateFile(Path.Combine(txtOutputFolder.Text, "All.frags"), chkCompressOutput.Checked ? FragDatListFile.CompressionType.DeflateStream : FragDatListFile.CompressionType.None);
             createObjectFragDatFile.CreateFile(Path.Combine(txtOutputFolder.Text, "CreateObject.frags"), chkCompressOutput.Checked ? FragDatListFile.CompressionType.DeflateStream : FragDatListFile.CompressionType.None);
+            appraisalInfoFragDatFile.CreateFile(Path.Combine(txtOutputFolder.Text, "AppraisalInfo.frags"), chkCompressOutput.Checked ? FragDatListFile.CompressionType.DeflateStream : FragDatListFile.CompressionType.None);
+            createObjectAppraisalInfoFragDatFile.CreateFile(Path.Combine(txtOutputFolder.Text, "CreateObjectPlusAppraisalInfo.frags"), chkCompressOutput.Checked ? FragDatListFile.CompressionType.DeflateStream : FragDatListFile.CompressionType.None);
 
             // Do not parallel this search
             foreach (var currentFile in filesToProcess)
@@ -191,6 +195,8 @@ namespace aclogview
             // ********************************************************************
             allFragDatFile.CloseFile();
             createObjectFragDatFile.CloseFile();
+            appraisalInfoFragDatFile.CloseFile();
+            createObjectAppraisalInfoFragDatFile.CloseFile();
         }
 
         private void ProcessFileForBuild(string fileName)
@@ -200,6 +206,8 @@ namespace aclogview
             // Temperorary objects
             var allFrags = new List<FragDatListFile.FragDatInfo>();
             var createObjectFrags = new List<FragDatListFile.FragDatInfo>();
+            var appraisalInfoFrags = new List<FragDatListFile.FragDatInfo>();
+            var createObjectPlusAppraisalInfoFrags = new List<FragDatListFile.FragDatInfo>();
 
             foreach (var record in records)
             {
@@ -233,6 +241,17 @@ namespace aclogview
                             Interlocked.Increment(ref totalHits);
 
                             createObjectFrags.Add(new FragDatListFile.FragDatInfo(packetDirection, record.index, frag.dat_));
+
+                            createObjectPlusAppraisalInfoFrags.Add(new FragDatListFile.FragDatInfo(packetDirection, record.index, frag.dat_));
+                        }
+
+                        if (messageCode == 0x00C9) // APPRAISAL_INFO_EVENT
+                        {
+                            Interlocked.Increment(ref totalHits);
+
+                            appraisalInfoFrags.Add(new FragDatListFile.FragDatInfo(packetDirection, record.index, frag.dat_));
+
+                            createObjectPlusAppraisalInfoFrags.Add(new FragDatListFile.FragDatInfo(packetDirection, record.index, frag.dat_));
                         }
                     }
                     catch
@@ -250,6 +269,8 @@ namespace aclogview
             // ********************************************************************
             allFragDatFile.Write(new KeyValuePair<string, IList<FragDatListFile.FragDatInfo>>(outputFileName, allFrags));
             createObjectFragDatFile.Write(new KeyValuePair<string, IList<FragDatListFile.FragDatInfo>>(outputFileName, createObjectFrags));
+            appraisalInfoFragDatFile.Write(new KeyValuePair<string, IList<FragDatListFile.FragDatInfo>>(outputFileName, appraisalInfoFrags));
+            createObjectAppraisalInfoFragDatFile.Write(new KeyValuePair<string, IList<FragDatListFile.FragDatInfo>>(outputFileName, createObjectPlusAppraisalInfoFrags));
 
             Interlocked.Increment(ref filesProcessed);
         }
