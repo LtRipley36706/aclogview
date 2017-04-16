@@ -160,6 +160,8 @@ namespace aclogview
         // ********************************************************************
         private readonly FragDatListFile allFragDatFile = new FragDatListFile();
         private readonly FragDatListFile createObjectFragDatFile = new FragDatListFile();
+        private readonly FragDatListFile appraisalInfoFragDatFile = new FragDatListFile();
+        private readonly FragDatListFile createObjectAppraisalInfoFragDatFile = new FragDatListFile();
 
         private void DoBuild()
         {
@@ -168,6 +170,8 @@ namespace aclogview
             // ********************************************************************
             allFragDatFile.CreateFile(Path.Combine(txtOutputFolder.Text, "All.frags"), chkCompressOutput.Checked ? FragDatListFile.CompressionType.DeflateStream : FragDatListFile.CompressionType.None);
             createObjectFragDatFile.CreateFile(Path.Combine(txtOutputFolder.Text, "CreateObject.frags"), chkCompressOutput.Checked ? FragDatListFile.CompressionType.DeflateStream : FragDatListFile.CompressionType.None);
+            appraisalInfoFragDatFile.CreateFile(Path.Combine(txtOutputFolder.Text, "AppraisalInfo.frags"), chkCompressOutput.Checked ? FragDatListFile.CompressionType.DeflateStream : FragDatListFile.CompressionType.None);
+            createObjectAppraisalInfoFragDatFile.CreateFile(Path.Combine(txtOutputFolder.Text, "CreateObjectPlusAppraisalInfo.frags"), chkCompressOutput.Checked ? FragDatListFile.CompressionType.DeflateStream : FragDatListFile.CompressionType.None);
 
             // Do not parallel this search
             foreach (var currentFile in filesToProcess)
@@ -190,17 +194,22 @@ namespace aclogview
             // ********************************************************************
             allFragDatFile.CloseFile();
             createObjectFragDatFile.CloseFile();
+            appraisalInfoFragDatFile.CloseFile();
+            createObjectAppraisalInfoFragDatFile.CloseFile();
         }
 
         private void ProcessFileForBuild(string fileName)
         {
             // NOTE: If you want to get fully constructed/merged messages isntead of fragments:
             // Pass true below and use record.data as the full message, instead of individual record.frags
-            var records = PCapReader.LoadPcap(fileName, false, ref searchAborted);
+            //var records = PCapReader.LoadPcap(fileName, false, ref searchAborted);
+            var records = PCapReader.LoadPcap(fileName, true, ref searchAborted);
 
             // Temperorary objects
             var allFrags = new List<FragDatListFile.FragDatInfo>();
             var createObjectFrags = new List<FragDatListFile.FragDatInfo>();
+            var appraisalInfoFrags = new List<FragDatListFile.FragDatInfo>();
+            var createObjectPlusAppraisalInfoFrags = new List<FragDatListFile.FragDatInfo>();
 
             foreach (var record in records)
             {
@@ -210,38 +219,55 @@ namespace aclogview
                 // ********************************************************************
                 // ************************ Custom Search Code ************************ 
                 // ********************************************************************
-                foreach (BlobFrag frag in record.frags)
+                //foreach (BlobFrag frag in record.frags)
+                //{
+                try
                 {
-                    try
+                    //if (frag.dat_.Length <= 4)
+                    //continue;
+
+                    Interlocked.Increment(ref fragmentsProcessed);
+
+                    FragDatListFile.PacketDirection packetDirection = (record.isSend ? FragDatListFile.PacketDirection.ClientToServer : FragDatListFile.PacketDirection.ServerToClient);
+
+                    // Write to emperorary object
+                    //allFrags.Add(new FragDatListFile.FragDatInfo(packetDirection, record.index, frag.dat_));
+                    allFrags.Add(new FragDatListFile.FragDatInfo(packetDirection, record.index, record.data));
+
+                    //BinaryReader fragDataReader = new BinaryReader(new MemoryStream(frag.dat_));
+                    BinaryReader fragDataReader = new BinaryReader(new MemoryStream(record.data));
+
+                    var messageCode = fragDataReader.ReadUInt32();
+
+                    // Write to emperorary object
+                    if (messageCode == 0xF745) // Create Object
                     {
-                        if (frag.dat_.Length <= 4)
-                            continue;
+                        Interlocked.Increment(ref totalHits);
 
-                        Interlocked.Increment(ref fragmentsProcessed);
+                        //createObjectFrags.Add(new FragDatListFile.FragDatInfo(packetDirection, record.index, frag.dat_));
+                        createObjectFrags.Add(new FragDatListFile.FragDatInfo(packetDirection, record.index, record.data));
 
-                        FragDatListFile.PacketDirection packetDirection = (record.isSend ? FragDatListFile.PacketDirection.ClientToServer : FragDatListFile.PacketDirection.ServerToClient);
-
-                        // Write to emperorary object
-                        allFrags.Add(new FragDatListFile.FragDatInfo(packetDirection, record.index, frag.dat_));
-
-                        BinaryReader fragDataReader = new BinaryReader(new MemoryStream(frag.dat_));
-
-                        var messageCode = fragDataReader.ReadUInt32();
-
-                        // Write to emperorary object
-                        if (messageCode == 0xF745) // Create Object
-                        {
-                            Interlocked.Increment(ref totalHits);
-
-                            createObjectFrags.Add(new FragDatListFile.FragDatInfo(packetDirection, record.index, frag.dat_));
-                        }
+                        //createObjectPlusAppraisalInfoFrags.Add(new FragDatListFile.FragDatInfo(packetDirection, record.index, frag.dat_));
+                        createObjectPlusAppraisalInfoFrags.Add(new FragDatListFile.FragDatInfo(packetDirection, record.index, record.data));
                     }
-                    catch
+
+                    if (messageCode == 0x00C9) // APPRAISAL_INFO_EVENT
                     {
-                        // Do something with the exception maybe
-                        Interlocked.Increment(ref totalExceptions);
+                        Interlocked.Increment(ref totalHits);
+
+                        //appraisalInfoFrags.Add(new FragDatListFile.FragDatInfo(packetDirection, record.index, frag.dat_));
+                        appraisalInfoFrags.Add(new FragDatListFile.FragDatInfo(packetDirection, record.index, record.data));
+
+                        //createObjectPlusAppraisalInfoFrags.Add(new FragDatListFile.FragDatInfo(packetDirection, record.index, frag.dat_));
+                        createObjectPlusAppraisalInfoFrags.Add(new FragDatListFile.FragDatInfo(packetDirection, record.index, record.data));
                     }
                 }
+                catch
+                {
+                    // Do something with the exception maybe
+                    Interlocked.Increment(ref totalExceptions);
+                }
+                //}
             }
 
             string outputFileName = (chkIncludeFullPathAndFileName.Checked ? fileName : (Path.GetFileName(fileName)));
@@ -251,6 +277,8 @@ namespace aclogview
             // ********************************************************************
             allFragDatFile.Write(new KeyValuePair<string, IList<FragDatListFile.FragDatInfo>>(outputFileName, allFrags));
             createObjectFragDatFile.Write(new KeyValuePair<string, IList<FragDatListFile.FragDatInfo>>(outputFileName, createObjectFrags));
+            appraisalInfoFragDatFile.Write(new KeyValuePair<string, IList<FragDatListFile.FragDatInfo>>(outputFileName, appraisalInfoFrags));
+            createObjectAppraisalInfoFragDatFile.Write(new KeyValuePair<string, IList<FragDatListFile.FragDatInfo>>(outputFileName, createObjectPlusAppraisalInfoFrags));
 
             Interlocked.Increment(ref filesProcessed);
         }
