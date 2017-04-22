@@ -542,11 +542,13 @@ namespace aclogview
                 float margin = 0.02f;
 
                 //if ((parsed.physicsdesc.pos.objcell_id >> 16) == 62810)
-                //if ((parsed.physicsdesc.pos.objcell_id >> 16) >= 52884 && (parsed.physicsdesc.pos.objcell_id >> 16) <= 53142)
+                if ((parsed.physicsdesc.pos.objcell_id >> 16) >= 52884 && (parsed.physicsdesc.pos.objcell_id >> 16) <= 53142)
                 //    addIt = true;
                 // if ((parsed.physicsdesc.pos.objcell_id >> 16) == 7)
-                if ((parsed.physicsdesc.pos.objcell_id >> 16) >= 56163 && (parsed.physicsdesc.pos.objcell_id >> 16) <= 56419)
+                // if ((parsed.physicsdesc.pos.objcell_id >> 16) >= 56163 && (parsed.physicsdesc.pos.objcell_id >> 16) <= 56419)
                 {
+                    if (parsed.wdesc._name.m_buffer.Contains("Door"))
+                        return;
                     addIt = true;
                     fileToPutItIn = Enum.GetName(typeof(ITEM_TYPE),parsed.wdesc._type).ToString();
                 }
