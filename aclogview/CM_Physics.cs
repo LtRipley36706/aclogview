@@ -95,12 +95,15 @@ public class CM_Physics : MessageProcessor {
         public static Subpalette read(BinaryReader binaryReader) {
             Subpalette newObj = new Subpalette();
             newObj.subID = Util.readDataIDOfKnownType(0x4000000, binaryReader);
-            newObj.offset = 8u * binaryReader.ReadByte();
+            // newObj.offset = 8u * binaryReader.ReadByte();
+            newObj.offset = binaryReader.ReadByte();
             newObj.numcolors = binaryReader.ReadByte();
-            if (newObj.numcolors == 0) {
+            /* if (newObj.numcolors == 0) {
                 newObj.numcolors = 256;
             }
-            newObj.numcolors *= 8;
+            newObj.numcolors *= 8; */
+            //if (newObj.numcolors == 0)
+            //    newObj.numcolors = 32;
             return newObj;
         }
 
