@@ -121,8 +121,6 @@ namespace aclogview
                 if (abort)
                     break;
 
-                curPacket++;
-
                 PcapRecordHeader recordHeader;
                 try
                 {
@@ -144,7 +142,7 @@ namespace aclogview
                 {
                     if (asMessages)
                     {
-                        if (!readMessageData(binaryReader, recordHeader.inclLen, recordHeader.tsSec, curPacket, results, incompletePacketMap))
+                        if (!readMessageData(binaryReader, recordHeader.inclLen, recordHeader.tsSec, results, incompletePacketMap))
                             break;
                     }
                     else
@@ -155,6 +153,7 @@ namespace aclogview
                             break;
 
                         results.Add(packetRecord);
+                        curPacket++;
                     }
                 }
                 catch (Exception e)
@@ -203,8 +202,6 @@ namespace aclogview
                 if (abort)
                     break;
 
-                curPacket++;
-
                 long blockStartPos = binaryReader.BaseStream.Position;
 
                 PcapngBlockHeader blockHeader;
@@ -228,7 +225,7 @@ namespace aclogview
                 {
                     if (asMessages)
                     {
-                        if (!readMessageData(binaryReader, blockHeader.capturedLen, blockHeader.tsLow, curPacket, results, incompletePacketMap))
+                        if (!readMessageData(binaryReader, blockHeader.capturedLen, blockHeader.tsLow, results, incompletePacketMap))
                             break;
                     }
                     else
@@ -239,6 +236,7 @@ namespace aclogview
                             break;
 
                         results.Add(packetRecord);
+                        curPacket++;
                     }
                 }
                 catch (Exception e)
@@ -298,7 +296,7 @@ namespace aclogview
             StringBuilder packetTypeStr = new StringBuilder();
 
             PacketRecord packet = new PacketRecord();
-            packet.index = (curPacket - 1);
+            packet.index = curPacket;
             packet.isSend = isSend;
             packet.tsSec = tsSec;
             packet.extraInfo = "";
@@ -360,7 +358,7 @@ namespace aclogview
             return packet;
         }
 
-        private static bool readMessageData(BinaryReader binaryReader, long len, uint tsSec, int curPacket, List<PacketRecord> results, Dictionary<ulong, PacketRecord> incompletePacketMap)
+        private static bool readMessageData(BinaryReader binaryReader, long len, uint tsSec, List<PacketRecord> results, Dictionary<ulong, PacketRecord> incompletePacketMap)
         {
             // Begin reading headers
             long packetStartPos = binaryReader.BaseStream.Position;
@@ -455,7 +453,8 @@ namespace aclogview
 
             if ((header_ & CServerSwitchStructHeader.mask) != 0)
             {
-                /*CServerSwitchStruct serverSwitchStruct = */CServerSwitchStruct.read(packetReader);
+                /*CServerSwitchStruct serverSwitchStruct = */
+                CServerSwitchStruct.read(packetReader);
                 if (packetHeadersStr.Length != 0)
                     packetHeadersStr.Append(" | ");
                 packetHeadersStr.Append("Server Switch");
@@ -463,7 +462,8 @@ namespace aclogview
 
             if ((header_ & LogonServerAddrHeader.mask) != 0)
             {
-                /*sockaddr_in serverAddr = */sockaddr_in.read(packetReader);
+                /*sockaddr_in serverAddr = */
+                sockaddr_in.read(packetReader);
                 if (packetHeadersStr.Length != 0)
                     packetHeadersStr.Append(" | ");
                 packetHeadersStr.Append("Logon Server Addr");
@@ -478,7 +478,8 @@ namespace aclogview
 
             if ((header_ & CReferralStructHeader.mask) != 0)
             {
-                /*CReferralStruct referralStruct = */CReferralStruct.read(packetReader);
+                /*CReferralStruct referralStruct = */
+                CReferralStruct.read(packetReader);
                 if (packetHeadersStr.Length != 0)
                     packetHeadersStr.Append(" | ");
                 packetHeadersStr.Append("Referral");
@@ -486,7 +487,8 @@ namespace aclogview
 
             if ((header_ & NakHeader.mask) != 0)
             {
-                /*CSeqIDListHeader nakSeqIDs = */NakHeader.read(packetReader);
+                /*CSeqIDListHeader nakSeqIDs = */
+                NakHeader.read(packetReader);
                 if (packetHeadersStr.Length != 0)
                     packetHeadersStr.Append(" | ");
                 packetHeadersStr.Append("Nak");
@@ -494,7 +496,8 @@ namespace aclogview
 
             if ((header_ & EmptyAckHeader.mask) != 0)
             {
-                /*CSeqIDListHeader ackSeqIDs = */EmptyAckHeader.read(packetReader);
+                /*CSeqIDListHeader ackSeqIDs = */
+                EmptyAckHeader.read(packetReader);
                 if (packetHeadersStr.Length != 0)
                     packetHeadersStr.Append(" | ");
                 packetHeadersStr.Append("Empty Ack");
@@ -502,7 +505,8 @@ namespace aclogview
 
             if ((header_ & PakHeader.mask) != 0)
             {
-                /*PakHeader pakHeader = */PakHeader.read(packetReader);
+                /*PakHeader pakHeader = */
+                PakHeader.read(packetReader);
                 if (packetHeadersStr.Length != 0)
                     packetHeadersStr.Append(" | ");
                 packetHeadersStr.Append("Pak");
@@ -518,7 +522,8 @@ namespace aclogview
             if ((header_ & CLogonHeader.mask) != 0)
             {
                 CLogonHeader.HandshakeWireData handshakeData = CLogonHeader.HandshakeWireData.read(packetReader);
-                /*byte[] authData = */packetReader.ReadBytes((int)handshakeData.cbAuthData);
+                /*byte[] authData = */
+                packetReader.ReadBytes((int)handshakeData.cbAuthData);
                 if (packetHeadersStr.Length != 0)
                     packetHeadersStr.Append(" | ");
                 packetHeadersStr.Append("Logon");
@@ -526,7 +531,8 @@ namespace aclogview
 
             if ((header_ & ULongHeader.mask) != 0)
             {
-                /*ULongHeader ulongHeader = */ULongHeader.read(packetReader);
+                /*ULongHeader ulongHeader = */
+                ULongHeader.read(packetReader);
                 if (packetHeadersStr.Length != 0)
                     packetHeadersStr.Append(" | ");
                 packetHeadersStr.Append("ULong 1");
@@ -534,7 +540,8 @@ namespace aclogview
 
             if ((header_ & CConnectHeader.mask) != 0)
             {
-                /*CConnectHeader.HandshakeWireData handshakeData = */CConnectHeader.HandshakeWireData.read(packetReader);
+                /*CConnectHeader.HandshakeWireData handshakeData = */
+                CConnectHeader.HandshakeWireData.read(packetReader);
                 if (packetHeadersStr.Length != 0)
                     packetHeadersStr.Append(" | ");
                 packetHeadersStr.Append("Connect");
@@ -542,7 +549,8 @@ namespace aclogview
 
             if ((header_ & ULongHeader2.mask) != 0)
             {
-                /*ULongHeader2 ulongHeader = */ULongHeader2.read(packetReader);
+                /*ULongHeader2 ulongHeader = */
+                ULongHeader2.read(packetReader);
                 if (packetHeadersStr.Length != 0)
                     packetHeadersStr.Append(" | ");
                 packetHeadersStr.Append("ULong 2");
@@ -550,7 +558,8 @@ namespace aclogview
 
             if ((header_ & NetErrorHeader.mask) != 0)
             {
-                /*NetError netError = */NetError.read(packetReader);
+                /*NetError netError = */
+                NetError.read(packetReader);
                 if (packetHeadersStr.Length != 0)
                     packetHeadersStr.Append(" | ");
                 packetHeadersStr.Append("Net Error");
@@ -558,7 +567,8 @@ namespace aclogview
 
             if ((header_ & NetErrorHeader_cs_DisconnectReceived.mask) != 0)
             {
-                /*NetError netError = */NetError.read(packetReader);
+                /*NetError netError = */
+                NetError.read(packetReader);
                 if (packetHeadersStr.Length != 0)
                     packetHeadersStr.Append(" | ");
                 packetHeadersStr.Append("Net Error Disconnect");
@@ -566,7 +576,8 @@ namespace aclogview
 
             if ((header_ & CICMDCommandStructHeader.mask) != 0)
             {
-                /*CICMDCommandStruct icmdStruct = */CICMDCommandStruct.read(packetReader);
+                /*CICMDCommandStruct icmdStruct = */
+                CICMDCommandStruct.read(packetReader);
                 if (packetHeadersStr.Length != 0)
                     packetHeadersStr.Append(" | ");
                 packetHeadersStr.Append("ICmd");
@@ -574,7 +585,8 @@ namespace aclogview
 
             if ((header_ & CTimeSyncHeader.mask) != 0)
             {
-                /*CTimeSyncHeader timeSyncHeader = */CTimeSyncHeader.read(packetReader);
+                /*CTimeSyncHeader timeSyncHeader = */
+                CTimeSyncHeader.read(packetReader);
                 if (packetHeadersStr.Length != 0)
                     packetHeadersStr.Append(" | ");
                 packetHeadersStr.Append("Time Sync");
@@ -582,7 +594,8 @@ namespace aclogview
 
             if ((header_ & CEchoRequestHeader.mask) != 0)
             {
-                /*CEchoRequestHeader echoRequestHeader = */CEchoRequestHeader.read(packetReader);
+                /*CEchoRequestHeader echoRequestHeader = */
+                CEchoRequestHeader.read(packetReader);
                 if (packetHeadersStr.Length != 0)
                     packetHeadersStr.Append(" | ");
                 packetHeadersStr.Append("Echo Request");
@@ -590,7 +603,8 @@ namespace aclogview
 
             if ((header_ & CEchoResponseHeader.mask) != 0)
             {
-                /*CEchoResponseHeader.CEchoResponseHeaderWireData echoResponseData = */CEchoResponseHeader.CEchoResponseHeaderWireData.read(packetReader);
+                /*CEchoResponseHeader.CEchoResponseHeaderWireData echoResponseData = */
+                CEchoResponseHeader.CEchoResponseHeaderWireData.read(packetReader);
                 if (packetHeadersStr.Length != 0)
                     packetHeadersStr.Append(" | ");
                 packetHeadersStr.Append("Echo Response");
@@ -598,7 +612,8 @@ namespace aclogview
 
             if ((header_ & CFlowStructHeader.mask) != 0)
             {
-                /*CFlowStruct flowStruct = */CFlowStruct.read(packetReader);
+                /*CFlowStruct flowStruct = */
+                CFlowStruct.read(packetReader);
                 if (packetHeadersStr.Length != 0)
                     packetHeadersStr.Append(" | ");
                 packetHeadersStr.Append("Flow");
