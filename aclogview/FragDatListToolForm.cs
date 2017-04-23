@@ -574,27 +574,27 @@ namespace aclogview
                 //    addIt = false;
                 //}
 
-                if(parsed.wdesc._bitfield == (uint)CM_Physics.PublicWeenieDesc.BitfieldIndex.BF_LIFESTONE)
+                if((parsed.wdesc._bitfield & (uint)CM_Physics.PublicWeenieDesc.BitfieldIndex.BF_LIFESTONE) != 0)
                 {
                     fileToPutItIn = "Lifestones";
                     addIt = true;
                 }
-                else if (parsed.wdesc._bitfield == (uint)CM_Physics.PublicWeenieDesc.BitfieldIndex.BF_BINDSTONE)
+                else if ((parsed.wdesc._bitfield & (uint)CM_Physics.PublicWeenieDesc.BitfieldIndex.BF_BINDSTONE) != 0)
                 {
                     fileToPutItIn = "Bindstones";
                     addIt = true;
                 }
-                else if (parsed.wdesc._bitfield == (uint)CM_Physics.PublicWeenieDesc.BitfieldIndex.BF_PKSWITCH)
+                else if ((parsed.wdesc._bitfield & (uint)CM_Physics.PublicWeenieDesc.BitfieldIndex.BF_PKSWITCH) != 0)
                 {
                     fileToPutItIn = "PKSwitches";
                     addIt = true;
                 }
-                else if (parsed.wdesc._bitfield == (uint)CM_Physics.PublicWeenieDesc.BitfieldIndex.BF_NPKSWITCH)
+                else if ((parsed.wdesc._bitfield & (uint)CM_Physics.PublicWeenieDesc.BitfieldIndex.BF_NPKSWITCH) != 0)
                 {
                     fileToPutItIn = "NPKSwitches";
                     addIt = true;
                 }
-                else if (parsed.wdesc._bitfield == (uint)CM_Physics.PublicWeenieDesc.BitfieldIndex.BF_PORTAL)
+                else if ((parsed.wdesc._bitfield & (uint)CM_Physics.PublicWeenieDesc.BitfieldIndex.BF_PORTAL) != 0)
                 {
                     if (
                         parsed.wdesc._wcid == 9620 || // W_PORTALHOUSE_CLASS
@@ -620,12 +620,12 @@ namespace aclogview
                         addIt = true;
                     }
                 }
-                else if (parsed.wdesc._bitfield == (uint)CM_Physics.PublicWeenieDesc.BitfieldIndex.BF_DOOR)
+                else if ((parsed.wdesc._bitfield & (uint)CM_Physics.PublicWeenieDesc.BitfieldIndex.BF_DOOR) != 0)
                 {
                         fileToPutItIn = "Doors";
                         addIt = true;
                 }
-                else if (parsed.wdesc._bitfield == (uint)CM_Physics.PublicWeenieDesc.BitfieldIndex.BF_VENDOR)
+                else if ((parsed.wdesc._bitfield & (uint)CM_Physics.PublicWeenieDesc.BitfieldIndex.BF_VENDOR) != 0)
                 {
                     if (parsed.wdesc._name.m_buffer == "The Chicken"
                         || parsed.wdesc._name.m_buffer == "Babe the Blue Auroch"
