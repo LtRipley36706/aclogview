@@ -542,8 +542,8 @@ namespace aclogview
                 string weeniefileToPutItIn = "OtherWeenies";
                 float margin = 0.02f;
 
-                if ((parsed.physicsdesc.pos.objcell_id >> 16) >= 56163 && (parsed.physicsdesc.pos.objcell_id >> 16) <= 56419)
-                {
+                //if ((parsed.physicsdesc.pos.objcell_id >> 16) >= 56163 && (parsed.physicsdesc.pos.objcell_id >> 16) <= 56419)
+                //{
 
                     ////if ((parsed.physicsdesc.pos.objcell_id >> 16) == 62810)
                     //if ((parsed.physicsdesc.pos.objcell_id >> 16) >= 52884 && (parsed.physicsdesc.pos.objcell_id >> 16) <= 53142)
@@ -611,71 +611,71 @@ namespace aclogview
                             fileToPutItIn = "HouseObjects";
                             addIt = true;
                         }
-                        //else if (parsed.wdesc._name.m_buffer.Contains("Door"))
-                        //{
-                        //    fileToPutItIn = "Doors";
-                        //    addIt = true;
-                        //}
-                        //else if (parsed.wdesc._name.m_buffer == "Sign")
-                        //{
-                        //    fileToPutItIn = "Signs";
-                        //    addIt = true;
-                        //}
-                        //else if (parsed.wdesc._name.m_buffer == "Statue")
-                        //{
-                        //    fileToPutItIn = "Statues";
-                        //    addIt = true;
-                        //}
-                        //else if (parsed.wdesc._name.m_buffer == "Lever")
-                        //{
-                        //    fileToPutItIn = "Levers";
-                        //    addIt = true;
-                        //}
-                        //////else if (parsed.wdesc._name.m_buffer.Contains("Essence"))
-                        //////{
-                        //////    weeniefileToPutItIn = "Essences";
-                        //////    addWeenie = true;
-                        //////}
-                        //////else if (parsed.wdesc._name.m_buffer.Contains("Spirit"))
-                        //////{
-                        //////    weeniefileToPutItIn = "Essences";
-                        //////    addWeenie = true;
-                        //////}
-                        else
-                        {
-                            fileToPutItIn = "MiscObjects";
-                            addIt = true;
-                        }
-                    }
-                    else if (parsed.wdesc._type == ITEM_TYPE.TYPE_PORTAL) // HOUSE PORTALS
+                    //else if (parsed.wdesc._name.m_buffer.Contains("Door"))
+                    //{
+                    //    fileToPutItIn = "Doors";
+                    //    addIt = true;
+                    //}
+                    //else if (parsed.wdesc._name.m_buffer == "Sign")
+                    //{
+                    //    fileToPutItIn = "Signs";
+                    //    addIt = true;
+                    //}
+                    //else if (parsed.wdesc._name.m_buffer == "Statue")
+                    //{
+                    //    fileToPutItIn = "Statues";
+                    //    addIt = true;
+                    //}
+                    //else if (parsed.wdesc._name.m_buffer == "Lever")
+                    //{
+                    //    fileToPutItIn = "Levers";
+                    //    addIt = true;
+                    //}
+                    else if (parsed.wdesc._name.m_buffer.Contains("Essence"))
                     {
-                        if (
-                            parsed.wdesc._wcid == 9620 || // W_PORTALHOUSE_CLASS
-                            parsed.wdesc._wcid == 10751 || // W_PORTALHOUSETEST_CLASS
-                            parsed.wdesc._wcid == 11730    // W_HOUSEPORTAL_CLASS
-                            )
-                        {
-                            fileToPutItIn = "HousePortals";
-                            addIt = true;
-                        }
-                        // else if (parsed.wdesc._type == ITEM_TYPE.TYPE_PORTAL)
-                        // && !(parsed.wdesc._blipColor == 3 && parsed.wdesc._name.m_buffer == "Gateway")) // exclude player summoned portals
-                        // {
-                        //else if (parsed.wdesc._name.m_buffer == "Gateway" && parsed.physicsdesc.setup_id == 33556212)
-                        else if (parsed.wdesc._wcid == 1955)
-                        {
-                            //////fileToPutItIn = "SummonedPortals";
-                            //////addIt = true;
-                        }
-                        else
-                        {
-                            fileToPutItIn = "Portals";
-                            addIt = true;
-                        }
-                        //}
-
+                        weeniefileToPutItIn = "Essences";
+                        addWeenie = true;
                     }
-                    else if (parsed.wdesc._type == ITEM_TYPE.TYPE_CONTAINER) // HOOKS AND STORAGE
+                    else if (parsed.wdesc._name.m_buffer.Contains("Spirit"))
+                    {
+                        weeniefileToPutItIn = "Spirits";
+                        addWeenie = true;
+                    }
+                    else
+                    {
+                        fileToPutItIn = "MiscObjects";
+                        addIt = true;
+                    }
+                }
+                else if (parsed.wdesc._type == ITEM_TYPE.TYPE_PORTAL) // HOUSE PORTALS
+                {
+                    if (
+                        parsed.wdesc._wcid == 9620 || // W_PORTALHOUSE_CLASS
+                        parsed.wdesc._wcid == 10751 || // W_PORTALHOUSETEST_CLASS
+                        parsed.wdesc._wcid == 11730    // W_HOUSEPORTAL_CLASS
+                        )
+                    {
+                        fileToPutItIn = "HousePortals";
+                        addIt = true;
+                    }
+                    // else if (parsed.wdesc._type == ITEM_TYPE.TYPE_PORTAL)
+                    // && !(parsed.wdesc._blipColor == 3 && parsed.wdesc._name.m_buffer == "Gateway")) // exclude player summoned portals
+                    // {
+                    //else if (parsed.wdesc._name.m_buffer == "Gateway" && parsed.physicsdesc.setup_id == 33556212)
+                    else if (parsed.wdesc._wcid == 1955)
+                    {
+                        fileToPutItIn = "SummonedPortals";
+                        addIt = true;
+                    }
+                    else
+                    {
+                        fileToPutItIn = "Portals";
+                        addIt = true;
+                    }
+                    //}
+
+                }
+                else if (parsed.wdesc._type == ITEM_TYPE.TYPE_CONTAINER) // HOOKS AND STORAGE
                     {
                         if (
                             parsed.wdesc._wcid == 9686 && parsed.wdesc._name.ToString().Contains("Hook") || // W_HOOK_CLASS
@@ -687,457 +687,339 @@ namespace aclogview
                         {
                             fileToPutItIn = "HouseHooks";
                             addIt = true;
-                            //weeniefileToPutItIn = "HouseHooks";
-                            //if (parsed.wdesc._wcid == 9686)
-                            //    parsed.wdesc._name.m_buffer = "Wall Hook";
-                            //if (parsed.wdesc._wcid == 11697)
-                            //    parsed.wdesc._name.m_buffer = "Floor Hook";
-                            //if (parsed.wdesc._wcid == 11698)
-                            //    parsed.wdesc._name.m_buffer = "Ceiling Hook";
-                            //if (parsed.wdesc._wcid == 12678)
-                            //    parsed.wdesc._name.m_buffer = "Roof Hook";
-                            //if (parsed.wdesc._wcid == 12679)
-                            //    parsed.wdesc._name.m_buffer = "Yard Hook";
-                            //addWeenie = true;
                         }
-                        else if (
-                                parsed.wdesc._wcid == 9686 || // W_HOOK_CLASS
-                                parsed.wdesc._wcid == 11697 || // W_HOOK_FLOOR_CLASS
-                                parsed.wdesc._wcid == 11698 || // W_HOOK_CEILING_CLASS
-                                parsed.wdesc._wcid == 12678 || // W_HOOK_ROOF_CLASS
-                                parsed.wdesc._wcid == 12679  // W_HOOK_YARD_CLASS
-                                )
-                        {
-                            fileToPutItIn = "HouseHooks";
-                            //if (parsed.wdesc._wcid == 9686)
-                            //    parsed.wdesc._name.m_buffer = "Wall Hook";
-                            //if (parsed.wdesc._wcid == 11697)
-                            //    parsed.wdesc._name.m_buffer = "Floor Hook";
-                            //if (parsed.wdesc._wcid == 11698)
-                            //    parsed.wdesc._name.m_buffer = "Ceiling Hook";
-                            //if (parsed.wdesc._wcid == 12678)
-                            //    parsed.wdesc._name.m_buffer = "Roof Hook";
-                            //if (parsed.wdesc._wcid == 12679)
-                            //    parsed.wdesc._name.m_buffer = "Yard Hook";
-                            addIt = true;
-                        }
-                        //////else if (
-                        //////        parsed.wdesc._wcid == 9686 || // W_HOOK_CLASS
-                        //////        parsed.wdesc._wcid == 11697 || // W_HOOK_FLOOR_CLASS
-                        //////        parsed.wdesc._wcid == 11698  || // W_HOOK_CEILING_CLASS
-                        //////        parsed.wdesc._wcid == 12678  || // W_HOOK_ROOF_CLASS
-                        //////        parsed.wdesc._wcid == 12679  // W_HOOK_YARD_CLASS
-                        //////        )
-                        //////{
-                        //////    weeniefileToPutItIn = "HouseHooks";
-                        //////    if (parsed.wdesc._wcid == 9686)
-                        //////        parsed.wdesc._name.m_buffer = "Wall Hook";
-                        //////    if (parsed.wdesc._wcid == 11697)
-                        //////        parsed.wdesc._name.m_buffer = "Floor Hook";
-                        //////    if (parsed.wdesc._wcid == 11698)
-                        //////        parsed.wdesc._name.m_buffer = "Ceiling Hook";
-                        //////    if (parsed.wdesc._wcid == 12678)
-                        //////        parsed.wdesc._name.m_buffer = "Roof Hook";
-                        //////    if (parsed.wdesc._wcid == 12679)
-                        //////        parsed.wdesc._name.m_buffer = "Yard Hook";
-                        //////    addWeenie = true;
-                        //////}
-                        else if (
+                    else if (
+                            parsed.wdesc._wcid == 9686 || // W_HOOK_CLASS
+                            parsed.wdesc._wcid == 11697 || // W_HOOK_FLOOR_CLASS
+                            parsed.wdesc._wcid == 11698 || // W_HOOK_CEILING_CLASS
+                            parsed.wdesc._wcid == 12678 || // W_HOOK_ROOF_CLASS
+                            parsed.wdesc._wcid == 12679  // W_HOOK_YARD_CLASS
+                            )
+                    {
+                        weeniefileToPutItIn = "HouseHooks";
+                        if (parsed.wdesc._wcid == 9686)
+                            parsed.wdesc._name.m_buffer = "Wall Hook";
+                        if (parsed.wdesc._wcid == 11697)
+                            parsed.wdesc._name.m_buffer = "Floor Hook";
+                        if (parsed.wdesc._wcid == 11698)
+                            parsed.wdesc._name.m_buffer = "Ceiling Hook";
+                        if (parsed.wdesc._wcid == 12678)
+                            parsed.wdesc._name.m_buffer = "Roof Hook";
+                        if (parsed.wdesc._wcid == 12679)
+                            parsed.wdesc._name.m_buffer = "Yard Hook";
+                        addWeenie = true;
+                    }
+                    else if (
                             parsed.wdesc._wcid == 9687     // W_STORAGE_CLASS
                             )
-                        {
-                            fileToPutItIn = "HouseStorage";
-                            addIt = true;
-                        }
-                        //else if (parsed.wdesc._name.m_buffer.Contains("Storage"))
-                        //{
-                        //    fileToPutItIn = "Storage";
-                        //    addIt = true;
-                        //}
-                        //////else if (
-                        //////    parsed.wdesc._name.m_buffer.Contains("Chest")
-                        //////    || parsed.wdesc._name.m_buffer.Contains("Coffer")
-                        //////    || parsed.wdesc._name.m_buffer.Contains("Vault")
-                        //////    || parsed.wdesc._name.m_buffer.Contains("Storage")
-                        //////    || parsed.wdesc._name.m_buffer.Contains("Stump")
-                        //////    || parsed.wdesc._name.m_buffer.Contains("Shelf")
-                        //////    || parsed.wdesc._name.m_buffer.Contains("Reliquary")
-                        //////    || parsed.wdesc._name.m_buffer.Contains("Crate")
-                        //////    || parsed.wdesc._name.m_buffer.Contains("Cache")
-                        //////    || parsed.wdesc._name.m_buffer.Contains("Tomb")
-                        //////    || parsed.wdesc._name.m_buffer.Contains("Sarcophagus")
-                        //////    || parsed.wdesc._name.m_buffer.Contains("Footlocker")
-                        //////    || parsed.wdesc._name.m_buffer.Contains("Holding")
-                        //////    || parsed.wdesc._name.m_buffer.Contains("Wheelbarrow")
-                        //////    || parsed.wdesc._name.m_buffer.Contains("Stash")
-                        //////    || parsed.wdesc._name.m_buffer.Contains("Trove")
-                        //////    || parsed.wdesc._name.m_buffer.Contains("Prism")
-                        //////    || parsed.wdesc._name.m_buffer.Contains("Strongbox")
-                        //////    || parsed.wdesc._name.m_buffer.Contains("Supplies")
-                        //////    )
-                        //////{
-                        //////    fileToPutItIn = "Chests";
-                        //////    addIt = true;
-                        //////}
-                        //////else if (parsed.wdesc._name.m_buffer.Contains("Corpse"))
-                        //////{
-                        //////    fileToPutItIn = "Corpses";
-                        //////    addIt = true;
-                        //////}
-                        //////else if (parsed.wdesc._name.m_buffer.Contains("Standing Stone"))
-                        //////{
-                        //////    fileToPutItIn = "StandingStones";
-                        //////    addIt = true;
-                        //////}
-                        //else if (parsed.wdesc._name.m_buffer.Contains("Coffer"))
-                        //{
-                        //    fileToPutItIn = "Coffers";
-                        //    addIt = true;
-                        //}
-                        //else if (parsed.wdesc._name.m_buffer.Contains("Coffer"))
-                        //{
-                        //    fileToPutItIn = "Coffers";
-                        //    addIt = true;
-                        //}
-                        else
-                        {
-                            //////fileToPutItIn = "Containers";
-                            //////addIt = true;
-                        }
-                    }
-                    else if (parsed.wdesc._type == ITEM_TYPE.TYPE_UNDEF) // SLUMLORD OBJECTS
                     {
-                        if (
-                            parsed.wdesc._wcid == 9621 || // W_SLUMLORD_CLASS
-                            parsed.wdesc._wcid == 10752 || // W_SLUMLORDTESTCHEAP_CLASS
-                            parsed.wdesc._wcid == 10753 || // W_SLUMLORDTESTEXPENSIVE_CLASS
-                            parsed.wdesc._wcid == 10754 || // W_SLUMLORDTESTMODERATE_CLASS
-                            parsed.wdesc._wcid == 11711 || // W_SLUMLORDCOTTAGECHEAP_CLASS
-                            parsed.wdesc._wcid == 11712 || // W_SLUMLORDCOTTAGEEXPENSIVE_CLASS
-                            parsed.wdesc._wcid == 11713 || // W_SLUMLORDCOTTAGEMODERATE_CLASS
-                            parsed.wdesc._wcid == 11714 || // W_SLUMLORDMANSIONCHEAP_CLASS
-                            parsed.wdesc._wcid == 11715 || // W_SLUMLORDMANSIONEXPENSIVE_CLASS
-                            parsed.wdesc._wcid == 11716 || // W_SLUMLORDMANSIONMODERATE_CLASS
-                            parsed.wdesc._wcid == 11717 || // W_SLUMLORDVILLACHEAP_CLASS
-                            parsed.wdesc._wcid == 11718 || // W_SLUMLORDVILLAEXPENSIVE_CLASS
-                            parsed.wdesc._wcid == 11719 || // W_SLUMLORDVILLAMODERATE_CLASS
-                            parsed.wdesc._wcid == 11977 || // W_SLUMLORDCOTTAGES349_579_CLASS
-                            parsed.wdesc._wcid == 11978 || // W_SLUMLORDVILLA851_925_CLASS
-                            parsed.wdesc._wcid == 11979 || // W_SLUMLORDCOTTAGE580_800_CLASS
-                            parsed.wdesc._wcid == 11980 || // W_SLUMLORDVILLA926_970_CLASS
-                            parsed.wdesc._wcid == 11980 || // W_SLUMLORDVILLA926_970_CLASS
-                            parsed.wdesc._wcid == 12461 || // W_SLUMLORDCOTTAGE1001_1075_CLASS
-                            parsed.wdesc._wcid == 12462 || // W_SLUMLORDCOTTAGE1076_1150_CLASS
-                            parsed.wdesc._wcid == 13078 || // W_SLUMLORDCOTTAGE1151_1275_CLASS
-                            parsed.wdesc._wcid == 13079 || // W_SLUMLORDCOTTAGE1276_1400_CLASS
-                            parsed.wdesc._wcid == 13080 || // W_SLUMLORDVILLA1401_1440_CLASS
-                            parsed.wdesc._wcid == 13081 || // W_SLUMLORDMANSION1441_1450_CLASS
-                            parsed.wdesc._wcid == 14243 || // W_SLUMLORDCOTTAGE1451_1650_CLASS
-                            parsed.wdesc._wcid == 14244 || // W_SLUMLORDCOTTAGE1651_1850_CLASS
-                            parsed.wdesc._wcid == 14245 || // W_SLUMLORDVILLA1851_1940_CLASS
-                            parsed.wdesc._wcid == 14246 || // W_SLUMLORDMANSION1941_1950_CLASS
-                            parsed.wdesc._wcid == 14247 || // W_SLUMLORDCOTTAGE1951_2150_CLASS
-                            parsed.wdesc._wcid == 14248 || // W_SLUMLORDCOTTAGE2151_2350_CLASS
-                            parsed.wdesc._wcid == 14249 || // W_SLUMLORDVILLA2351_2440_CLASS
-                            parsed.wdesc._wcid == 14250 || // W_SLUMLORDMANSION2441_2450_CLASS
-                            parsed.wdesc._wcid == 14934 || // W_SLUMLORDCOTTAGE2451_2525_CLASS
-                            parsed.wdesc._wcid == 14935 || // W_SLUMLORDCOTTAGE2526_2600_CLASS
-                            parsed.wdesc._wcid == 14936 || // W_SLUMLORDVILLA2601_2640_CLASS
-                            parsed.wdesc._wcid == 14937 || // W_SLUMLORDMANSION2641_2650_CLASS
-                                                           // parsed.wdesc._wcid == 15273 || // W_SLUMLORDFAKENUHMUDIRA_CLASS
-                            parsed.wdesc._wcid == 15608 || // W_SLUMLORDAPARTMENT_CLASS
-                            parsed.wdesc._wcid == 15609 || // W_SLUMLORDCOTTAGE2651_2725_CLASS
-                            parsed.wdesc._wcid == 15610 || // W_SLUMLORDCOTTAGE2726_2800_CLASS
-                            parsed.wdesc._wcid == 15611 || // W_SLUMLORDVILLA2801_2850_CLASS
-                            parsed.wdesc._wcid == 19074 || // W_SLUMLORDCOTTAGE3851_3925_CLASS
-                            parsed.wdesc._wcid == 19075 || // W_SLUMLORDCOTTAGE3926_4000_CLASS
-                            parsed.wdesc._wcid == 19076 || // W_SLUMLORDVILLA4001_4050_CLASS
-                            parsed.wdesc._wcid == 20850 || // W_SLUMLORDCOTTAGE6051_6125_CLASS
-                            parsed.wdesc._wcid == 20851 || // W_SLUMLORDCOTTAGE6126_6200_CLASS
-                            parsed.wdesc._wcid == 20852 || // W_SLUMLORDVILLA6201_6240_CLASS
-                            parsed.wdesc._wcid == 20853    // W_SLUMLORDMANSION6241_6250_CLASS
-                                                           // parsed.wdesc._wcid == 22118 || // W_SLUMLORDHAUNTEDMANSION_CLASS
-                            )
-                        {
-                            fileToPutItIn = "SlumLords";
-                            //////if (parsed.wdesc._name.m_buffer.Contains("'s Cottage"))
-                            //////    parsed.wdesc._name.m_buffer = "Cottage";
-                            //////if (parsed.wdesc._name.m_buffer.Contains("'s Villa"))
-                            //////    parsed.wdesc._name.m_buffer = "Villa";
-                            //////if (parsed.wdesc._name.m_buffer.Contains("'s Mansion"))
-                            //////    parsed.wdesc._name.m_buffer = "Mansion";
-                            //////if (parsed.wdesc._name.m_buffer.Contains("'s Apartment"))
-                            //////    parsed.wdesc._name.m_buffer = "Apartment";
-                            addIt = true;
-                        }
-
-                        else if (
-                                                            parsed.wdesc._wcid == 15273 || // W_SLUMLORDFAKENUHMUDIRA_CLASS
-                                                            parsed.wdesc._wcid == 22118    // W_SLUMLORDHAUNTEDMANSION_CLASS
-                            )
-                        {
-                            fileToPutItIn = "FakeSlumLords";
-                            addIt = true;
-                        }
-                        //////else if (
-                        //////    parsed.wdesc._name.m_buffer.Contains("Bolt")
-                        //////    || parsed.wdesc._name.m_buffer.Contains("wave")
-                        //////    || parsed.wdesc._name.m_buffer.Contains("Blast")
-                        //////    || parsed.wdesc._name.m_buffer.Contains("Ring")
-                        //////    || parsed.wdesc._name.m_buffer.Contains("Stream")
-                        //////    || parsed.wdesc._name.m_buffer.Contains("Fist")
-                        //////    || parsed.wdesc._name.m_buffer.Contains("Missile")
-                        //////    || parsed.wdesc._name.m_buffer.Contains("Egg")
-                        //////    || parsed.wdesc._name.m_buffer.Contains("Death")
-                        //////    || parsed.wdesc._name.m_buffer.Contains("Fury")
-                        //////    // || parsed.wdesc._name.m_buffer.Contains("Wind")
-                        //////    || parsed.wdesc._name.m_buffer.Contains("Flaming Skull")
-                        //////    // || parsed.wdesc._name.m_buffer.Contains("Edge")
-                        //////    || parsed.wdesc._name.m_buffer.Contains("Snowball")
-                        //////    || parsed.wdesc._name.m_buffer.Contains("Bomb")
-                        //////    )
-                        //////{
-                        //////    weeniefileToPutItIn = "UndefObjects";
-                        //////    addWeenie = true;
-                        //////}
-                        //////else if (parsed.wdesc._name.m_buffer.Contains("Generator"))
-
-                        //////{
-                        //////    fileToPutItIn = "Generators";
-                        //////    addIt = true;
-                        //////}
-                        else
-                        {
-                            fileToPutItIn = "UndefObjects";
-                            addIt = true;
-                        }
+                        fileToPutItIn = "HouseStorage";
+                        addIt = true;
+                    }
+                    else if (
+                        parsed.wdesc._name.m_buffer.Contains("Chest")
+                        || parsed.wdesc._name.m_buffer.Contains("Coffer")
+                        || parsed.wdesc._name.m_buffer.Contains("Vault")
+                        || parsed.wdesc._name.m_buffer.Contains("Storage")
+                        || parsed.wdesc._name.m_buffer.Contains("Stump")
+                        || parsed.wdesc._name.m_buffer.Contains("Shelf")
+                        || parsed.wdesc._name.m_buffer.Contains("Reliquary")
+                        || parsed.wdesc._name.m_buffer.Contains("Crate")
+                        || parsed.wdesc._name.m_buffer.Contains("Cache")
+                        || parsed.wdesc._name.m_buffer.Contains("Tomb")
+                        || parsed.wdesc._name.m_buffer.Contains("Sarcophagus")
+                        || parsed.wdesc._name.m_buffer.Contains("Footlocker")
+                        || parsed.wdesc._name.m_buffer.Contains("Holding")
+                        || parsed.wdesc._name.m_buffer.Contains("Wheelbarrow")
+                        || parsed.wdesc._name.m_buffer.Contains("Stash")
+                        || parsed.wdesc._name.m_buffer.Contains("Trove")
+                        || parsed.wdesc._name.m_buffer.Contains("Prism")
+                        || parsed.wdesc._name.m_buffer.Contains("Strongbox")
+                        || parsed.wdesc._name.m_buffer.Contains("Supplies")
+                        )
+                    {
+                        fileToPutItIn = "Chests";
+                        addIt = true;
+                    }
+                    else if (parsed.wdesc._name.m_buffer.Contains("Corpse"))
+                    {
+                        fileToPutItIn = "Corpses";
+                        addIt = true;
+                    }
+                    else if (parsed.wdesc._name.m_buffer.Contains("Standing Stone"))
+                    {
+                        fileToPutItIn = "StandingStones";
+                        addIt = true;
+                    }
+                    else
+                    {
+                        fileToPutItIn = "Containers";
+                        addIt = true;
+                    }
+                }
+                else if (parsed.wdesc._type == ITEM_TYPE.TYPE_UNDEF) // SLUMLORD OBJECTS
+                {
+                    if (
+                        parsed.wdesc._wcid == 9621 || // W_SLUMLORD_CLASS
+                        parsed.wdesc._wcid == 10752 || // W_SLUMLORDTESTCHEAP_CLASS
+                        parsed.wdesc._wcid == 10753 || // W_SLUMLORDTESTEXPENSIVE_CLASS
+                        parsed.wdesc._wcid == 10754 || // W_SLUMLORDTESTMODERATE_CLASS
+                        parsed.wdesc._wcid == 11711 || // W_SLUMLORDCOTTAGECHEAP_CLASS
+                        parsed.wdesc._wcid == 11712 || // W_SLUMLORDCOTTAGEEXPENSIVE_CLASS
+                        parsed.wdesc._wcid == 11713 || // W_SLUMLORDCOTTAGEMODERATE_CLASS
+                        parsed.wdesc._wcid == 11714 || // W_SLUMLORDMANSIONCHEAP_CLASS
+                        parsed.wdesc._wcid == 11715 || // W_SLUMLORDMANSIONEXPENSIVE_CLASS
+                        parsed.wdesc._wcid == 11716 || // W_SLUMLORDMANSIONMODERATE_CLASS
+                        parsed.wdesc._wcid == 11717 || // W_SLUMLORDVILLACHEAP_CLASS
+                        parsed.wdesc._wcid == 11718 || // W_SLUMLORDVILLAEXPENSIVE_CLASS
+                        parsed.wdesc._wcid == 11719 || // W_SLUMLORDVILLAMODERATE_CLASS
+                        parsed.wdesc._wcid == 11977 || // W_SLUMLORDCOTTAGES349_579_CLASS
+                        parsed.wdesc._wcid == 11978 || // W_SLUMLORDVILLA851_925_CLASS
+                        parsed.wdesc._wcid == 11979 || // W_SLUMLORDCOTTAGE580_800_CLASS
+                        parsed.wdesc._wcid == 11980 || // W_SLUMLORDVILLA926_970_CLASS
+                        parsed.wdesc._wcid == 11980 || // W_SLUMLORDVILLA926_970_CLASS
+                        parsed.wdesc._wcid == 12461 || // W_SLUMLORDCOTTAGE1001_1075_CLASS
+                        parsed.wdesc._wcid == 12462 || // W_SLUMLORDCOTTAGE1076_1150_CLASS
+                        parsed.wdesc._wcid == 13078 || // W_SLUMLORDCOTTAGE1151_1275_CLASS
+                        parsed.wdesc._wcid == 13079 || // W_SLUMLORDCOTTAGE1276_1400_CLASS
+                        parsed.wdesc._wcid == 13080 || // W_SLUMLORDVILLA1401_1440_CLASS
+                        parsed.wdesc._wcid == 13081 || // W_SLUMLORDMANSION1441_1450_CLASS
+                        parsed.wdesc._wcid == 14243 || // W_SLUMLORDCOTTAGE1451_1650_CLASS
+                        parsed.wdesc._wcid == 14244 || // W_SLUMLORDCOTTAGE1651_1850_CLASS
+                        parsed.wdesc._wcid == 14245 || // W_SLUMLORDVILLA1851_1940_CLASS
+                        parsed.wdesc._wcid == 14246 || // W_SLUMLORDMANSION1941_1950_CLASS
+                        parsed.wdesc._wcid == 14247 || // W_SLUMLORDCOTTAGE1951_2150_CLASS
+                        parsed.wdesc._wcid == 14248 || // W_SLUMLORDCOTTAGE2151_2350_CLASS
+                        parsed.wdesc._wcid == 14249 || // W_SLUMLORDVILLA2351_2440_CLASS
+                        parsed.wdesc._wcid == 14250 || // W_SLUMLORDMANSION2441_2450_CLASS
+                        parsed.wdesc._wcid == 14934 || // W_SLUMLORDCOTTAGE2451_2525_CLASS
+                        parsed.wdesc._wcid == 14935 || // W_SLUMLORDCOTTAGE2526_2600_CLASS
+                        parsed.wdesc._wcid == 14936 || // W_SLUMLORDVILLA2601_2640_CLASS
+                        parsed.wdesc._wcid == 14937 || // W_SLUMLORDMANSION2641_2650_CLASS
+                                                       // parsed.wdesc._wcid == 15273 || // W_SLUMLORDFAKENUHMUDIRA_CLASS
+                        parsed.wdesc._wcid == 15608 || // W_SLUMLORDAPARTMENT_CLASS
+                        parsed.wdesc._wcid == 15609 || // W_SLUMLORDCOTTAGE2651_2725_CLASS
+                        parsed.wdesc._wcid == 15610 || // W_SLUMLORDCOTTAGE2726_2800_CLASS
+                        parsed.wdesc._wcid == 15611 || // W_SLUMLORDVILLA2801_2850_CLASS
+                        parsed.wdesc._wcid == 19074 || // W_SLUMLORDCOTTAGE3851_3925_CLASS
+                        parsed.wdesc._wcid == 19075 || // W_SLUMLORDCOTTAGE3926_4000_CLASS
+                        parsed.wdesc._wcid == 19076 || // W_SLUMLORDVILLA4001_4050_CLASS
+                        parsed.wdesc._wcid == 20850 || // W_SLUMLORDCOTTAGE6051_6125_CLASS
+                        parsed.wdesc._wcid == 20851 || // W_SLUMLORDCOTTAGE6126_6200_CLASS
+                        parsed.wdesc._wcid == 20852 || // W_SLUMLORDVILLA6201_6240_CLASS
+                        parsed.wdesc._wcid == 20853    // W_SLUMLORDMANSION6241_6250_CLASS
+                                                       // parsed.wdesc._wcid == 22118 || // W_SLUMLORDHAUNTEDMANSION_CLASS
+                        )
+                    {
+                        fileToPutItIn = "SlumLords";
+                        if (parsed.wdesc._name.m_buffer.Contains("'s Cottage"))
+                            parsed.wdesc._name.m_buffer = "Cottage";
+                        if (parsed.wdesc._name.m_buffer.Contains("'s Villa"))
+                            parsed.wdesc._name.m_buffer = "Villa";
+                        if (parsed.wdesc._name.m_buffer.Contains("'s Mansion"))
+                            parsed.wdesc._name.m_buffer = "Mansion";
+                        if (parsed.wdesc._name.m_buffer.Contains("'s Apartment"))
+                            parsed.wdesc._name.m_buffer = "Apartment";
+                        addIt = true;
                     }
 
-                    ////////else if (parsed.wdesc._name.m_buffer.Contains("Door")
-                    ////////    && parsed.wdesc._type == ITEM_TYPE.TYPE_MISC)
-                    ////////{
-                    ////////    fileToPutItIn = "Doors";
-                    ////////    addIt = true;
-                    ////////}
-                    ////////else if (parsed.wdesc._name.m_buffer == "Sign"
-                    ////////    && parsed.wdesc._type == ITEM_TYPE.TYPE_MISC)
-                    ////////{
-                    ////////    fileToPutItIn = "Signs";
-                    ////////    addIt = true;
-                    ////////}
-                    //////else if (parsed.wdesc._name.m_buffer == "Statue"
-                    //////    && parsed.wdesc._type == ITEM_TYPE.TYPE_MISC)
-                    //////{
-                    //////    fileToPutItIn = "Statues";
-                    //////    addIt = true;
-                    //////}
-                    //////else if (parsed.wdesc._name.m_buffer == "Statue"
-                    //////    && parsed.wdesc._type == ITEM_TYPE.TYPE_WRITABLE)
-                    //////{
-                    //////    fileToPutItIn = "Statues";
-                    //////    addIt = true;
-                    //////}
-                    //////else if (parsed.wdesc._name.m_buffer.Contains("Statue")
-                    //////    && parsed.wdesc._type == ITEM_TYPE.TYPE_WRITABLE)
-                    //////{
-                    //////    fileToPutItIn = "Statues";
-                    //////    addIt = true;
-                    //////}
-                    //////else if (parsed.wdesc._wcid == 9002
-                    //////    && parsed.wdesc._type == ITEM_TYPE.TYPE_WRITABLE)
-                    //////{
-                    //////    fileToPutItIn = "ShardVigil";
-                    //////    addIt = true;
-                    //////}
-                    ////////else if (parsed.wdesc._name.m_buffer == "Lever"
-                    ////////    && parsed.wdesc._type == ITEM_TYPE.TYPE_MISC)
-                    ////////{
-                    ////////    fileToPutItIn = "Levers";
-                    ////////    addIt = true;
-                    ////////}
-                    //else if (parsed.wdesc._type == ITEM_TYPE.TYPE_MISC)
-                    //{
-                    //    fileToPutItIn = "MiscObjects";
-                    //    addIt = true;
-                    //}
-                    else if (parsed.wdesc._type == ITEM_TYPE.TYPE_WRITABLE)
+                    else if (
+                                                        parsed.wdesc._wcid == 15273 || // W_SLUMLORDFAKENUHMUDIRA_CLASS
+                                                        parsed.wdesc._wcid == 22118    // W_SLUMLORDHAUNTEDMANSION_CLASS
+                        )
                     {
-                        //////if (parsed.wdesc._name.m_buffer.Contains("Statue"))                        
-                        //////{
-                        //////    fileToPutItIn = "Statues";
-                        //////    addIt = true;
-                        //////}
-                        //////else if (parsed.wdesc._name.m_buffer.Contains("Scrolls"))
-                        //////{
-                        //////    weeniefileToPutItIn = "Scrolls";
-                        //////    addWeenie = true;
-                        //////}
-                        //////else if (parsed.wdesc._name.m_buffer.Contains("Pack"))
-                        //////{
-                        //////    weeniefileToPutItIn = "PackToys";
-                        //////    addWeenie = true;
-                        //////}
-                        //////else if (parsed.wdesc._wcid == 9002)
-                        //////{
-                        //////    fileToPutItIn = "ShardVigil";
-                        //////    addIt = true;
-                        //////}
-                        //////else
-                        //////{
+                        fileToPutItIn = "FakeSlumLords";
+                        addIt = true;
+                    }
+                    else if (
+                        parsed.wdesc._name.m_buffer.Contains("Bolt")
+                        || parsed.wdesc._name.m_buffer.Contains("wave")
+                        || parsed.wdesc._name.m_buffer.Contains("Blast")
+                        || parsed.wdesc._name.m_buffer.Contains("Ring")
+                        || parsed.wdesc._name.m_buffer.Contains("Stream")
+                        || parsed.wdesc._name.m_buffer.Contains("Fist")
+                        || parsed.wdesc._name.m_buffer.Contains("Missile")
+                        || parsed.wdesc._name.m_buffer.Contains("Egg")
+                        || parsed.wdesc._name.m_buffer.Contains("Death")
+                        || parsed.wdesc._name.m_buffer.Contains("Fury")
+                        // || parsed.wdesc._name.m_buffer.Contains("Wind")
+                        || parsed.wdesc._name.m_buffer.Contains("Flaming Skull")
+                        // || parsed.wdesc._name.m_buffer.Contains("Edge")
+                        || parsed.wdesc._name.m_buffer.Contains("Snowball")
+                        || parsed.wdesc._name.m_buffer.Contains("Bomb")
+                        )
+                    {
+                        weeniefileToPutItIn = "UndefObjects";
+                        addWeenie = true;
+                    }
+                    else if (parsed.wdesc._name.m_buffer.Contains("Generator"))
+
+                    {
+                        fileToPutItIn = "Generators";
+                        addIt = true;
+                    }
+                    else
+                    {
+                        fileToPutItIn = "UndefObjects";
+                        addIt = true;
+                    }
+                }
+                else if (parsed.wdesc._type == ITEM_TYPE.TYPE_WRITABLE)
+                {
+                    if (parsed.wdesc._name.m_buffer.Contains("Statue"))
+                    {
+                        fileToPutItIn = "Statues";
+                        addIt = true;
+                    }
+                    else if (parsed.wdesc._name.m_buffer.Contains("Scrolls"))
+                    {
+                        weeniefileToPutItIn = "Scrolls";
+                        addWeenie = true;
+                    }
+                    else if (parsed.wdesc._name.m_buffer.Contains("Pack"))
+                    {
+                        weeniefileToPutItIn = "PackToys";
+                        addWeenie = true;
+                    }
+                    else if (parsed.wdesc._wcid == 9002)
+                    {
+                        fileToPutItIn = "ShardVigil";
+                        addIt = true;
+                    }
+                    else
+                    {
                         fileToPutItIn = "WritableObjects";
                         addIt = true;
-                        //////}
                     }
-                    //else if (parsed.wdesc._name.m_buffer.Contains("Crier")
-                    //    && parsed.wdesc._type == ITEM_TYPE.TYPE_CREATURE
-                    //    && parsed.wdesc._blipColor == 8)
-                    //{
-                    //    fileToPutItIn = "Town Criers";
-                    //    addIt = true;
-                    //    margin = 15f;
-                    //}
-                    //else if (parsed.wdesc._type == ITEM_TYPE.TYPE_PORTAL)
-                    //// && !(parsed.wdesc._blipColor == 3 && parsed.wdesc._name.m_buffer == "Gateway")) // exclude player summoned portals
-                    //{
-                    //    if (parsed.wdesc._name.m_buffer == "Gateway" && parsed.physicsdesc.setup_id == 33556212)
-                    //    {
-                    //        fileToPutItIn = "SummonedPortals";
-                    //        addIt = true;
-                    //    }
-                    //    else
-                    //    {
-                    //        fileToPutItIn = "Portals";
-                    //        addIt = true;
-                    //    }
-                    //}
-                    //////else if (parsed.wdesc._type == ITEM_TYPE.TYPE_LIFESTONE)
-                    //////{
-                    //////    fileToPutItIn = "Lifestones";
-                    //////    addIt = true;
-                    //////}
-                    //else if ((parsed.wdesc._name.m_buffer.Contains("Scrivener")
-                    //        || parsed.wdesc._name.m_buffer.Contains("Scribe")
-                    //        || parsed.wdesc._name.m_buffer.Contains("Archmage")
-                    //        || parsed.wdesc._name.m_buffer.Contains("Healer")
-                    //        || parsed.wdesc._name.m_buffer.Contains("Weaponsmith")
-                    //        || parsed.wdesc._name.m_buffer.Contains("Weapons Master")
-                    //        || parsed.wdesc._name.m_buffer.Contains("Armorer")
-                    //        || parsed.wdesc._name.m_buffer.Contains("Grocer")
-                    //        || parsed.wdesc._name.m_buffer.Contains("Shopkeep")
-                    //        || parsed.wdesc._name.m_buffer.Contains("Shopkeeper")
-                    //        || parsed.wdesc._name.m_buffer.Contains("Jeweler")
-                    //        || parsed.wdesc._name.m_buffer.Contains("Barkeep")
-                    //        || parsed.wdesc._name.m_buffer.Contains("Barkeeper")
-                    //        || parsed.wdesc._name.m_buffer.Contains("Provisioner")
-                    //        || parsed.wdesc._name.m_buffer.Contains("Tailor")
-                    //        || parsed.wdesc._name.m_buffer.Contains("Seamstress")
-                    //        || parsed.wdesc._name.m_buffer.Contains("Fletcher")
-                    //        || parsed.wdesc._name.m_buffer.Contains("Bowyer")
-                    //        || parsed.wdesc._name.m_buffer.Contains("Marksman")
-                    //        || parsed.wdesc._name.m_buffer.Contains("Crafter")
-                    //        || parsed.wdesc._name.m_buffer.Contains("Cook")
-                    //        || parsed.wdesc._name.m_buffer.Contains("Alchemist")
-                    //        || parsed.wdesc._name.m_buffer.Contains("Woodsman")
-                    //        || parsed.wdesc._name.m_buffer.Contains("Apprentice"))
-                    //    && parsed.wdesc._type == ITEM_TYPE.TYPE_CREATURE
-                    //    && parsed.wdesc._blipColor == 8)
-                    //{
-                    //    fileToPutItIn = "Vendors";
-                    //    addIt = true;
-                    //}
-                    //else if ((parsed.wdesc._name.m_buffer == "Agent of the Arcanum"
-                    //        || parsed.wdesc._name.m_buffer == "Sentry"
-                    //        || parsed.wdesc._name.m_buffer == "Ulgrim the Unpleasant"
-                    //        || parsed.wdesc._name.m_buffer.Contains("Ulgrim")
-                    //        || parsed.wdesc._name.m_buffer == "Ned the Clever"
-                    //        || parsed.wdesc._name.m_buffer == "Wedding Planner"
-                    //        || parsed.wdesc._name.m_buffer.Contains("Collector")
-                    //        || parsed.wdesc._name.m_buffer.Contains("Guard")
-                    //        || parsed.wdesc._name.m_buffer == "Jonathan"
-                    //        || parsed.wdesc._name.m_buffer == "Farmer")
-                    //    && parsed.wdesc._type == ITEM_TYPE.TYPE_CREATURE
-                    //    && parsed.wdesc._blipColor == 8)
-                    //{
-                    //    fileToPutItIn = "OtherNPCs";
-                    //    addIt = true;
-                    //}
-                    else if (parsed.wdesc._type == ITEM_TYPE.TYPE_CREATURE)
-                    {
-                        //////if (parsed.wdesc._name.m_buffer == "The Chicken"
-                        //////    || parsed.wdesc._name.m_buffer == "Babe the Blue Auroch"
-                        //////    || parsed.wdesc._name.m_buffer == "Paul the Monouga"
-                        //////    )
-                        //////{
-                        //////    fileToPutItIn = "SpecialNPCs";
-                        //////    addIt = true;
-                        //////    margin = 15f;
-                        //////}
-                        //////else if (parsed.wdesc._name.m_buffer.Contains("Crier")                        
-                        //////    && parsed.wdesc._blipColor == 8)
-                        //////{
-                        //////    fileToPutItIn = "Town Criers";
-                        //////    addIt = true;
-                        //////    margin = 15f;
-                        //////}
-                        ////////else if (parsed.wdesc._type == ITEM_TYPE.TYPE_CREATURE && parsed.wdesc._blipColor == 8)
-                        ////////{
-                        ////////    fileToPutItIn = "UnknownNPCs";
-                        ////////    addIt = true;
-                        ////////}
-                        ////////else if (parsed.wdesc._blipColor == 8)
-                        ////////{
-                        ////////    fileToPutItIn = "UnknownBlip8s";
-                        ////////    addIt = true;
-                        ////////}
-                        //////else if (parsed.wdesc._blipColor == 8)
-                        //////{
-                        //////    fileToPutItIn = "NPCs";
-                        //////    addIt = true;
-                        //////}
-                        //////else if (parsed.wdesc._blipColor == 2)
-                        //////{
-                        //////    weeniefileToPutItIn = "Monsters";
-                        //////    addWeenie = true;
-                        //////}
-                        //////else
-                        //////{
-                        //////    fileToPutItIn = "UnsortedCreatures";
-                        //////    addIt = true;
-                        //////}
-                    }
-                    //else if (parsed.wdesc._type == ITEM_TYPE.TYPE_CREATURE && parsed.wdesc._blipColor == 8)
-                    //{
-                    //    fileToPutItIn = "UnknownNPCs";
-                    //    addIt = true;
-                    //}
-                    //else if (parsed.wdesc._blipColor == 8)
-                    //{
-                    //    fileToPutItIn = "UnknownBlip8s";
-                    //    addIt = true;
-                    //}
-                    //else if (parsed.wdesc._type == ITEM_TYPE.TYPE_CREATURE && parsed.wdesc._blipColor == 2)
-                    //{
-                    //    fileToPutItIn = "Monsters";
-                    //    addIt = true;
-                    //}
-                    //////else if (parsed.object_id < 0x80000000)
-                    //////{
-                    //////    fileToPutItIn = "PotentialStatics";
-                    //////    addIt = true;
-                    //////}
-                    //////else if (((uint)parsed.wdesc._type & (uint)ITEM_TYPE.TYPE_ITEM) > 0
-                    //////    )
-                    //////{
-                    //////    weeniefileToPutItIn = "UnsortedItems";
-                    //////    addWeenie = true;
-                    //////}
-                    //////else
-                    //////{
-                    //////    fileToPutItIn = "OtherObjects";
-                    //////    addIt = true;
-                    //////}
-
                 }
+                else if (parsed.wdesc._type == ITEM_TYPE.TYPE_LIFESTONE)
+                {
+                    fileToPutItIn = "Lifestones";
+                    addIt = true;
+                }
+                //else if ((parsed.wdesc._name.m_buffer.Contains("Scrivener")
+                //        || parsed.wdesc._name.m_buffer.Contains("Scribe")
+                //        || parsed.wdesc._name.m_buffer.Contains("Archmage")
+                //        || parsed.wdesc._name.m_buffer.Contains("Healer")
+                //        || parsed.wdesc._name.m_buffer.Contains("Weaponsmith")
+                //        || parsed.wdesc._name.m_buffer.Contains("Weapons Master")
+                //        || parsed.wdesc._name.m_buffer.Contains("Armorer")
+                //        || parsed.wdesc._name.m_buffer.Contains("Grocer")
+                //        || parsed.wdesc._name.m_buffer.Contains("Shopkeep")
+                //        || parsed.wdesc._name.m_buffer.Contains("Shopkeeper")
+                //        || parsed.wdesc._name.m_buffer.Contains("Jeweler")
+                //        || parsed.wdesc._name.m_buffer.Contains("Barkeep")
+                //        || parsed.wdesc._name.m_buffer.Contains("Barkeeper")
+                //        || parsed.wdesc._name.m_buffer.Contains("Provisioner")
+                //        || parsed.wdesc._name.m_buffer.Contains("Tailor")
+                //        || parsed.wdesc._name.m_buffer.Contains("Seamstress")
+                //        || parsed.wdesc._name.m_buffer.Contains("Fletcher")
+                //        || parsed.wdesc._name.m_buffer.Contains("Bowyer")
+                //        || parsed.wdesc._name.m_buffer.Contains("Marksman")
+                //        || parsed.wdesc._name.m_buffer.Contains("Crafter")
+                //        || parsed.wdesc._name.m_buffer.Contains("Cook")
+                //        || parsed.wdesc._name.m_buffer.Contains("Alchemist")
+                //        || parsed.wdesc._name.m_buffer.Contains("Woodsman")
+                //        || parsed.wdesc._name.m_buffer.Contains("Apprentice"))
+                //    && parsed.wdesc._type == ITEM_TYPE.TYPE_CREATURE
+                //    && parsed.wdesc._blipColor == 8)
+                //{
+                //    fileToPutItIn = "Vendors";
+                //    addIt = true;
+                //}
+                //else if ((parsed.wdesc._name.m_buffer == "Agent of the Arcanum"
+                //        || parsed.wdesc._name.m_buffer == "Sentry"
+                //        || parsed.wdesc._name.m_buffer == "Ulgrim the Unpleasant"
+                //        || parsed.wdesc._name.m_buffer.Contains("Ulgrim")
+                //        || parsed.wdesc._name.m_buffer == "Ned the Clever"
+                //        || parsed.wdesc._name.m_buffer == "Wedding Planner"
+                //        || parsed.wdesc._name.m_buffer.Contains("Collector")
+                //        || parsed.wdesc._name.m_buffer.Contains("Guard")
+                //        || parsed.wdesc._name.m_buffer == "Jonathan"
+                //        || parsed.wdesc._name.m_buffer == "Farmer")
+                //    && parsed.wdesc._type == ITEM_TYPE.TYPE_CREATURE
+                //    && parsed.wdesc._blipColor == 8)
+                //{
+                //    fileToPutItIn = "OtherNPCs";
+                //    addIt = true;
+                //}
+                else if (parsed.wdesc._type == ITEM_TYPE.TYPE_CREATURE)
+                {
+                    if (parsed.wdesc._name.m_buffer == "The Chicken"
+                        || parsed.wdesc._name.m_buffer == "Babe the Blue Auroch"
+                        || parsed.wdesc._name.m_buffer == "Paul the Monouga"
+                        )
+                    {
+                        fileToPutItIn = "SpecialNPCs";
+                        addIt = true;
+                        margin = 15f;
+                    }
+                    else if (parsed.wdesc._name.m_buffer.Contains("Crier")
+                        && parsed.wdesc._blipColor == 8)
+                    {
+                        fileToPutItIn = "Town Criers";
+                        addIt = true;
+                        margin = 15f;
+                    }
+                    ////////else if (parsed.wdesc._type == ITEM_TYPE.TYPE_CREATURE && parsed.wdesc._blipColor == 8)
+                    ////////{
+                    ////////    fileToPutItIn = "UnknownNPCs";
+                    ////////    addIt = true;
+                    ////////}
+                    ////////else if (parsed.wdesc._blipColor == 8)
+                    ////////{
+                    ////////    fileToPutItIn = "UnknownBlip8s";
+                    ////////    addIt = true;
+                    ////////}
+                    else if (parsed.wdesc._blipColor == 8)
+                    {
+                        fileToPutItIn = "NPCs";
+                        addIt = true;
+                    }
+                    else if (parsed.wdesc._blipColor == 2)
+                    {
+                        weeniefileToPutItIn = "Monsters";
+                        addWeenie = true;
+                    }
+                    else
+                    {
+                        fileToPutItIn = "UnsortedCreatures";
+                        addIt = true;
+                    }
+                }
+                //else if (parsed.wdesc._type == ITEM_TYPE.TYPE_CREATURE && parsed.wdesc._blipColor == 8)
+                //{
+                //    fileToPutItIn = "UnknownNPCs";
+                //    addIt = true;
+                //}
+                //else if (parsed.wdesc._blipColor == 8)
+                //{
+                //    fileToPutItIn = "UnknownBlip8s";
+                //    addIt = true;
+                //}
+                //else if (parsed.wdesc._type == ITEM_TYPE.TYPE_CREATURE && parsed.wdesc._blipColor == 2)
+                //{
+                //    fileToPutItIn = "Monsters";
+                //    addIt = true;
+                //}
+                else if (parsed.object_id < 0x80000000)
+                {
+                    fileToPutItIn = "PotentialStatics";
+                    addIt = true;
+                }
+                else if (((uint)parsed.wdesc._type & (uint)ITEM_TYPE.TYPE_ITEM) > 0
+                    )
+                {
+                    weeniefileToPutItIn = "UnsortedItems";
+                    addWeenie = true;
+                }
+                else
+                {
+                    fileToPutItIn = "OtherObjects";
+                    addIt = true;
+                }
+
+                //}
 
                 //if (!addIt
                 //    && !(parsed.wdesc._wcid == 9686) // W_HOOK_CLASS
@@ -1161,8 +1043,8 @@ namespace aclogview
                     processedWeeniePositions.Add(parsed.wdesc._wcid, new List<Position>());
 
                 // de-dupe based on position and wcid
-                // if (addIt && !PositionRecorded(parsed, processedWeeniePositions[parsed.wdesc._wcid], parsed.physicsdesc.pos, margin))
-                if (addIt) //&& !PositionRecorded(parsed, processedWeeniePositions[parsed.wdesc._wcid], parsed.physicsdesc.pos, margin))
+                if (addIt && !PositionRecorded(parsed, processedWeeniePositions[parsed.wdesc._wcid], parsed.physicsdesc.pos, margin))
+                // if (addIt) //&& !PositionRecorded(parsed, processedWeeniePositions[parsed.wdesc._wcid], parsed.physicsdesc.pos, margin))
                 {
                     if (!weenieIds.Contains(parsed.wdesc._wcid))
                     {
