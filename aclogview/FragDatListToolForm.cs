@@ -545,36 +545,133 @@ namespace aclogview
                 //if ((parsed.physicsdesc.pos.objcell_id >> 16) >= 56163 && (parsed.physicsdesc.pos.objcell_id >> 16) <= 56419)
                 //{
 
-                    ////if ((parsed.physicsdesc.pos.objcell_id >> 16) == 62810)
-                    //if ((parsed.physicsdesc.pos.objcell_id >> 16) >= 52884 && (parsed.physicsdesc.pos.objcell_id >> 16) <= 53142)
-                    ////    addIt = true;
-                    //// if ((parsed.physicsdesc.pos.objcell_id >> 16) == 7)
-                    //// if ((parsed.physicsdesc.pos.objcell_id >> 16) >= 56163 && (parsed.physicsdesc.pos.objcell_id >> 16) <= 56419)
-                    //{
-                    //    if (parsed.wdesc._name.m_buffer.Contains("Door"))
-                    //        return;
-                    //    addIt = true;
-                    //    fileToPutItIn = Enum.GetName(typeof(ITEM_TYPE),parsed.wdesc._type).ToString();
-                    //}
-                    //if (parsed.wdesc._wcid == 41898
-                    //    || parsed.wdesc._wcid == 2472
-                    //    || parsed.wdesc._wcid == 29265
-                    //    || parsed.wdesc._wcid == 43381
-                    //    || parsed.wdesc._wcid == 161
-                    //    || parsed.wdesc._wcid == 37219
-                    //    || parsed.wdesc._wcid == 29244
-                    //    || parsed.wdesc._wcid == 35295
-                    //    || parsed.wdesc._wcid == 33053
-                    //    || parsed.wdesc._wcid == 1457
-                    //    || parsed.wdesc._wcid == 46088
-                    //    || parsed.wdesc._name.m_buffer.Contains("Barkeep")
-                    //    || parsed.wdesc._type != ITEM_TYPE.TYPE_PORTAL
-                    //    )
-                    //{
-                    //    addIt = false;
-                    //}
+                ////if ((parsed.physicsdesc.pos.objcell_id >> 16) == 62810)
+                //if ((parsed.physicsdesc.pos.objcell_id >> 16) >= 52884 && (parsed.physicsdesc.pos.objcell_id >> 16) <= 53142)
+                ////    addIt = true;
+                //// if ((parsed.physicsdesc.pos.objcell_id >> 16) == 7)
+                //// if ((parsed.physicsdesc.pos.objcell_id >> 16) >= 56163 && (parsed.physicsdesc.pos.objcell_id >> 16) <= 56419)
+                //{
+                //    if (parsed.wdesc._name.m_buffer.Contains("Door"))
+                //        return;
+                //    addIt = true;
+                //    fileToPutItIn = Enum.GetName(typeof(ITEM_TYPE),parsed.wdesc._type).ToString();
+                //}
+                //if (parsed.wdesc._wcid == 41898
+                //    || parsed.wdesc._wcid == 2472
+                //    || parsed.wdesc._wcid == 29265
+                //    || parsed.wdesc._wcid == 43381
+                //    || parsed.wdesc._wcid == 161
+                //    || parsed.wdesc._wcid == 37219
+                //    || parsed.wdesc._wcid == 29244
+                //    || parsed.wdesc._wcid == 35295
+                //    || parsed.wdesc._wcid == 33053
+                //    || parsed.wdesc._wcid == 1457
+                //    || parsed.wdesc._wcid == 46088
+                //    || parsed.wdesc._name.m_buffer.Contains("Barkeep")
+                //    || parsed.wdesc._type != ITEM_TYPE.TYPE_PORTAL
+                //    )
+                //{
+                //    addIt = false;
+                //}
 
-                    if (parsed.wdesc._type == ITEM_TYPE.TYPE_MISC) // HOUSE OBJECTS
+                if(parsed.wdesc._bitfield == (uint)CM_Physics.PublicWeenieDesc.BitfieldIndex.BF_LIFESTONE)
+                {
+                    fileToPutItIn = "Lifestones";
+                    addIt = true;
+                }
+                else if (parsed.wdesc._bitfield == (uint)CM_Physics.PublicWeenieDesc.BitfieldIndex.BF_BINDSTONE)
+                {
+                    fileToPutItIn = "Bindstones";
+                    addIt = true;
+                }
+                else if (parsed.wdesc._bitfield == (uint)CM_Physics.PublicWeenieDesc.BitfieldIndex.BF_PKSWITCH)
+                {
+                    fileToPutItIn = "PKSwitches";
+                    addIt = true;
+                }
+                else if (parsed.wdesc._bitfield == (uint)CM_Physics.PublicWeenieDesc.BitfieldIndex.BF_NPKSWITCH)
+                {
+                    fileToPutItIn = "NPKSwitches";
+                    addIt = true;
+                }
+                else if (parsed.wdesc._bitfield == (uint)CM_Physics.PublicWeenieDesc.BitfieldIndex.BF_PORTAL)
+                {
+                    if (
+                        parsed.wdesc._wcid == 9620 || // W_PORTALHOUSE_CLASS
+                        parsed.wdesc._wcid == 10751 || // W_PORTALHOUSETEST_CLASS
+                        parsed.wdesc._wcid == 11730    // W_HOUSEPORTAL_CLASS
+                        )
+                    {
+                        fileToPutItIn = "HousePortals";
+                        addIt = true;
+                    }
+                    // else if (parsed.wdesc._type == ITEM_TYPE.TYPE_PORTAL)
+                    // && !(parsed.wdesc._blipColor == 3 && parsed.wdesc._name.m_buffer == "Gateway")) // exclude player summoned portals
+                    // {
+                    //else if (parsed.wdesc._name.m_buffer == "Gateway" && parsed.physicsdesc.setup_id == 33556212)
+                    else if (parsed.wdesc._wcid == 1955)
+                    {
+                        weeniefileToPutItIn = "SummonedPortals";
+                        addWeenie = true;
+                    }
+                    else
+                    {
+                        fileToPutItIn = "Portals";
+                        addIt = true;
+                    }
+                }
+                else if (parsed.wdesc._bitfield == (uint)CM_Physics.PublicWeenieDesc.BitfieldIndex.BF_DOOR)
+                {
+                        fileToPutItIn = "Doors";
+                        addIt = true;
+                }
+                else if (parsed.wdesc._bitfield == (uint)CM_Physics.PublicWeenieDesc.BitfieldIndex.BF_VENDOR)
+                {
+                    if (parsed.wdesc._name.m_buffer == "The Chicken"
+                        || parsed.wdesc._name.m_buffer == "Babe the Blue Auroch"
+                        || parsed.wdesc._name.m_buffer == "Paul the Monouga"
+                        )
+                    {
+                        fileToPutItIn = "SpecialNPCs";
+                        addIt = true;
+                        margin = 15f;
+                    }
+                    else if (parsed.wdesc._name.m_buffer.Contains("Crier")
+                        && parsed.wdesc._blipColor == 8)
+                    {
+                        fileToPutItIn = "Town Criers";
+                        addIt = true;
+                        margin = 15f;
+                    }
+                    ////////else if (parsed.wdesc._type == ITEM_TYPE.TYPE_CREATURE && parsed.wdesc._blipColor == 8)
+                    ////////{
+                    ////////    fileToPutItIn = "UnknownNPCs";
+                    ////////    addIt = true;
+                    ////////}
+                    ////////else if (parsed.wdesc._blipColor == 8)
+                    ////////{
+                    ////////    fileToPutItIn = "UnknownBlip8s";
+                    ////////    addIt = true;
+                    ////////}
+                    else if (parsed.wdesc._blipColor == 8)
+                    {
+                        fileToPutItIn = "NPCs";
+                        addIt = true;
+                    }
+                    //else if (parsed.wdesc._blipColor == 2)
+                    //{
+                    //    weeniefileToPutItIn = "Monsters";
+                    //    addWeenie = true;
+                    //}
+                    else
+                    {
+                        //fileToPutItIn = "UnsortedCreatures";
+                        //addIt = true;
+                        fileToPutItIn = "Vendors";
+                        addIt = true;
+                    }
+                }
+                else if (parsed.wdesc._type == ITEM_TYPE.TYPE_MISC) // HOUSE OBJECTS
                     {
                         if (
                                parsed.wdesc._wcid == 9548 || // W_HOUSE_CLASS
@@ -741,6 +838,11 @@ namespace aclogview
                         fileToPutItIn = "Chests";
                         addIt = true;
                     }
+                    else if (parsed.wdesc._wcid == 21)
+                    {
+                        weeniefileToPutItIn = "Corpses";
+                        addWeenie = true;
+                    }
                     else if (parsed.wdesc._name.m_buffer.Contains("Corpse"))
                     {
                         fileToPutItIn = "Corpses";
@@ -847,6 +949,7 @@ namespace aclogview
                         // || parsed.wdesc._name.m_buffer.Contains("Edge")
                         || parsed.wdesc._name.m_buffer.Contains("Snowball")
                         || parsed.wdesc._name.m_buffer.Contains("Bomb")
+                        || parsed.wdesc._name.m_buffer.Contains("Blade")
                         )
                     {
                         weeniefileToPutItIn = "UndefObjects";
