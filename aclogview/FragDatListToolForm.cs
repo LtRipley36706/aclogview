@@ -574,7 +574,7 @@ namespace aclogview
                 //    addIt = false;
                 //}
 
-                if((parsed.wdesc._bitfield & (uint)CM_Physics.PublicWeenieDesc.BitfieldIndex.BF_LIFESTONE) != 0)
+                if ((parsed.wdesc._bitfield & (uint)CM_Physics.PublicWeenieDesc.BitfieldIndex.BF_LIFESTONE) != 0)
                 {
                     fileToPutItIn = "Lifestones";
                     addIt = true;
@@ -622,8 +622,8 @@ namespace aclogview
                 }
                 else if ((parsed.wdesc._bitfield & (uint)CM_Physics.PublicWeenieDesc.BitfieldIndex.BF_DOOR) != 0)
                 {
-                        fileToPutItIn = "Doors";
-                        addIt = true;
+                    fileToPutItIn = "Doors";
+                    addIt = true;
                 }
                 else if ((parsed.wdesc._bitfield & (uint)CM_Physics.PublicWeenieDesc.BitfieldIndex.BF_VENDOR) != 0)
                 {
@@ -639,7 +639,7 @@ namespace aclogview
                     else if (parsed.wdesc._name.m_buffer.Contains("Crier")
                         && parsed.wdesc._blipColor == 8)
                     {
-                        fileToPutItIn = "Town Criers";
+                        fileToPutItIn = "TownCriers";
                         addIt = true;
                         margin = 15f;
                     }
@@ -672,42 +672,42 @@ namespace aclogview
                     }
                 }
                 else if (parsed.wdesc._type == ITEM_TYPE.TYPE_MISC) // HOUSE OBJECTS
+                {
+                    if (
+                           parsed.wdesc._wcid == 9548 || // W_HOUSE_CLASS
+                           parsed.wdesc._wcid >= 9693 && parsed.wdesc._wcid <= 10492 || // W_HOUSECOTTAGE1_CLASS to W_HOUSECOTTAGE800_CLASS
+                           parsed.wdesc._wcid >= 10493 && parsed.wdesc._wcid <= 10662 || // W_HOUSEVILLA801_CLASS to W_HOUSEVILLA970_CLASS
+                           parsed.wdesc._wcid >= 10663 && parsed.wdesc._wcid <= 10692 || // W_HOUSEMANSION971_CLASS to W_HOUSEMANSION1000_CLASS
+                           parsed.wdesc._wcid >= 10746 && parsed.wdesc._wcid <= 10750 || // W_HOUSETEST1_CLASS to W_HOUSETEST5_CLASS
+                           parsed.wdesc._wcid >= 10829 && parsed.wdesc._wcid <= 10839 || // W_HOUSETEST6_CLASS to W_HOUSETEST16_CLASS
+                           parsed.wdesc._wcid >= 11677 && parsed.wdesc._wcid <= 11682 || // W_HOUSETEST17_CLASS to W_HOUSETEST22_CLASS
+                           parsed.wdesc._wcid >= 12311 && parsed.wdesc._wcid <= 12460 || // W_HOUSECOTTAGE1001_CLASS to W_HOUSECOTTAGE1150_CLASS
+                           parsed.wdesc._wcid >= 12775 && parsed.wdesc._wcid <= 13024 || // W_HOUSECOTTAGE1151_CLASS to W_HOUSECOTTAGE1400_CLASS
+                           parsed.wdesc._wcid >= 13025 && parsed.wdesc._wcid <= 13064 || // W_HOUSEVILLA1401_CLASS to W_HOUSEVILLA1440_CLASS
+                           parsed.wdesc._wcid >= 13065 && parsed.wdesc._wcid <= 13074 || // W_HOUSEMANSION1441_CLASS to W_HOUSEMANSION1450_CLASS
+                           parsed.wdesc._wcid == 13234 || // W_HOUSECOTTAGETEST10000_CLASS
+                           parsed.wdesc._wcid == 13235 || // W_HOUSEVILLATEST10001_CLASS
+                           parsed.wdesc._wcid >= 13243 && parsed.wdesc._wcid <= 14042 || // W_HOUSECOTTAGE1451_CLASS to W_HOUSECOTTAGE2350_CLASS
+                           parsed.wdesc._wcid >= 14043 && parsed.wdesc._wcid <= 14222 || // W_HOUSEVILLA1851_CLASS to W_HOUSEVILLA2440_CLASS
+                           parsed.wdesc._wcid >= 14223 && parsed.wdesc._wcid <= 14242 || // W_HOUSEMANSION1941_CLASS to W_HOUSEMANSION2450_CLASS
+                           parsed.wdesc._wcid >= 14938 && parsed.wdesc._wcid <= 15087 || // W_HOUSECOTTAGE2451_CLASS to W_HOUSECOTTAGE2600_CLASS
+                           parsed.wdesc._wcid >= 15088 && parsed.wdesc._wcid <= 15127 || // W_HOUSEVILLA2601_CLASS to W_HOUSEVILLA2640_CLASS
+                           parsed.wdesc._wcid >= 15128 && parsed.wdesc._wcid <= 15137 || // W_HOUSEMANSION2641_CLASS to W_HOUSEMANSION2650_CLASS
+                           parsed.wdesc._wcid >= 15452 && parsed.wdesc._wcid <= 15457 || // W_HOUSEAPARTMENT2851_CLASS to W_HOUSEAPARTMENT2856_CLASS
+                           parsed.wdesc._wcid >= 15458 && parsed.wdesc._wcid <= 15607 || // W_HOUSECOTTAGE2651_CLASS to W_HOUSECOTTAGE2800_CLASS
+                           parsed.wdesc._wcid >= 15612 && parsed.wdesc._wcid <= 15661 || // W_HOUSEVILLA2801_CLASS to W_HOUSEVILLA2850_CLASS
+                           parsed.wdesc._wcid >= 15897 && parsed.wdesc._wcid <= 16890 || // W_HOUSEAPARTMENT2857_CLASS to W_HOUSEAPARTMENT3850_CLASS
+                           parsed.wdesc._wcid >= 16923 && parsed.wdesc._wcid <= 18923 || // W_HOUSEAPARTMENT4051_CLASS to W_HOUSEAPARTMENT6050_CLASS
+                           parsed.wdesc._wcid >= 18924 && parsed.wdesc._wcid <= 19073 || // W_HOUSECOTTAGE3851_CLASS to W_HOUSECOTTAGE4000_CLASS
+                           parsed.wdesc._wcid >= 19077 && parsed.wdesc._wcid <= 19126 || // W_HOUSEVILLA4001_CLASS to W_HOUSEVILLA4050_CLASS
+                           parsed.wdesc._wcid >= 20650 && parsed.wdesc._wcid <= 20799 || // W_HOUSECOTTAGE6051_CLASS to W_HOUSECOTTAGE6200_CLASS
+                           parsed.wdesc._wcid >= 20800 && parsed.wdesc._wcid <= 20839 || // W_HOUSEVILLA6201_CLASS to W_HOUSEVILLA6240_CLASS
+                           parsed.wdesc._wcid >= 20840 && parsed.wdesc._wcid <= 20849    // W_HOUSEMANSION6241_CLASS to W_HOUSEMANSION6250_CLASS
+                           )
                     {
-                        if (
-                               parsed.wdesc._wcid == 9548 || // W_HOUSE_CLASS
-                               parsed.wdesc._wcid >= 9693 && parsed.wdesc._wcid <= 10492 || // W_HOUSECOTTAGE1_CLASS to W_HOUSECOTTAGE800_CLASS
-                               parsed.wdesc._wcid >= 10493 && parsed.wdesc._wcid <= 10662 || // W_HOUSEVILLA801_CLASS to W_HOUSEVILLA970_CLASS
-                               parsed.wdesc._wcid >= 10663 && parsed.wdesc._wcid <= 10692 || // W_HOUSEMANSION971_CLASS to W_HOUSEMANSION1000_CLASS
-                               parsed.wdesc._wcid >= 10746 && parsed.wdesc._wcid <= 10750 || // W_HOUSETEST1_CLASS to W_HOUSETEST5_CLASS
-                               parsed.wdesc._wcid >= 10829 && parsed.wdesc._wcid <= 10839 || // W_HOUSETEST6_CLASS to W_HOUSETEST16_CLASS
-                               parsed.wdesc._wcid >= 11677 && parsed.wdesc._wcid <= 11682 || // W_HOUSETEST17_CLASS to W_HOUSETEST22_CLASS
-                               parsed.wdesc._wcid >= 12311 && parsed.wdesc._wcid <= 12460 || // W_HOUSECOTTAGE1001_CLASS to W_HOUSECOTTAGE1150_CLASS
-                               parsed.wdesc._wcid >= 12775 && parsed.wdesc._wcid <= 13024 || // W_HOUSECOTTAGE1151_CLASS to W_HOUSECOTTAGE1400_CLASS
-                               parsed.wdesc._wcid >= 13025 && parsed.wdesc._wcid <= 13064 || // W_HOUSEVILLA1401_CLASS to W_HOUSEVILLA1440_CLASS
-                               parsed.wdesc._wcid >= 13065 && parsed.wdesc._wcid <= 13074 || // W_HOUSEMANSION1441_CLASS to W_HOUSEMANSION1450_CLASS
-                               parsed.wdesc._wcid == 13234 || // W_HOUSECOTTAGETEST10000_CLASS
-                               parsed.wdesc._wcid == 13235 || // W_HOUSEVILLATEST10001_CLASS
-                               parsed.wdesc._wcid >= 13243 && parsed.wdesc._wcid <= 14042 || // W_HOUSECOTTAGE1451_CLASS to W_HOUSECOTTAGE2350_CLASS
-                               parsed.wdesc._wcid >= 14043 && parsed.wdesc._wcid <= 14222 || // W_HOUSEVILLA1851_CLASS to W_HOUSEVILLA2440_CLASS
-                               parsed.wdesc._wcid >= 14223 && parsed.wdesc._wcid <= 14242 || // W_HOUSEMANSION1941_CLASS to W_HOUSEMANSION2450_CLASS
-                               parsed.wdesc._wcid >= 14938 && parsed.wdesc._wcid <= 15087 || // W_HOUSECOTTAGE2451_CLASS to W_HOUSECOTTAGE2600_CLASS
-                               parsed.wdesc._wcid >= 15088 && parsed.wdesc._wcid <= 15127 || // W_HOUSEVILLA2601_CLASS to W_HOUSEVILLA2640_CLASS
-                               parsed.wdesc._wcid >= 15128 && parsed.wdesc._wcid <= 15137 || // W_HOUSEMANSION2641_CLASS to W_HOUSEMANSION2650_CLASS
-                               parsed.wdesc._wcid >= 15452 && parsed.wdesc._wcid <= 15457 || // W_HOUSEAPARTMENT2851_CLASS to W_HOUSEAPARTMENT2856_CLASS
-                               parsed.wdesc._wcid >= 15458 && parsed.wdesc._wcid <= 15607 || // W_HOUSECOTTAGE2651_CLASS to W_HOUSECOTTAGE2800_CLASS
-                               parsed.wdesc._wcid >= 15612 && parsed.wdesc._wcid <= 15661 || // W_HOUSEVILLA2801_CLASS to W_HOUSEVILLA2850_CLASS
-                               parsed.wdesc._wcid >= 15897 && parsed.wdesc._wcid <= 16890 || // W_HOUSEAPARTMENT2857_CLASS to W_HOUSEAPARTMENT3850_CLASS
-                               parsed.wdesc._wcid >= 16923 && parsed.wdesc._wcid <= 18923 || // W_HOUSEAPARTMENT4051_CLASS to W_HOUSEAPARTMENT6050_CLASS
-                               parsed.wdesc._wcid >= 18924 && parsed.wdesc._wcid <= 19073 || // W_HOUSECOTTAGE3851_CLASS to W_HOUSECOTTAGE4000_CLASS
-                               parsed.wdesc._wcid >= 19077 && parsed.wdesc._wcid <= 19126 || // W_HOUSEVILLA4001_CLASS to W_HOUSEVILLA4050_CLASS
-                               parsed.wdesc._wcid >= 20650 && parsed.wdesc._wcid <= 20799 || // W_HOUSECOTTAGE6051_CLASS to W_HOUSECOTTAGE6200_CLASS
-                               parsed.wdesc._wcid >= 20800 && parsed.wdesc._wcid <= 20839 || // W_HOUSEVILLA6201_CLASS to W_HOUSEVILLA6240_CLASS
-                               parsed.wdesc._wcid >= 20840 && parsed.wdesc._wcid <= 20849    // W_HOUSEMANSION6241_CLASS to W_HOUSEMANSION6250_CLASS
-                               )
-                        {
-                            fileToPutItIn = "HouseObjects";
-                            addIt = true;
-                        }
+                        fileToPutItIn = "HouseObjects";
+                        addIt = true;
+                    }
                     //else if (parsed.wdesc._name.m_buffer.Contains("Door"))
                     //{
                     //    fileToPutItIn = "Doors";
@@ -773,18 +773,18 @@ namespace aclogview
 
                 }
                 else if (parsed.wdesc._type == ITEM_TYPE.TYPE_CONTAINER) // HOOKS AND STORAGE
+                {
+                    if (
+                        parsed.wdesc._wcid == 9686 && parsed.wdesc._name.ToString().Contains("Hook") || // W_HOOK_CLASS
+                        parsed.wdesc._wcid == 11697 && parsed.wdesc._name.ToString().Contains("Hook") || // W_HOOK_FLOOR_CLASS
+                        parsed.wdesc._wcid == 11698 && parsed.wdesc._name.ToString().Contains("Hook") || // W_HOOK_CEILING_CLASS
+                        parsed.wdesc._wcid == 12678 && parsed.wdesc._name.ToString().Contains("Hook") || // W_HOOK_ROOF_CLASS
+                        parsed.wdesc._wcid == 12679 && parsed.wdesc._name.ToString().Contains("Hook") // W_HOOK_YARD_CLASS
+                        )
                     {
-                        if (
-                            parsed.wdesc._wcid == 9686 && parsed.wdesc._name.ToString().Contains("Hook") || // W_HOOK_CLASS
-                            parsed.wdesc._wcid == 11697 && parsed.wdesc._name.ToString().Contains("Hook") || // W_HOOK_FLOOR_CLASS
-                            parsed.wdesc._wcid == 11698 && parsed.wdesc._name.ToString().Contains("Hook") || // W_HOOK_CEILING_CLASS
-                            parsed.wdesc._wcid == 12678 && parsed.wdesc._name.ToString().Contains("Hook") || // W_HOOK_ROOF_CLASS
-                            parsed.wdesc._wcid == 12679 && parsed.wdesc._name.ToString().Contains("Hook") // W_HOOK_YARD_CLASS
-                            )
-                        {
-                            fileToPutItIn = "HouseHooks";
-                            addIt = true;
-                        }
+                        fileToPutItIn = "HouseHooks";
+                        addIt = true;
+                    }
                     else if (
                             parsed.wdesc._wcid == 9686 || // W_HOOK_CLASS
                             parsed.wdesc._wcid == 11697 || // W_HOOK_FLOOR_CLASS
@@ -936,6 +936,7 @@ namespace aclogview
                     else if (
                         parsed.wdesc._name.m_buffer.Contains("Bolt")
                         || parsed.wdesc._name.m_buffer.Contains("wave")
+                        || parsed.wdesc._name.m_buffer.Contains("Wave")
                         || parsed.wdesc._name.m_buffer.Contains("Blast")
                         || parsed.wdesc._name.m_buffer.Contains("Ring")
                         || parsed.wdesc._name.m_buffer.Contains("Stream")
@@ -944,21 +945,27 @@ namespace aclogview
                         || parsed.wdesc._name.m_buffer.Contains("Egg")
                         || parsed.wdesc._name.m_buffer.Contains("Death")
                         || parsed.wdesc._name.m_buffer.Contains("Fury")
-                        // || parsed.wdesc._name.m_buffer.Contains("Wind")
+                         || parsed.wdesc._name.m_buffer.Contains("Wind")
                         || parsed.wdesc._name.m_buffer.Contains("Flaming Skull")
-                        // || parsed.wdesc._name.m_buffer.Contains("Edge")
+                         || parsed.wdesc._name.m_buffer.Contains("Edge")
                         || parsed.wdesc._name.m_buffer.Contains("Snowball")
                         || parsed.wdesc._name.m_buffer.Contains("Bomb")
                         || parsed.wdesc._name.m_buffer.Contains("Blade")
+                        || parsed.wdesc._name.m_buffer.Contains("Stalactite")
+                        || parsed.wdesc._name.m_buffer.Contains("Boulder")
                         )
                     {
                         weeniefileToPutItIn = "UndefObjects";
                         addWeenie = true;
                     }
                     else if (parsed.wdesc._name.m_buffer.Contains("Generator"))
-
                     {
                         fileToPutItIn = "Generators";
+                        addIt = true;
+                    }
+                    else if (parsed.wdesc._name.m_buffer.Contains("Rabbit"))
+                    {
+                        fileToPutItIn = "UndefRabbits";
                         addIt = true;
                     }
                     else
@@ -1060,7 +1067,7 @@ namespace aclogview
                     else if (parsed.wdesc._name.m_buffer.Contains("Crier")
                         && parsed.wdesc._blipColor == 8)
                     {
-                        fileToPutItIn = "Town Criers";
+                        fileToPutItIn = "TownCriers";
                         addIt = true;
                         margin = 15f;
                     }
@@ -1084,10 +1091,81 @@ namespace aclogview
                         weeniefileToPutItIn = "Monsters";
                         addWeenie = true;
                     }
+                    else if (parsed.wdesc._name.m_buffer.Contains("Statue")
+                        || parsed.wdesc._name.m_buffer.Contains("Shrine")
+                        || parsed.wdesc._name.m_buffer.Contains("Alter")
+                        || parsed.wdesc._name.m_buffer.Contains("Warden")
+                        || parsed.wdesc._name.m_buffer.Contains("Device")
+                        || parsed.wdesc._name.m_buffer.Contains("Seed")
+                        || parsed.wdesc._name.m_buffer.Contains("Tower Guardian")
+                        || parsed.wdesc._name.m_buffer.Contains("Forge")
+                        || parsed.wdesc._name.m_buffer.Contains("Tower Guardian")
+                        || parsed.wdesc._name.m_buffer.Contains("New Aluvian Champion")
+                        || parsed.wdesc._name.m_buffer.Contains("Barrel")
+                        || parsed.wdesc._name.m_buffer.Contains("New Aluvian War Mage Champion")
+                        || parsed.wdesc._name.m_buffer.Contains("Wounded Drudge Skulker")
+                        || parsed.wdesc._name.m_buffer.Contains("Servant")
+                        || parsed.wdesc._name.m_buffer.Contains("Prison")
+                        || parsed.wdesc._name.m_buffer.Contains("Temple")
+                        || parsed.wdesc._name.m_buffer.Contains("Mana Siphon")
+                        || parsed.wdesc._name.m_buffer.Contains("Mnemosyne")
+                        || parsed.wdesc._name.m_buffer.Contains("Portal")
+                        || parsed.wdesc._name.m_buffer.Contains("Door")
+                        || parsed.wdesc._name.m_buffer.Contains("Wall")
+                        || parsed.wdesc._name.m_buffer.Contains("Pit")
+                        || parsed.wdesc._name.m_buffer.Contains("Book")
+                        || parsed.wdesc._name.m_buffer.Contains("The Deep")
+                        || parsed.wdesc._name.m_buffer.Contains("Warner Brother")
+                        || parsed.wdesc._name.m_buffer.Contains("Fishing")
+                        || parsed.wdesc._name.m_buffer.Contains("Bookshelf")
+                        || parsed.wdesc._name.m_buffer.Contains("Cavern")
+                        || parsed.wdesc._name.m_buffer.Contains("Sword of Frozen Fury")
+                        || parsed.wdesc._name.m_buffer.Contains("Coffin")
+                        || parsed.wdesc._name.m_buffer.Contains("Silence")
+                        || parsed.wdesc._name.m_buffer == "Black"
+                        || parsed.wdesc._name.m_buffer.Contains("Eyes")
+                        || parsed.wdesc._name.m_buffer.Contains("Bed")
+                        || parsed.wdesc._name.m_buffer.Contains("Hole")
+                        || parsed.wdesc._name.m_buffer.Contains("Tribunal")
+                        || parsed.wdesc._name.m_buffer.Contains("Sunlight")
+                        || parsed.wdesc._name.m_buffer.Contains("Wind")
+                        || parsed.wdesc._name.m_buffer == "E"
+                        || parsed.wdesc._name.m_buffer == "Flame"
+                        || parsed.wdesc._name.m_buffer == "Death"
+                        || parsed.wdesc._name.m_buffer == "Darkness"
+                        || parsed.wdesc._name.m_buffer == "Time"
+                        || parsed.wdesc._name.m_buffer == "Ring"
+                        || parsed.wdesc._name.m_buffer == "Hope"
+                        || parsed.wdesc._name.m_buffer == "Mushroom"
+                        || parsed.wdesc._name.m_buffer == "Stars"
+                        || parsed.wdesc._name.m_buffer == "Man"
+                        || parsed.wdesc._name.m_buffer == "Nothing"
+                        || parsed.wdesc._name.m_buffer.Contains("Lever")
+                        || parsed.wdesc._name.m_buffer.Contains("Gateway")
+                        || parsed.wdesc._name.m_buffer.Contains("Gate Stone")
+                        || parsed.wdesc._name.m_buffer.Contains("Gate Stone")
+                        || parsed.wdesc._name.m_buffer.Contains("Target")
+                        || parsed.wdesc._name.m_buffer.Contains("Backpack")
+                        || parsed.wdesc._name.m_buffer.Contains("Odd Looking Vine")
+                        || parsed.wdesc._name.m_buffer.Contains("Pumpkin Vine")
+                        || parsed.wdesc._name.m_buffer.Contains("Font")
+                        || parsed.wdesc._name.m_buffer.Contains("Lair")
+                        || parsed.wdesc._name.m_buffer.Contains("Essence")
+                        || parsed.wdesc._name.m_buffer.Contains("Smelting")
+                        || parsed.wdesc._name.m_buffer.Contains("Documents")
+                        || parsed.wdesc._name.m_buffer.Contains("Harmonic Transference Field")
+                        || parsed.wdesc._name.m_buffer.Contains("Deeper into")
+                        || parsed.wdesc._name.m_buffer.Contains("Up to the")
+                        || parsed.wdesc._name.m_buffer.Contains("Pool")
+                        )
+                    {
+                        fileToPutItIn = "OtherNPCs";
+                        addIt = true;
+                    }
                     else
                     {
-                        fileToPutItIn = "UnsortedCreatures";
-                        addIt = true;
+                        weeniefileToPutItIn = "UnsortedCreatures";
+                        addWeenie = true;
                     }
                 }
                 //else if (parsed.wdesc._type == ITEM_TYPE.TYPE_CREATURE && parsed.wdesc._blipColor == 8)
