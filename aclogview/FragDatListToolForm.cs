@@ -594,6 +594,26 @@ namespace aclogview
                     fileToPutItIn = "NPKSwitches";
                     addIt = true;
                 }
+                else if ((parsed.wdesc._bitfield & (uint)CM_Physics.PublicWeenieDesc.BitfieldIndex.BF_LOCKPICK) != 0)
+                {
+                    weeniefileToPutItIn = "Lockpicks";
+                    addWeenie = true;
+                }
+                else if ((parsed.wdesc._bitfield & (uint)CM_Physics.PublicWeenieDesc.BitfieldIndex.BF_FOOD) != 0)
+                {
+                    weeniefileToPutItIn = "FoodObjects";
+                    addWeenie = true;
+                }
+                else if ((parsed.wdesc._bitfield & (uint)CM_Physics.PublicWeenieDesc.BitfieldIndex.BF_HEALER) != 0)
+                {
+                    weeniefileToPutItIn = "Healers";
+                    addWeenie = true;
+                }
+                //else if ((parsed.wdesc._bitfield & (uint)CM_Physics.PublicWeenieDesc.BitfieldIndex.BF_BOOK) != 0)
+                //{
+                //    weeniefileToPutItIn = "Books";
+                //    addWeenie = true;
+                //}
                 else if ((parsed.wdesc._bitfield & (uint)CM_Physics.PublicWeenieDesc.BitfieldIndex.BF_PORTAL) != 0)
                 {
                     if (
@@ -634,7 +654,7 @@ namespace aclogview
                     {
                         fileToPutItIn = "SpecialNPCs";
                         addIt = true;
-                        margin = 15f;
+                        margin = 25f;
                     }
                     else if (parsed.wdesc._name.m_buffer.Contains("Crier")
                         && parsed.wdesc._blipColor == 8)
@@ -933,6 +953,12 @@ namespace aclogview
                         fileToPutItIn = "FakeSlumLords";
                         addIt = true;
                     }
+                    else if (parsed.wdesc._name.m_buffer.Contains("Gen")
+                        )
+                    {
+                        fileToPutItIn = "Generators";
+                        addIt = true;
+                    }
                     else if (
                         parsed.wdesc._name.m_buffer.Contains("Bolt")
                         || parsed.wdesc._name.m_buffer.Contains("wave")
@@ -953,6 +979,7 @@ namespace aclogview
                         || parsed.wdesc._name.m_buffer.Contains("Blade")
                         || parsed.wdesc._name.m_buffer.Contains("Stalactite")
                         || parsed.wdesc._name.m_buffer.Contains("Boulder")
+                        || parsed.wdesc._name.m_buffer.Contains("Whirlwind")
                         )
                     {
                         weeniefileToPutItIn = "UndefObjects";
@@ -1062,7 +1089,7 @@ namespace aclogview
                     {
                         fileToPutItIn = "SpecialNPCs";
                         addIt = true;
-                        margin = 15f;
+                        margin = 25f;
                     }
                     else if (parsed.wdesc._name.m_buffer.Contains("Crier")
                         && parsed.wdesc._blipColor == 8)
