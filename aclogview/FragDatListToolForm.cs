@@ -933,7 +933,7 @@ namespace aclogview
                                                        // parsed.wdesc._wcid == 22118 || // W_SLUMLORDHAUNTEDMANSION_CLASS
                         )
                     {
-                        fileToPutItIn = "SlumLords";
+                        fileToPutItIn = "HouseSlumLords";
                         if (parsed.wdesc._name.m_buffer.Contains("'s Cottage"))
                             parsed.wdesc._name.m_buffer = "Cottage";
                         if (parsed.wdesc._name.m_buffer.Contains("'s Villa"))
