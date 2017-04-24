@@ -675,17 +675,28 @@ namespace aclogview
                     ////////}
                     else if (parsed.wdesc._name.m_buffer.Contains("Pet")
                         || parsed.wdesc._name.m_buffer.Contains("Wind-up")
+                        || parsed.wdesc._wcid == 48881
+                        || parsed.wdesc._wcid == 34902
+                        || parsed.wdesc._wcid == 48891
+                        || parsed.wdesc._wcid == 48879
+                        || parsed.wdesc._wcid == 34906
+                        || parsed.wdesc._wcid == 48887
+                        || parsed.wdesc._wcid == 48889
+                        || parsed.wdesc._wcid == 48883
+                        || parsed.wdesc._wcid == 34900
+                        || parsed.wdesc._wcid == 34901
+                        || parsed.wdesc._wcid == 34908
                         )
                     {
                         weeniefileToPutItIn = "Pets";
                         addWeenie = true;
                     }
-                    else if (parsed.wdesc._name.m_buffer.Contains("Golem")
-                        )
-                    {
-                        weeniefileToPutItIn = "NPCGolems";
-                        addIt = true;
-                    }
+                    //else if (parsed.wdesc._name.m_buffer.Contains("Golem")
+                    //    )
+                    //{
+                    //    weeniefileToPutItIn = "NPCGolems";
+                    //    addWeenie = true;
+                    //}
                     else if (parsed.wdesc._blipColor == 8)
                     {
                         fileToPutItIn = "NPCs";
@@ -1036,7 +1047,7 @@ namespace aclogview
                         fileToPutItIn = "Statues";
                         addIt = true;
                     }
-                    else if (parsed.wdesc._name.m_buffer.Contains("Scrolls"))
+                    else if (parsed.wdesc._name.m_buffer.Contains("Scroll"))
                     {
                         weeniefileToPutItIn = "Scrolls";
                         addWeenie = true;
@@ -1049,6 +1060,11 @@ namespace aclogview
                     else if (parsed.wdesc._wcid == 9002)
                     {
                         fileToPutItIn = "ShardVigil";
+                        addIt = true;
+                    }
+                    else if (parsed.object_id < 0x80000000)
+                    {
+                        fileToPutItIn = "WritableStaticsObjects";
                         addIt = true;
                     }
                     else
@@ -1113,6 +1129,8 @@ namespace aclogview
                     if (parsed.wdesc._name.m_buffer == "The Chicken"
                         || parsed.wdesc._name.m_buffer == "Babe the Blue Auroch"
                         || parsed.wdesc._name.m_buffer == "Paul the Monouga"
+                        //|| parsed.wdesc._name.m_buffer == "Silencia's Magma Golem"
+                        //|| parsed.wdesc._name.m_buffer == "Repair Golem"
                         )
                     {
                         fileToPutItIn = "SpecialNPCs";
@@ -1138,17 +1156,28 @@ namespace aclogview
                     ////////}
                     else if (parsed.wdesc._name.m_buffer.Contains("Pet")
                         || parsed.wdesc._name.m_buffer.Contains("Wind-up")
+                        || parsed.wdesc._wcid == 48881
+                        || parsed.wdesc._wcid == 34902
+                        || parsed.wdesc._wcid == 48891
+                        || parsed.wdesc._wcid == 48879
+                        || parsed.wdesc._wcid == 34906
+                        || parsed.wdesc._wcid == 48887
+                        || parsed.wdesc._wcid == 48889
+                        || parsed.wdesc._wcid == 48883
+                        || parsed.wdesc._wcid == 34900
+                        || parsed.wdesc._wcid == 34901
+                        || parsed.wdesc._wcid == 34908
                         )
                     {
                         weeniefileToPutItIn = "Pets";
                         addWeenie = true;
                     }
-                    else if (parsed.wdesc._name.m_buffer.Contains("Golem")
-                        )
-                    {
-                        weeniefileToPutItIn = "NPCGolems";
-                        addIt = true;
-                    }
+                    //else if (parsed.wdesc._name.m_buffer.Contains("Golem")
+                    //    )
+                    //{
+                    //    weeniefileToPutItIn = "NPCGolems";
+                    //    addWeenie = true;
+                    //}
                     else if (parsed.wdesc._blipColor == 8)
                     {
                         fileToPutItIn = "NPCs";
