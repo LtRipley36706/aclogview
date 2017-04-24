@@ -661,7 +661,7 @@ namespace aclogview
                     {
                         fileToPutItIn = "TownCriers";
                         addIt = true;
-                        margin = 15f;
+                        margin = 20f;
                     }
                     ////////else if (parsed.wdesc._type == ITEM_TYPE.TYPE_CREATURE && parsed.wdesc._blipColor == 8)
                     ////////{
@@ -673,10 +673,24 @@ namespace aclogview
                     ////////    fileToPutItIn = "UnknownBlip8s";
                     ////////    addIt = true;
                     ////////}
+                    else if (parsed.wdesc._name.m_buffer.Contains("Pet")
+                        || parsed.wdesc._name.m_buffer.Contains("Wind-up")
+                        )
+                    {
+                        weeniefileToPutItIn = "Pets";
+                        addWeenie = true;
+                    }
+                    else if (parsed.wdesc._name.m_buffer.Contains("Golem")
+                        )
+                    {
+                        weeniefileToPutItIn = "NPCGolems";
+                        addIt = true;
+                    }
                     else if (parsed.wdesc._blipColor == 8)
                     {
                         fileToPutItIn = "NPCs";
                         addIt = true;
+                        margin = 20f;
                     }
                     //else if (parsed.wdesc._blipColor == 2)
                     //{
@@ -758,10 +772,15 @@ namespace aclogview
                         weeniefileToPutItIn = "Spirits";
                         addWeenie = true;
                     }
+                    else if (parsed.object_id < 0x80000000)
+                    {
+                        fileToPutItIn = "MiscStaticsObjects";
+                        addIt = true;
+                    }
                     else
                     {
-                        fileToPutItIn = "MiscObjects";
-                        addIt = true;
+                        weeniefileToPutItIn = "MiscObjects";
+                        addWeenie = true;
                     }
                 }
                 else if (parsed.wdesc._type == ITEM_TYPE.TYPE_PORTAL) // HOUSE PORTALS
@@ -872,6 +891,15 @@ namespace aclogview
                     {
                         fileToPutItIn = "StandingStones";
                         addIt = true;
+                    }
+                    else if (parsed.wdesc._name.m_buffer.Contains("Pack")
+                        || parsed.wdesc._name.m_buffer.Contains("Backpack")
+                        || parsed.wdesc._name.m_buffer.Contains("Sack")
+                        || parsed.wdesc._name.m_buffer.Contains("Pouch")
+                        )
+                    {
+                        weeniefileToPutItIn = "Packs";
+                        addWeenie = true;
                     }
                     else
                     {
@@ -1096,7 +1124,7 @@ namespace aclogview
                     {
                         fileToPutItIn = "TownCriers";
                         addIt = true;
-                        margin = 15f;
+                        margin = 20f;
                     }
                     ////////else if (parsed.wdesc._type == ITEM_TYPE.TYPE_CREATURE && parsed.wdesc._blipColor == 8)
                     ////////{
@@ -1108,10 +1136,24 @@ namespace aclogview
                     ////////    fileToPutItIn = "UnknownBlip8s";
                     ////////    addIt = true;
                     ////////}
+                    else if (parsed.wdesc._name.m_buffer.Contains("Pet")
+                        || parsed.wdesc._name.m_buffer.Contains("Wind-up")
+                        )
+                    {
+                        weeniefileToPutItIn = "Pets";
+                        addWeenie = true;
+                    }
+                    else if (parsed.wdesc._name.m_buffer.Contains("Golem")
+                        )
+                    {
+                        weeniefileToPutItIn = "NPCGolems";
+                        addIt = true;
+                    }
                     else if (parsed.wdesc._blipColor == 8)
                     {
                         fileToPutItIn = "NPCs";
                         addIt = true;
+                        margin = 20f;
                     }
                     else if (parsed.wdesc._blipColor == 2)
                     {
@@ -1120,18 +1162,17 @@ namespace aclogview
                     }
                     else if (parsed.wdesc._name.m_buffer.Contains("Statue")
                         || parsed.wdesc._name.m_buffer.Contains("Shrine")
-                        || parsed.wdesc._name.m_buffer.Contains("Alter")
-                        || parsed.wdesc._name.m_buffer.Contains("Warden")
+                        //|| parsed.wdesc._name.m_buffer.Contains("Altar")
+                        || parsed.wdesc._name.m_buffer.Contains("Warden of")
                         || parsed.wdesc._name.m_buffer.Contains("Device")
                         || parsed.wdesc._name.m_buffer.Contains("Seed")
-                        || parsed.wdesc._name.m_buffer.Contains("Tower Guardian")
                         || parsed.wdesc._name.m_buffer.Contains("Forge")
                         || parsed.wdesc._name.m_buffer.Contains("Tower Guardian")
                         || parsed.wdesc._name.m_buffer.Contains("New Aluvian Champion")
                         || parsed.wdesc._name.m_buffer.Contains("Barrel")
                         || parsed.wdesc._name.m_buffer.Contains("New Aluvian War Mage Champion")
                         || parsed.wdesc._name.m_buffer.Contains("Wounded Drudge Skulker")
-                        || parsed.wdesc._name.m_buffer.Contains("Servant")
+                        || parsed.wdesc._name.m_buffer.Contains("Servant of")
                         || parsed.wdesc._name.m_buffer.Contains("Prison")
                         || parsed.wdesc._name.m_buffer.Contains("Temple")
                         || parsed.wdesc._name.m_buffer.Contains("Mana Siphon")
@@ -1170,7 +1211,6 @@ namespace aclogview
                         || parsed.wdesc._name.m_buffer.Contains("Lever")
                         || parsed.wdesc._name.m_buffer.Contains("Gateway")
                         || parsed.wdesc._name.m_buffer.Contains("Gate Stone")
-                        || parsed.wdesc._name.m_buffer.Contains("Gate Stone")
                         || parsed.wdesc._name.m_buffer.Contains("Target")
                         || parsed.wdesc._name.m_buffer.Contains("Backpack")
                         || parsed.wdesc._name.m_buffer.Contains("Odd Looking Vine")
@@ -1187,6 +1227,7 @@ namespace aclogview
                         )
                     {
                         fileToPutItIn = "OtherNPCs";
+                        margin = 20f;
                         addIt = true;
                     }
                     else
