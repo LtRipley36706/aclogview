@@ -401,6 +401,9 @@ namespace aclogview
                     {
                         fragmentsProcessed++;
 
+                        //if (fragmentsProcessed > 600000)
+                        //    break;
+
                         try
                         {
                             // ********************************************************************
