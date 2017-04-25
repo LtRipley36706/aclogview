@@ -609,11 +609,19 @@ namespace aclogview
                     weeniefileToPutItIn = "Healers";
                     addWeenie = true;
                 }
-                //else if ((parsed.wdesc._bitfield & (uint)CM_Physics.PublicWeenieDesc.BitfieldIndex.BF_BOOK) != 0)
-                //{
-                //    weeniefileToPutItIn = "Books";
-                //    addWeenie = true;
-                //}
+                else if ((parsed.wdesc._bitfield & (uint)CM_Physics.PublicWeenieDesc.BitfieldIndex.BF_BOOK) != 0)
+                {
+                    if (parsed.object_id < 0x80000000)
+                    {
+                        fileToPutItIn = "BookStatics";
+                        addIt = true;
+                    }
+                    else
+                    {
+                        weeniefileToPutItIn = "Books";
+                        addWeenie = true;
+                    }
+                }
                 else if ((parsed.wdesc._bitfield & (uint)CM_Physics.PublicWeenieDesc.BitfieldIndex.BF_PORTAL) != 0)
                 {
                     if (
@@ -647,8 +655,9 @@ namespace aclogview
                 }
                 else if ((parsed.wdesc._bitfield & (uint)CM_Physics.PublicWeenieDesc.BitfieldIndex.BF_VENDOR) != 0)
                 {
-                    if (parsed.wdesc._name.m_buffer == "The Chicken"
-                        || parsed.wdesc._name.m_buffer == "Babe the Blue Auroch"
+                    if (// parsed.wdesc._name.m_buffer == "The Chicken"
+                        // || parsed.wdesc._name.m_buffer == "Babe the Blue Auroch"
+                         parsed.wdesc._name.m_buffer == "Babe the Blue Auroch"
                         || parsed.wdesc._name.m_buffer == "Paul the Monouga"
                         )
                     {
@@ -656,12 +665,17 @@ namespace aclogview
                         addIt = true;
                         margin = 25f;
                     }
+                    else if (parsed.wdesc._wcid == 43481)
+                    {
+                        weeniefileToPutItIn = "OlthoiPlayers";
+                        addWeenie = true;
+                    }
                     else if (parsed.wdesc._name.m_buffer.Contains("Crier")
                         && parsed.wdesc._blipColor == 8)
                     {
                         fileToPutItIn = "TownCriers";
                         addIt = true;
-                        margin = 20f;
+                        margin = 25f;
                     }
                     ////////else if (parsed.wdesc._type == ITEM_TYPE.TYPE_CREATURE && parsed.wdesc._blipColor == 8)
                     ////////{
@@ -701,7 +715,7 @@ namespace aclogview
                     {
                         fileToPutItIn = "NPCs";
                         addIt = true;
-                        margin = 20f;
+                        margin = 25f;
                     }
                     //else if (parsed.wdesc._blipColor == 2)
                     //{
@@ -713,8 +727,14 @@ namespace aclogview
                         //fileToPutItIn = "UnsortedCreatures";
                         //addIt = true;
                         fileToPutItIn = "Vendors";
+                        margin = 25f;
                         addIt = true;
                     }
+                }
+                else if (parsed.wdesc._wcid == 4)
+                {
+                    weeniefileToPutItIn = "Admins";
+                    addWeenie = true;
                 }
                 else if (parsed.wdesc._type == ITEM_TYPE.TYPE_MISC) // HOUSE OBJECTS
                 {
@@ -893,11 +913,11 @@ namespace aclogview
                         weeniefileToPutItIn = "Corpses";
                         addWeenie = true;
                     }
-                    else if (parsed.wdesc._name.m_buffer.Contains("Corpse"))
-                    {
-                        fileToPutItIn = "Corpses";
-                        addIt = true;
-                    }
+                    //else if (parsed.wdesc._name.m_buffer.Contains("Corpse"))
+                    //{
+                    //    fileToPutItIn = "Corpses";
+                    //    addIt = true;
+                    //}
                     else if (parsed.wdesc._name.m_buffer.Contains("Standing Stone"))
                     {
                         fileToPutItIn = "StandingStones";
@@ -912,10 +932,15 @@ namespace aclogview
                         weeniefileToPutItIn = "Packs";
                         addWeenie = true;
                     }
+                    else if (parsed.object_id < 0x80000000)
+                    {
+                        fileToPutItIn = "ContainersStatics";
+                        addIt = true;
+                    }
                     else
                     {
-                        fileToPutItIn = "Containers";
-                        addIt = true;
+                        weeniefileToPutItIn = "Containers";
+                        addWeenie = true;
                     }
                 }
                 else if (parsed.wdesc._type == ITEM_TYPE.TYPE_UNDEF) // SLUMLORD OBJECTS
@@ -1029,15 +1054,20 @@ namespace aclogview
                         fileToPutItIn = "Generators";
                         addIt = true;
                     }
-                    else if (parsed.wdesc._name.m_buffer.Contains("Rabbit"))
+                    //else if (parsed.wdesc._name.m_buffer.Contains("Rabbit"))
+                    //{
+                    //    fileToPutItIn = "UndefRabbits";
+                    //    addIt = true;
+                    //}
+                    else if (parsed.object_id < 0x80000000)
                     {
-                        fileToPutItIn = "UndefRabbits";
+                        fileToPutItIn = "UndefStatics";
                         addIt = true;
                     }
                     else
                     {
-                        fileToPutItIn = "UndefObjects";
-                        addIt = true;
+                        weeniefileToPutItIn = "UndefObjects";
+                        addWeenie = true;
                     }
                 }
                 else if (parsed.wdesc._type == ITEM_TYPE.TYPE_WRITABLE)
@@ -1069,8 +1099,8 @@ namespace aclogview
                     }
                     else
                     {
-                        fileToPutItIn = "WritableObjects";
-                        addIt = true;
+                        weeniefileToPutItIn = "WritableObjects";
+                        addWeenie = true;
                     }
                 }
                 else if (parsed.wdesc._type == ITEM_TYPE.TYPE_LIFESTONE)
@@ -1078,56 +1108,57 @@ namespace aclogview
                     fileToPutItIn = "Lifestones";
                     addIt = true;
                 }
-                //else if ((parsed.wdesc._name.m_buffer.Contains("Scrivener")
-                //        || parsed.wdesc._name.m_buffer.Contains("Scribe")
-                //        || parsed.wdesc._name.m_buffer.Contains("Archmage")
-                //        || parsed.wdesc._name.m_buffer.Contains("Healer")
-                //        || parsed.wdesc._name.m_buffer.Contains("Weaponsmith")
-                //        || parsed.wdesc._name.m_buffer.Contains("Weapons Master")
-                //        || parsed.wdesc._name.m_buffer.Contains("Armorer")
-                //        || parsed.wdesc._name.m_buffer.Contains("Grocer")
-                //        || parsed.wdesc._name.m_buffer.Contains("Shopkeep")
-                //        || parsed.wdesc._name.m_buffer.Contains("Shopkeeper")
-                //        || parsed.wdesc._name.m_buffer.Contains("Jeweler")
-                //        || parsed.wdesc._name.m_buffer.Contains("Barkeep")
-                //        || parsed.wdesc._name.m_buffer.Contains("Barkeeper")
-                //        || parsed.wdesc._name.m_buffer.Contains("Provisioner")
-                //        || parsed.wdesc._name.m_buffer.Contains("Tailor")
-                //        || parsed.wdesc._name.m_buffer.Contains("Seamstress")
-                //        || parsed.wdesc._name.m_buffer.Contains("Fletcher")
-                //        || parsed.wdesc._name.m_buffer.Contains("Bowyer")
-                //        || parsed.wdesc._name.m_buffer.Contains("Marksman")
-                //        || parsed.wdesc._name.m_buffer.Contains("Crafter")
-                //        || parsed.wdesc._name.m_buffer.Contains("Cook")
-                //        || parsed.wdesc._name.m_buffer.Contains("Alchemist")
-                //        || parsed.wdesc._name.m_buffer.Contains("Woodsman")
-                //        || parsed.wdesc._name.m_buffer.Contains("Apprentice"))
-                //    && parsed.wdesc._type == ITEM_TYPE.TYPE_CREATURE
-                //    && parsed.wdesc._blipColor == 8)
-                //{
-                //    fileToPutItIn = "Vendors";
-                //    addIt = true;
-                //}
-                //else if ((parsed.wdesc._name.m_buffer == "Agent of the Arcanum"
-                //        || parsed.wdesc._name.m_buffer == "Sentry"
-                //        || parsed.wdesc._name.m_buffer == "Ulgrim the Unpleasant"
-                //        || parsed.wdesc._name.m_buffer.Contains("Ulgrim")
-                //        || parsed.wdesc._name.m_buffer == "Ned the Clever"
-                //        || parsed.wdesc._name.m_buffer == "Wedding Planner"
-                //        || parsed.wdesc._name.m_buffer.Contains("Collector")
-                //        || parsed.wdesc._name.m_buffer.Contains("Guard")
-                //        || parsed.wdesc._name.m_buffer == "Jonathan"
-                //        || parsed.wdesc._name.m_buffer == "Farmer")
-                //    && parsed.wdesc._type == ITEM_TYPE.TYPE_CREATURE
-                //    && parsed.wdesc._blipColor == 8)
-                //{
-                //    fileToPutItIn = "OtherNPCs";
-                //    addIt = true;
-                //}
+                ////else if ((parsed.wdesc._name.m_buffer.Contains("Scrivener")
+                ////        || parsed.wdesc._name.m_buffer.Contains("Scribe")
+                ////        || parsed.wdesc._name.m_buffer.Contains("Archmage")
+                ////        || parsed.wdesc._name.m_buffer.Contains("Healer")
+                ////        || parsed.wdesc._name.m_buffer.Contains("Weaponsmith")
+                ////        || parsed.wdesc._name.m_buffer.Contains("Weapons Master")
+                ////        || parsed.wdesc._name.m_buffer.Contains("Armorer")
+                ////        || parsed.wdesc._name.m_buffer.Contains("Grocer")
+                ////        || parsed.wdesc._name.m_buffer.Contains("Shopkeep")
+                ////        || parsed.wdesc._name.m_buffer.Contains("Shopkeeper")
+                ////        || parsed.wdesc._name.m_buffer.Contains("Jeweler")
+                ////        || parsed.wdesc._name.m_buffer.Contains("Barkeep")
+                ////        || parsed.wdesc._name.m_buffer.Contains("Barkeeper")
+                ////        || parsed.wdesc._name.m_buffer.Contains("Provisioner")
+                ////        || parsed.wdesc._name.m_buffer.Contains("Tailor")
+                ////        || parsed.wdesc._name.m_buffer.Contains("Seamstress")
+                ////        || parsed.wdesc._name.m_buffer.Contains("Fletcher")
+                ////        || parsed.wdesc._name.m_buffer.Contains("Bowyer")
+                ////        || parsed.wdesc._name.m_buffer.Contains("Marksman")
+                ////        || parsed.wdesc._name.m_buffer.Contains("Crafter")
+                ////        || parsed.wdesc._name.m_buffer.Contains("Cook")
+                ////        || parsed.wdesc._name.m_buffer.Contains("Alchemist")
+                ////        || parsed.wdesc._name.m_buffer.Contains("Woodsman")
+                ////        || parsed.wdesc._name.m_buffer.Contains("Apprentice"))
+                ////    && parsed.wdesc._type == ITEM_TYPE.TYPE_CREATURE
+                ////    && parsed.wdesc._blipColor == 8)
+                ////{
+                ////    fileToPutItIn = "Vendors";
+                ////    addIt = true;
+                ////}
+                ////else if ((parsed.wdesc._name.m_buffer == "Agent of the Arcanum"
+                ////        || parsed.wdesc._name.m_buffer == "Sentry"
+                ////        || parsed.wdesc._name.m_buffer == "Ulgrim the Unpleasant"
+                ////        || parsed.wdesc._name.m_buffer.Contains("Ulgrim")
+                ////        || parsed.wdesc._name.m_buffer == "Ned the Clever"
+                ////        || parsed.wdesc._name.m_buffer == "Wedding Planner"
+                ////        || parsed.wdesc._name.m_buffer.Contains("Collector")
+                ////        || parsed.wdesc._name.m_buffer.Contains("Guard")
+                ////        || parsed.wdesc._name.m_buffer == "Jonathan"
+                ////        || parsed.wdesc._name.m_buffer == "Farmer")
+                ////    && parsed.wdesc._type == ITEM_TYPE.TYPE_CREATURE
+                ////    && parsed.wdesc._blipColor == 8)
+                ////{
+                ////    fileToPutItIn = "OtherNPCs";
+                ////    addIt = true;
+                ////}
                 else if (parsed.wdesc._type == ITEM_TYPE.TYPE_CREATURE)
                 {
-                    if (parsed.wdesc._name.m_buffer == "The Chicken"
-                        || parsed.wdesc._name.m_buffer == "Babe the Blue Auroch"
+                    if (//parsed.wdesc._name.m_buffer == "The Chicken"
+                        //|| parsed.wdesc._name.m_buffer == "Babe the Blue Auroch"
+                        parsed.wdesc._name.m_buffer == "Babe the Blue Auroch"
                         || parsed.wdesc._name.m_buffer == "Paul the Monouga"
                         //|| parsed.wdesc._name.m_buffer == "Silencia's Magma Golem"
                         //|| parsed.wdesc._name.m_buffer == "Repair Golem"
@@ -1137,12 +1168,17 @@ namespace aclogview
                         addIt = true;
                         margin = 25f;
                     }
+                    else if (parsed.wdesc._wcid == 43481)
+                    {
+                        weeniefileToPutItIn = "OlthoiPlayers";
+                        addWeenie = true;
+                    }
                     else if (parsed.wdesc._name.m_buffer.Contains("Crier")
                         && parsed.wdesc._blipColor == 8)
                     {
                         fileToPutItIn = "TownCriers";
                         addIt = true;
-                        margin = 20f;
+                        margin = 25f;
                     }
                     ////////else if (parsed.wdesc._type == ITEM_TYPE.TYPE_CREATURE && parsed.wdesc._blipColor == 8)
                     ////////{
@@ -1182,12 +1218,17 @@ namespace aclogview
                     {
                         fileToPutItIn = "NPCs";
                         addIt = true;
-                        margin = 20f;
+                        margin = 25f;
                     }
                     else if (parsed.wdesc._blipColor == 2)
                     {
                         weeniefileToPutItIn = "Monsters";
                         addWeenie = true;
+                    }
+                    else if (parsed.object_id < 0x80000000)
+                    {
+                        fileToPutItIn = "NPCStatics";
+                        addIt = true;
                     }
                     else if (parsed.wdesc._name.m_buffer.Contains("Statue")
                         || parsed.wdesc._name.m_buffer.Contains("Shrine")
@@ -1282,7 +1323,7 @@ namespace aclogview
                 //}
                 else if (parsed.object_id < 0x80000000)
                 {
-                    fileToPutItIn = "PotentialStatics";
+                    fileToPutItIn = "LandscapeStatics";
                     addIt = true;
                 }
                 else if (((uint)parsed.wdesc._type & (uint)ITEM_TYPE.TYPE_ITEM) > 0
@@ -1293,8 +1334,8 @@ namespace aclogview
                 }
                 else
                 {
-                    fileToPutItIn = "OtherObjects";
-                    addIt = true;
+                    weeniefileToPutItIn = "OtherObjects";
+                    addWeenie = true;
                 }
 
                 //}
@@ -1371,32 +1412,88 @@ namespace aclogview
             if (!Directory.Exists(staticFolder))
                 Directory.CreateDirectory(staticFolder);
 
-            Dictionary<ITEM_TYPE, int> fileCount = new Dictionary<ITEM_TYPE, int>();
+            //Dictionary<ITEM_TYPE, int> fileCount = new Dictionary<ITEM_TYPE, int>();
+            Dictionary<string, int> fileCount = new Dictionary<string, int>();
 
             foreach (string key in staticObjects.Keys)
             {
-                string filename = Path.Combine(staticFolder, $"{key}.sql");
+                //string filename = Path.Combine(staticFolder, $"{key}.sql");
 
-                if (File.Exists(filename))
-                    File.Delete(filename);
+                //if (File.Exists(filename))
+                //    File.Delete(filename);
+
+                //if (!fileCount.ContainsKey(key))
+                //    fileCount.Add(key, 0);
+
+                ////string fullFile = Path.Combine(staticFolder, $"{filename}");
+                //string fullFile = Path.Combine(staticFolder, $"{key}_{fileCount[key]}.sql");
+
+                //if (File.Exists(fullFile))
+                //{
+                //    FileInfo fi = new FileInfo(fullFile);
+
+                //    // go to the next file if it's bigger than a MB
+                //    if (fi.Length > ((1048576) * 40))
+                //    {
+                //        //fileCount[parsed.wdesc._type]++;
+                //        fileCount[key]++;
+                //        // fullFile = Path.Combine(staticFolder, $"{parsed.wdesc._type}_{fileCount[parsed.wdesc._type]}.sql");
+                //        fullFile = Path.Combine(staticFolder, $"{key}_{fileCount[key]}.sql");
+
+                //        if (File.Exists(fullFile))
+                //            File.Delete(fullFile);
+                //    }
+                //}
 
                 foreach (var parsed in staticObjects[key])
                 {
                     try
                     {
-                        string fullFile = Path.Combine(staticFolder, $"{filename}");
+                        //if (!fileCount.ContainsKey(key))
+                        //    fileCount.Add(key, 0);
+
+                        ////string fullFile = Path.Combine(staticFolder, $"{filename}");
+                        //string fullFile = Path.Combine(staticFolder, $"{key}_{fileCount[key]}.sql");
 
                         //if (File.Exists(fullFile))
                         //{
                         //    FileInfo fi = new FileInfo(fullFile);
 
                         //    // go to the next file if it's bigger than a MB
-                        //    if (fi.Length > (1048576))
+                        //    if (fi.Length > ((1048576) * 40))
                         //    {
-                        //        fileCount[parsed.wdesc._type]++;
-                        //        fullFile = Path.Combine(staticFolder, $"{parsed.wdesc._type}_{fileCount[parsed.wdesc._type]}.sql");
+                        //        //fileCount[parsed.wdesc._type]++;
+                        //        fileCount[key]++;
+                        //        // fullFile = Path.Combine(staticFolder, $"{parsed.wdesc._type}_{fileCount[parsed.wdesc._type]}.sql");
+                        //        fullFile = Path.Combine(staticFolder, $"{key}_{fileCount[key]}.sql");
+
+                        //        if (File.Exists(fullFile))
+                        //            File.Delete(fullFile);
                         //    }
                         //}
+
+                        if (!fileCount.ContainsKey(key))
+                            fileCount.Add(key, 0);
+
+                        //string fullFile = Path.Combine(staticFolder, $"{filename}");
+                        string fullFile = Path.Combine(staticFolder, $"{key}_{fileCount[key]}.sql");
+
+                        if (File.Exists(fullFile))
+                        {
+                            FileInfo fi = new FileInfo(fullFile);
+
+                            // go to the next file if it's bigger than a MB
+                            if (fi.Length > ((1048576) * 40))
+                            {
+                                //fileCount[parsed.wdesc._type]++;
+                                fileCount[key]++;
+                                // fullFile = Path.Combine(staticFolder, $"{parsed.wdesc._type}_{fileCount[parsed.wdesc._type]}.sql");
+                                fullFile = Path.Combine(staticFolder, $"{key}_{fileCount[key]}.sql");
+
+                                if (File.Exists(fullFile))
+                                    File.Delete(fullFile);
+                            }
+                        }
 
                         using (FileStream fs = new FileStream(fullFile, FileMode.Append))
                         {
@@ -1536,6 +1633,19 @@ namespace aclogview
                 foreach (var parsed in weenies[key])
                 {
                     bool once = false;
+
+                    //if (File.Exists(fullFile))
+                    //{
+                    //    FileInfo fi = new FileInfo(fullFile);
+
+                    //    // go to the next file if it's bigger than a MB
+                    //    if (fi.Length > ((1048576) * 40))
+                    //    {
+                    //        fileCount[parsed.wdesc._type]++;
+                    //        fullFile = Path.Combine(staticFolder, $"{parsed.wdesc._type}_{fileCount[parsed.wdesc._type]}.sql");
+                    //    }
+                    //}
+
                     using (FileStream fs = new FileStream(filename, FileMode.Append))
                     {
                         using (StreamWriter writer = new StreamWriter(fs))
