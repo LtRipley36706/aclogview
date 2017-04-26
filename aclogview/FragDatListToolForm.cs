@@ -666,9 +666,11 @@ namespace aclogview
                     {
                         fileToPutItIn = "SpecialNPCs";
                         addIt = true;
-                        margin = 25f;
+                        margin = 15f;
                     }
-                    else if (parsed.wdesc._wcid == 43481)
+                    else if (parsed.wdesc._wcid == 43481 
+                        || parsed.wdesc._wcid == 43480
+                        )
                     {
                         weeniefileToPutItIn = "OlthoiPlayers";
                         addWeenie = true;
@@ -678,7 +680,7 @@ namespace aclogview
                     {
                         fileToPutItIn = "TownCriers";
                         addIt = true;
-                        margin = 25f;
+                        margin = 20f;
                     }
                     ////////else if (parsed.wdesc._type == ITEM_TYPE.TYPE_CREATURE && parsed.wdesc._blipColor == 8)
                     ////////{
@@ -703,6 +705,7 @@ namespace aclogview
                         || parsed.wdesc._wcid == 34900
                         || parsed.wdesc._wcid == 34901
                         || parsed.wdesc._wcid == 34908
+                        || parsed.wdesc._wcid == 34898
                         )
                     {
                         weeniefileToPutItIn = "Pets";
@@ -718,7 +721,7 @@ namespace aclogview
                     {
                         fileToPutItIn = "NPCs";
                         addIt = true;
-                        margin = 25f;
+                        margin = 15f;
                     }
                     //else if (parsed.wdesc._blipColor == 2)
                     //{
@@ -730,7 +733,7 @@ namespace aclogview
                         //fileToPutItIn = "UnsortedCreatures";
                         //addIt = true;
                         fileToPutItIn = "Vendors";
-                        margin = 25f;
+                        margin = 15f;
                         addIt = true;
                     }
                 }
@@ -1169,9 +1172,11 @@ namespace aclogview
                     {
                         fileToPutItIn = "SpecialNPCs";
                         addIt = true;
-                        margin = 25f;
+                        margin = 15f;
                     }
-                    else if (parsed.wdesc._wcid == 43481)
+                    else if (parsed.wdesc._wcid == 43481
+                        || parsed.wdesc._wcid == 43480
+                        )
                     {
                         weeniefileToPutItIn = "OlthoiPlayers";
                         addWeenie = true;
@@ -1181,7 +1186,7 @@ namespace aclogview
                     {
                         fileToPutItIn = "TownCriers";
                         addIt = true;
-                        margin = 25f;
+                        margin = 20f;
                     }
                     ////////else if (parsed.wdesc._type == ITEM_TYPE.TYPE_CREATURE && parsed.wdesc._blipColor == 8)
                     ////////{
@@ -1206,6 +1211,7 @@ namespace aclogview
                         || parsed.wdesc._wcid == 34900
                         || parsed.wdesc._wcid == 34901
                         || parsed.wdesc._wcid == 34908
+                        || parsed.wdesc._wcid == 34898
                         )
                     {
                         weeniefileToPutItIn = "Pets";
@@ -1221,7 +1227,7 @@ namespace aclogview
                     {
                         fileToPutItIn = "NPCs";
                         addIt = true;
-                        margin = 25f;
+                        margin = 15f;
                     }
                     else if (parsed.wdesc._blipColor == 2)
                     {
@@ -1300,6 +1306,18 @@ namespace aclogview
                         )
                     {
                         fileToPutItIn = "OtherNPCs";
+                        margin = 20f;
+                        addIt = true;
+                    }
+                    else if (parsed.wdesc._name.m_buffer.Contains("Exploration Marker"))
+                    {
+                        fileToPutItIn = "ExplorationMarkers";
+                        margin = 20f;
+                        addIt = true;
+                    }
+                    else if (parsed.wdesc._name.m_buffer.Contains("Mysterious Hatch"))
+                    {
+                        fileToPutItIn = "Hatches";
                         margin = 20f;
                         addIt = true;
                     }
@@ -1412,6 +1430,9 @@ namespace aclogview
         {
             string staticFolder = Path.Combine(outputFolder, "objects");
 
+            string sqlCommand = "INSERT";
+            // string sqlCommand = "REPLACE";
+
             if (!Directory.Exists(staticFolder))
                 Directory.CreateDirectory(staticFolder);
 
@@ -1502,7 +1523,7 @@ namespace aclogview
                         {
                             using (StreamWriter writer = new StreamWriter(fs))
                             {
-                                string line = "INSERT INTO `base_ace_object` (`baseAceObjectId`, `name`, `typeId`, `paletteId`, " +
+                                string line = $"{sqlCommand} INTO `base_ace_object` (`baseAceObjectId`, `name`, `typeId`, `paletteId`, " +
 
                                 // wdesc data
                                 "`ammoType`, `blipColor`, `bitField`, `burden`, `combatUse`, `cooldownDuration`, " +
@@ -1536,7 +1557,7 @@ namespace aclogview
                                 // creates the weenieClass record
                                 writer.WriteLine(line);
 
-                                line = "INSERT INTO `ace_object` (`baseAceObjectId`, `weenieClassId`, `landblock`, `cell`, `posX`, `posY`, `posZ`, `qW`, `qX`, `qY`, `qZ`)" + Environment.NewLine +
+                                line = $"{sqlCommand} INTO `ace_object` (`baseAceObjectId`, `weenieClassId`, `landblock`, `cell`, `posX`, `posY`, `posZ`, `qW`, `qX`, `qY`, `qZ`)" + Environment.NewLine +
                                     $"VALUES ({parsed.object_id}, {parsed.wdesc._wcid}, {parsed.physicsdesc.pos.objcell_id >> 16}, {parsed.physicsdesc.pos.objcell_id & 0xFFFF}, " +
                                     $"{parsed.physicsdesc.pos.frame.m_fOrigin.x}, {parsed.physicsdesc.pos.frame.m_fOrigin.y}, {parsed.physicsdesc.pos.frame.m_fOrigin.z}, " +
                                     $"{parsed.physicsdesc.pos.frame.qw}, {parsed.physicsdesc.pos.frame.qx}, {parsed.physicsdesc.pos.frame.qy}, {parsed.physicsdesc.pos.frame.qz});" + Environment.NewLine;
@@ -1546,7 +1567,7 @@ namespace aclogview
                                 bool once = false;
                                 if (parsed.objdesc.subpalettes.Count > 0)
                                 {
-                                    line = "INSERT INTO `ace_object_palette_changes` (`baseAceObjectId`, `subPaletteId`, `offset`, `length`)" + Environment.NewLine;
+                                    line = $"{sqlCommand} INTO `ace_object_palette_changes` (`baseAceObjectId`, `subPaletteId`, `offset`, `length`)" + Environment.NewLine;
 
                                     foreach (var subPalette in parsed.objdesc.subpalettes)
                                     {
@@ -1568,7 +1589,7 @@ namespace aclogview
                                 once = false;
                                 if (parsed.objdesc.tmChanges.Count > 0)
                                 {
-                                    line = "INSERT INTO `ace_object_texture_map_changes` (`baseAceObjectId`, `index`, `oldId`, `newId`)" + Environment.NewLine;
+                                    line = $"{sqlCommand} INTO `ace_object_texture_map_changes` (`baseAceObjectId`, `index`, `oldId`, `newId`)" + Environment.NewLine;
 
                                     foreach (var texture in parsed.objdesc.tmChanges)
                                     {
@@ -1590,7 +1611,7 @@ namespace aclogview
                                 once = false;
                                 if (parsed.objdesc.apChanges.Count > 0)
                                 {
-                                    line = "INSERT INTO `ace_object_animation_changes` (`baseAceObjectId`, `index`, `animationId`)" + Environment.NewLine;
+                                    line = $"{sqlCommand} INTO `ace_object_animation_changes` (`baseAceObjectId`, `index`, `animationId`)" + Environment.NewLine;
 
                                     foreach (var animation in parsed.objdesc.apChanges)
                                     {
@@ -1623,6 +1644,9 @@ namespace aclogview
         {
             string templateFolder = Path.Combine(outputFolder, "weenies");
 
+            string sqlCommand = "INSERT";
+            // string sqlCommand = "REPLACE";
+
             if (!Directory.Exists(templateFolder))
                 Directory.CreateDirectory(templateFolder);
 
@@ -1653,7 +1677,7 @@ namespace aclogview
                     {
                         using (StreamWriter writer = new StreamWriter(fs))
                         {
-                            string line = "INSERT INTO `base_ace_object` (`baseAceObjectId`, `name`, `typeId`, `paletteId`, " +
+                            string line = $"{sqlCommand} INTO `base_ace_object` (`baseAceObjectId`, `name`, `typeId`, `paletteId`, " +
 
                             // wdesc data
                             "`ammoType`, `blipColor`, `bitField`, `burden`, `combatUse`, `cooldownDuration`, " +
@@ -1687,14 +1711,14 @@ namespace aclogview
                             // creates the base ace object record
                             writer.WriteLine(line);
 
-                            line = "INSERT INTO weenie_class (`weenieClassId`, `baseAceObjectId`)" + Environment.NewLine +
+                            line = $"{sqlCommand} INTO weenie_class (`weenieClassId`, `baseAceObjectId`)" + Environment.NewLine +
                                 $"VALUES ({parsed.wdesc._wcid}, {parsed.wdesc._wcid});" + Environment.NewLine;
                             writer.WriteLine(line);
 
                             once = false;
                             if (parsed.objdesc.subpalettes.Count > 0)
                             {
-                                line = "INSERT INTO `weenie_palette_changes` (`weenieClassId`, `subPaletteId`, `offset`, `length`)" + Environment.NewLine;
+                                line = $"{sqlCommand} INTO `weenie_palette_changes` (`weenieClassId`, `subPaletteId`, `offset`, `length`)" + Environment.NewLine;
 
                                 foreach (var subPalette in parsed.objdesc.subpalettes)
                                 {
@@ -1716,7 +1740,7 @@ namespace aclogview
                             once = false;
                             if (parsed.objdesc.tmChanges.Count > 0)
                             {
-                                line = "INSERT INTO `weenie_texture_map_changes` (`weenieClassId`, `index`, `oldId`, `newId`)" + Environment.NewLine;
+                                line = $"{sqlCommand} INTO `weenie_texture_map_changes` (`weenieClassId`, `index`, `oldId`, `newId`)" + Environment.NewLine;
 
                                 foreach (var texture in parsed.objdesc.tmChanges)
                                 {
@@ -1738,7 +1762,7 @@ namespace aclogview
                             once = false;
                             if (parsed.objdesc.apChanges.Count > 0)
                             {
-                                line = "INSERT INTO `weenie_animation_changes` (`weenieClassId`, `index`, `animationId`)" + Environment.NewLine;
+                                line = $"{sqlCommand} INTO `weenie_animation_changes` (`weenieClassId`, `index`, `animationId`)" + Environment.NewLine;
 
                                 foreach (var animation in parsed.objdesc.apChanges)
                                 {
