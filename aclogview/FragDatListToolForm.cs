@@ -1364,7 +1364,7 @@ namespace aclogview
                 }
                 else if (parsed.wdesc._type == ITEM_TYPE.TYPE_CRAFT_FLETCHING_INTERMEDIATE)
                 {
-                    weeniefileToPutItIn = "CraftFlethcingIntermediate";
+                    weeniefileToPutItIn = "CraftFletchingIntermediate";
                     addWeenie = true;
                 }
                 else if (parsed.wdesc._type == ITEM_TYPE.TYPE_TINKERING_TOOL)
