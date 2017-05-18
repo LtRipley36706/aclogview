@@ -585,11 +585,6 @@ namespace aclogview
                 }
                 else if ((parsed.wdesc._bitfield & (uint)CM_Physics.PublicWeenieDesc.BitfieldIndex.BF_BOOK) != 0)
                 {
-                    if (parsed.object_id < 0x80000000)
-                    {
-                        fileToPutItIn = "BooksStatics";
-                        addIt = true;
-                    }
                     if (parsed.wdesc._name.m_buffer.Contains("Statue"))
                     {
                         fileToPutItIn = "BooksStatues";
@@ -610,6 +605,18 @@ namespace aclogview
                         fileToPutItIn = "BooksShardVigil";
                         addIt = true;
                     }
+                    else if (parsed.wdesc._wcid == 12774
+                        || parsed.wdesc._wcid == 16908
+                        )
+                    {
+                        fileToPutItIn = "HouseBooks";
+                        addIt = true;
+                    }
+                    else if (parsed.object_id < 0x80000000)
+                    {
+                        fileToPutItIn = "BooksStatics";
+                        addIt = true;
+                    }
                     else
                     {
                         weeniefileToPutItIn = "Books";
@@ -625,12 +632,19 @@ namespace aclogview
                         )
                     {
                         fileToPutItIn = "HousePortals";
+                        parsed.wdesc._bitfield = 262164; // error correct
+                        parsed.wdesc.header = 41943088; // error correct
                         addIt = true;
                     }
                     else if (parsed.wdesc._wcid == 1955)
                     {
                         weeniefileToPutItIn = "PortalsSummoned";
                         addWeenie = true;
+                    }
+                    else if (parsed.wdesc._name.m_buffer.Contains("Town Newtwork"))
+                    {
+                        fileToPutItIn = "PortalsTownNetwork";
+                        addIt = true;
                     }
                     else if (parsed.wdesc._name.m_buffer.Contains("Floating City"))
                     {
@@ -657,6 +671,21 @@ namespace aclogview
                         fileToPutItIn = "PortalsDestroyed";
                         addIt = true;
                     }
+                    else if (parsed.wdesc._name.m_buffer.Contains("Meeting Hall"))
+                    {
+                        fileToPutItIn = "PortalsMeetingHall";
+                        addIt = true;
+                    }
+                    else if (parsed.wdesc._name.m_buffer.Contains("Portal to"))
+                    {
+                        fileToPutItIn = "PortalsPortalto";
+                        addIt = true;
+                    }
+                    else if (parsed.wdesc._name.m_buffer.Contains("Portal"))
+                    {
+                        fileToPutItIn = "PortalsPortal";
+                        addIt = true;
+                    }
                     else
                     {
                         fileToPutItIn = "Portals";
@@ -665,8 +694,29 @@ namespace aclogview
                 }
                 else if ((parsed.wdesc._bitfield & (uint)CM_Physics.PublicWeenieDesc.BitfieldIndex.BF_DOOR) != 0)
                 {
-                    fileToPutItIn = "Doors";
-                    addIt = true;
+                    if (parsed.wdesc._wcid == 412
+                        )
+                    {
+                        fileToPutItIn = "DoorsAluvianHouse";
+                        parsed.physicsdesc.setup_id = 33561087; // error correct
+                        parsed.physicsdesc.mtable_id = 150995458; // error correct
+                        addIt = true;
+                    }
+                    else if (parsed.wdesc._wcid == 15451)
+                    {
+                        fileToPutItIn = "DoorsApartments";
+                        addIt = true;
+                    }
+                    else if (parsed.wdesc._wcid == 577)
+                    {
+                        fileToPutItIn = "DoorsPrison10";
+                        addIt = true;
+                    }
+                    else
+                    {
+                        fileToPutItIn = "Doors";
+                        addIt = true;
+                    }
                 }
                 else if ((parsed.wdesc._bitfield & (uint)CM_Physics.PublicWeenieDesc.BitfieldIndex.BF_VENDOR) != 0)
                 {
@@ -776,6 +826,47 @@ namespace aclogview
                     //    weeniefileToPutItIn = "Spirits";
                     //    addWeenie = true;
                     //}
+                    else if (parsed.physicsdesc.setup_id == 33555088
+                        || parsed.physicsdesc.setup_id == 33557390
+                        || parsed.physicsdesc.setup_id == 33555594
+                        || parsed.physicsdesc.setup_id == 33555909
+                        )
+                    {
+                        fileToPutItIn = "MiscBuildingSigns";
+                        addIt = true;
+                    }
+                    else if (parsed.wdesc._name.m_buffer.Contains("Residential Halls"))
+                    {
+                        fileToPutItIn = "MiscResidentialHallSigns";
+                        addIt = true;
+                    }
+                    else if (parsed.wdesc._name.m_buffer.Contains("Court")
+                        || parsed.wdesc._name.m_buffer.Contains("Dwellings")
+                        || parsed.wdesc._name.m_buffer.Contains("SylvanDwellings")
+                        || parsed.wdesc._name.m_buffer.Contains("Veranda")
+                        || parsed.wdesc._name.m_buffer.Contains("Gate")
+                        || parsed.wdesc._name.m_buffer.Contains("Yard")
+                        || parsed.wdesc._name.m_buffer.Contains("Gardens")
+                        || parsed.wdesc._name.m_buffer.Contains("Lodge")
+                        || parsed.wdesc._name.m_buffer.Contains("Grotto")
+                        || parsed.wdesc._name.m_buffer.Contains("Hollow")
+                        )
+                    {
+                        fileToPutItIn = "MiscResidentialHallSigns";
+                        addIt = true;
+                    }
+                    else if (parsed.wdesc._name.m_buffer.Contains("Festival Stone"))
+                    {
+                        fileToPutItIn = "MiscFestivalStones";
+                        addIt = true;
+                    }
+                    else if (parsed.physicsdesc.setup_id == 33557463
+                        )
+                    {
+                        fileToPutItIn = "MiscSettlementMarkers";
+                        parsed.physicsdesc.bitfield = 32769; // error correct
+                        addIt = true;
+                    }
                     else if (parsed.object_id < 0x80000000)
                     {
                         fileToPutItIn = "MiscStaticsObjects";
@@ -793,14 +884,61 @@ namespace aclogview
                         parsed.wdesc._wcid == 9620 || // W_PORTALHOUSE_CLASS
                         parsed.wdesc._wcid == 10751 || // W_PORTALHOUSETEST_CLASS
                         parsed.wdesc._wcid == 11730    // W_HOUSEPORTAL_CLASS
-                        )
+                                            )
                     {
                         fileToPutItIn = "HousePortals";
+                        parsed.wdesc._bitfield = 262164; // error correct
+                        parsed.wdesc.header = 41943088; // error correct
                         addIt = true;
                     }
                     else if (parsed.wdesc._wcid == 1955)
                     {
-                        fileToPutItIn = "SummonedPortals";
+                        weeniefileToPutItIn = "PortalsSummoned";
+                        addWeenie = true;
+                    }
+                    else if (parsed.wdesc._name.m_buffer.Contains("Town Newtwork"))
+                    {
+                        fileToPutItIn = "PortalsTownNetwork";
+                        addIt = true;
+                    }
+                    else if (parsed.wdesc._name.m_buffer.Contains("Floating City"))
+                    {
+                        fileToPutItIn = "PortalsFloatingCity";
+                        addIt = true;
+                    }
+                    else if (parsed.wdesc._name.m_buffer.Contains("Humming Crystal"))
+                    {
+                        fileToPutItIn = "PortalsHummingCrystal";
+                        addIt = true;
+                    }
+                    else if (parsed.wdesc._name.m_buffer.Contains("The Orphanage"))
+                    {
+                        fileToPutItIn = "PortalsTheOrphanage";
+                        addIt = true;
+                    }
+                    else if (parsed.wdesc._name.m_buffer.Contains("Golem Sanctum"))
+                    {
+                        fileToPutItIn = "PortalsGolemSanctum";
+                        addIt = true;
+                    }
+                    else if (parsed.wdesc._name.m_buffer.Contains("Destroyed"))
+                    {
+                        fileToPutItIn = "PortalsDestroyed";
+                        addIt = true;
+                    }
+                    else if (parsed.wdesc._name.m_buffer.Contains("Meeting Hall"))
+                    {
+                        fileToPutItIn = "PortalsMeetingHall";
+                        addIt = true;
+                    }
+                    else if (parsed.wdesc._name.m_buffer.Contains("Portal to"))
+                    {
+                        fileToPutItIn = "PortalsPortalto";
+                        addIt = true;
+                    }
+                    else if (parsed.wdesc._name.m_buffer.Contains("Portal"))
+                    {
+                        fileToPutItIn = "PortalsPortal";
                         addIt = true;
                     }
                     else
@@ -973,6 +1111,10 @@ namespace aclogview
                             parsed.wdesc._name.m_buffer = "Mansion";
                         if (parsed.wdesc._name.m_buffer.Contains("'s Apartment"))
                             parsed.wdesc._name.m_buffer = "Apartment";
+
+                        parsed.wdesc.header = 33554480; // error correct
+                        parsed.physicsdesc.bitfield = 98435; // error correct
+
                         addIt = true;
                     }
 
@@ -982,6 +1124,11 @@ namespace aclogview
                         )
                     {
                         fileToPutItIn = "FakeSlumLords";
+                        addIt = true;
+                    }
+                    else if (parsed.wdesc._wcid == 10762)
+                    {
+                        fileToPutItIn = "HousePortalLinkspots";
                         addIt = true;
                     }
                     else if (parsed.wdesc._name.m_buffer.Contains("Gen")
