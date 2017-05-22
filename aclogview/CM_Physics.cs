@@ -218,7 +218,7 @@ public class CM_Physics : MessageProcessor {
     }
 
     public class PhysicsDesc {
-        enum PhysicsDescInfo {
+        public enum PhysicsDescInfo {
             CSetup = (1 << 0),
             MTABLE = (1 << 1),
             VELOCITY = (1 << 2),
