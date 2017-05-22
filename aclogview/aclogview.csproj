@@ -96,6 +96,7 @@
     <Compile Include="Enums\Sound.cs" />
     <Compile Include="Enums\Trade.cs" />
     <Compile Include="Enums\UI.cs" />
+    <Compile Include="Enums\WeenieClasses.cs" />
     <Compile Include="Enums\WeenieError.cs" />
     <Compile Include="FindOpcodeInFilesForm.cs">
       <SubType>Form</SubType>
