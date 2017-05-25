@@ -641,7 +641,7 @@ namespace aclogview
                         weeniefileToPutItIn = "PortalsSummoned";
                         addWeenie = true;
                     }
-                    else if (parsed.wdesc._name.m_buffer.Contains("Town Newtwork"))
+                    else if (parsed.wdesc._name.m_buffer.Contains("Town Network"))
                     {
                         fileToPutItIn = "PortalsTownNetwork";
                         addIt = true;
@@ -896,7 +896,7 @@ namespace aclogview
                         weeniefileToPutItIn = "PortalsSummoned";
                         addWeenie = true;
                     }
-                    else if (parsed.wdesc._name.m_buffer.Contains("Town Newtwork"))
+                    else if (parsed.wdesc._name.m_buffer.Contains("Town Network"))
                     {
                         fileToPutItIn = "PortalsTownNetwork";
                         addIt = true;
