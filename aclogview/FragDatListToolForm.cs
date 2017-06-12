@@ -649,10 +649,6 @@ namespace aclogview
 
         private void CreateAppraisalObjectsList(CM_Examine.SetAppraiseInfo parsed, List<uint> objectIds, Dictionary<string, List<CM_Physics.CreateObject>> staticObjects, List<uint> weenieIds, Dictionary<string, List<CM_Physics.CreateObject>> weenies, Dictionary<string, List<CM_Examine.SetAppraiseInfo>> appraisalObjects, List<uint> appraisalObjectIds, Dictionary<uint, string> appraisalObjectsCatagoryMap, Dictionary<uint, uint> appraisalObjectToWeenieId)
         {
-            //Dictionary<string, List<CM_Examine.SetAppraiseInfo>> appraisalObjects = new Dictionary<string, List<CM_Examine.SetAppraiseInfo>>();
-            //Dictionary<uint, uint> assessmentInfoStatus = new Dictionary<uint, uint>();
-            //Dictionary<uint, string> appraisalObjectsCatagoryMap = new Dictionary<uint, string>();
-            //Dictionary<uint, uint> appraisalObjectToWeenieId = new Dictionary<uint, uint>();
             try
             {
                 //uint success = 0;
@@ -793,70 +789,17 @@ namespace aclogview
             if (!Directory.Exists(staticFolder))
                 Directory.CreateDirectory(staticFolder);
 
-            //Dictionary<ITEM_TYPE, int> fileCount = new Dictionary<ITEM_TYPE, int>();
             Dictionary<string, int> fileCount = new Dictionary<string, int>();
 
             foreach (string key in appraisalObjects.Keys)
             {
-                //string filename = Path.Combine(staticFolder, $"{key}.sql");
-
-                //if (File.Exists(filename))
-                //    File.Delete(filename);
-
-                //if (!fileCount.ContainsKey(key))
-                //    fileCount.Add(key, 0);
-
-                ////string fullFile = Path.Combine(staticFolder, $"{filename}");
-                //string fullFile = Path.Combine(staticFolder, $"{key}_{fileCount[key]}.sql");
-
-                //if (File.Exists(fullFile))
-                //{
-                //    FileInfo fi = new FileInfo(fullFile);
-
-                //    // go to the next file if it's bigger than a MB
-                //    if (fi.Length > ((1048576) * 40))
-                //    {
-                //        //fileCount[parsed.wdesc._type]++;
-                //        fileCount[key]++;
-                //        // fullFile = Path.Combine(staticFolder, $"{parsed.wdesc._type}_{fileCount[parsed.wdesc._type]}.sql");
-                //        fullFile = Path.Combine(staticFolder, $"{key}_{fileCount[key]}.sql");
-
-                //        if (File.Exists(fullFile))
-                //            File.Delete(fullFile);
-                //    }
-                //}
-
                 foreach (var parsed in appraisalObjects[key])
                 {
                     try
                     {
-                        //if (!fileCount.ContainsKey(key))
-                        //    fileCount.Add(key, 0);
-
-                        ////string fullFile = Path.Combine(staticFolder, $"{filename}");
-                        //string fullFile = Path.Combine(staticFolder, $"{key}_{fileCount[key]}.sql");
-
-                        //if (File.Exists(fullFile))
-                        //{
-                        //    FileInfo fi = new FileInfo(fullFile);
-
-                        //    // go to the next file if it's bigger than a MB
-                        //    if (fi.Length > ((1048576) * 40))
-                        //    {
-                        //        //fileCount[parsed.wdesc._type]++;
-                        //        fileCount[key]++;
-                        //        // fullFile = Path.Combine(staticFolder, $"{parsed.wdesc._type}_{fileCount[parsed.wdesc._type]}.sql");
-                        //        fullFile = Path.Combine(staticFolder, $"{key}_{fileCount[key]}.sql");
-
-                        //        if (File.Exists(fullFile))
-                        //            File.Delete(fullFile);
-                        //    }
-                        //}
-
                         if (!fileCount.ContainsKey(key))
                             fileCount.Add(key, 0);
 
-                        //string fullFile = Path.Combine(staticFolder, $"{filename}");
                         string fullFile = Path.Combine(staticFolder, $"{key}_{fileCount[key]}.sql");
 
                         if (File.Exists(fullFile))
@@ -866,9 +809,7 @@ namespace aclogview
                             // go to the next file if it's bigger than a MB
                             if (fi.Length > ((1048576) * 40))
                             {
-                                //fileCount[parsed.wdesc._type]++;
                                 fileCount[key]++;
-                                // fullFile = Path.Combine(staticFolder, $"{parsed.wdesc._type}_{fileCount[parsed.wdesc._type]}.sql");
                                 fullFile = Path.Combine(staticFolder, $"{key}_{fileCount[key]}.sql");
 
                                 if (File.Exists(fullFile))
@@ -884,280 +825,6 @@ namespace aclogview
                                 string skillsLine = "", attributesLine = "", attribute2ndsLine = "", bodyDamageValuesLine = "", bodyDamageVariancesLine = "", bodyArmorValuesLine = "", numsLine = "";
                                 string spellsLine = ""; //, bigintsLine = "", floatsLine = "", boolsLine = "", strsLine = "", didsLine = "", iidsLine = "";
 
-                                ////string line = $"{sqlCommand} INTO `ace_object` (`" +
-                                ////"aceObjectId`, `aceObjectDescriptionFlags`, " +
-                                ////"`weenieClassId`, `weenieHeaderFlags`, " +
-                                ////"`iconId`, `iconOverlayId`, `iconUnderlayId`, " +
-                                ////"`modelTableId`, `soundTableId`, " +
-                                ////"`motionTableId`, `currentMotionState`, `animationFrameId`, " +
-                                ////"`physicsTableId`, `physicsDescriptionFlag`, " +
-                                ////"`spellId`, " +
-                                ////"`playScript`, `defaultScript`" +
-                                ////")" + Environment.NewLine + "VALUES (" +
-
-                                //string line = $"{sqlCommand} INTO `ace_object` (`" +
-                                //"aceObjectId`, `aceObjectDescriptionFlags`, " +
-                                //"`weenieClassId`, `weenieHeaderFlags`, " +
-                                //"`currentMotionState`, " +
-                                //"`physicsDescriptionFlag`" +
-                                //")" + Environment.NewLine + "VALUES (" +
-
-                                //$"{parsed.object_id}, {parsed.wdesc.header}, " +
-                                //$"{parsed.wdesc._wcid}, {parsed.wdesc._bitfield}, "; //+
-                                ////$"{parsed.wdesc._iconID}, ";
-                                //didsLine += $"     , ({parsed.object_id}, {(uint)STypeDID.ICON_DID}, {(uint)parsed.wdesc._iconID})" + Environment.NewLine;
-                                //if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_IconOverlay) != 0)
-                                //    //    line += $"{parsed.wdesc._iconOverlayID}, ";
-                                //    didsLine += $"     , ({parsed.object_id}, {(uint)STypeDID.ICON_OVERLAY_DID}, {(uint)parsed.wdesc._iconOverlayID})" + Environment.NewLine;
-                                ////else
-                                ////    line += $"NULL, ";
-                                //if ((parsed.wdesc.header2 & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader2.PWD2_Packed_IconUnderlay) != 0)
-                                //    //    line += $"{parsed.wdesc._iconUnderlayID}, ";
-                                //    didsLine += $"     , ({parsed.object_id}, {(uint)STypeDID.ICON_UNDERLAY_DID}, {(uint)parsed.wdesc._iconUnderlayID})" + Environment.NewLine;
-                                ////else
-                                ////    line += $"NULL, ";
-
-                                //if ((parsed.physicsdesc.bitfield & (uint)PhysicsDesc.PhysicsDescInfo.CSetup) != 0)
-                                //    //    line += $"{parsed.physicsdesc.setup_id}, ";
-                                //    didsLine += $"     , ({parsed.object_id}, {(uint)STypeDID.SETUP_DID}, {(uint)parsed.physicsdesc.setup_id})" + Environment.NewLine;
-                                ////else
-                                ////    line += $"NULL, ";
-                                //if ((parsed.physicsdesc.bitfield & (uint)PhysicsDesc.PhysicsDescInfo.STABLE) != 0)
-                                //    //    line += $"{parsed.physicsdesc.stable_id}, ";
-                                //    didsLine += $"     , ({parsed.object_id}, {(uint)STypeDID.SOUND_TABLE_DID}, {(uint)parsed.physicsdesc.stable_id})" + Environment.NewLine;
-                                ////else
-                                ////    line += $"NULL, ";
-                                //if ((parsed.physicsdesc.bitfield & (uint)PhysicsDesc.PhysicsDescInfo.MTABLE) != 0)
-                                //    //    line += $"{parsed.physicsdesc.mtable_id}, ";
-                                //    didsLine += $"     , ({parsed.object_id}, {(uint)STypeDID.MOTION_TABLE_DID}, {(uint)parsed.physicsdesc.mtable_id})" + Environment.NewLine;
-                                ////else
-                                ////    line += $"NULL, ";
-                                //if ((parsed.physicsdesc.bitfield & (uint)PhysicsDesc.PhysicsDescInfo.MOVEMENT) != 0)
-                                //    line += $"'{ConvertMovementBufferToString(parsed.physicsdesc.movement_buffer)}', ";
-                                //else
-                                //    line += $"NULL, ";
-                                //if ((parsed.physicsdesc.bitfield & (uint)PhysicsDesc.PhysicsDescInfo.ANIMFRAME_ID) != 0)
-                                //    //    line += $"{parsed.physicsdesc.animframe_id}, ";
-                                //    intsLine += $"     , ({parsed.object_id}, {(uint)STypeInt.PLACEMENT_POSITION_INT}, {(uint)parsed.physicsdesc.animframe_id})" + Environment.NewLine;
-                                ////else
-                                ////    line += $"NULL, ";
-                                //if ((parsed.physicsdesc.bitfield & (uint)PhysicsDesc.PhysicsDescInfo.PETABLE) != 0)
-                                //    //    line += $"{parsed.physicsdesc.phstable_id}, ";
-                                //    didsLine += $"     , ({parsed.object_id}, {(uint)STypeDID.PHYSICS_EFFECT_TABLE_DID}, {(uint)parsed.physicsdesc.phstable_id})" + Environment.NewLine;
-                                ////else
-                                ////    line += $"NULL, ";
-                                ////line += $"{parsed.physicsdesc.bitfield}, ";
-                                //line += $"{parsed.physicsdesc.bitfield}";
-                                //if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_SpellID) != 0)
-                                //    //    line += $"{parsed.wdesc._spellID}, ";
-                                //    didsLine += $"     , ({parsed.object_id}, {(uint)STypeDID.SPELL_DID}, {(uint)parsed.wdesc._spellID})" + Environment.NewLine;
-                                ////else
-                                ////    line += $"NULL, ";
-                                //if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_PScript) != 0)
-                                //    //    line += $"{parsed.wdesc._pscript}, ";
-                                //    didsLine += $"     , ({parsed.object_id}, {(uint)STypeDID.PHYSICS_SCRIPT_DID}, {(uint)parsed.wdesc._pscript})" + Environment.NewLine;
-                                ////else
-                                ////    line += $"NULL, ";
-                                //if ((parsed.physicsdesc.bitfield & (uint)PhysicsDesc.PhysicsDescInfo.DEFAULT_SCRIPT) != 0)
-                                //    //    line += $"{(uint)parsed.physicsdesc.default_script}";
-                                //    didsLine += $"     , ({parsed.object_id}, {(uint)STypeDID.USE_USER_ANIMATION_DID}, {(uint)parsed.physicsdesc.default_script})" + Environment.NewLine;
-                                ////else
-                                ////    line += $"NULL";
-
-                                //line += ");" + Environment.NewLine;
-
-                                //writer.WriteLine(line);
-
-                                //if ((parsed.physicsdesc.bitfield & (uint)PhysicsDesc.PhysicsDescInfo.POSITION) != 0)
-                                //{
-                                //    //line = $"{sqlCommand} INTO `ace_position` (`aceObjectId`, `positionType`, `landblockRaw`, `posX`, `posY`, `posZ`, `qW`, `qX`, `qY`, `qZ`)" + Environment.NewLine +
-                                //    line = $"{sqlCommand} INTO `ace_position` (`aceObjectId`, `positionType`, `landblockRaw`, `landblock`, `cell`, `posX`, `posY`, `posZ`, `qW`, `qX`, `qY`, `qZ`)" + Environment.NewLine +
-                                //    $"VALUES ({parsed.object_id}, {(uint)STypePosition.LOCATION_POSITION}, {parsed.physicsdesc.pos.objcell_id}, " +
-                                //    $"{parsed.physicsdesc.pos.objcell_id >> 16}, {parsed.physicsdesc.pos.objcell_id & 0xFFFF}, " +
-                                //    $"{parsed.physicsdesc.pos.frame.m_fOrigin.x}, {parsed.physicsdesc.pos.frame.m_fOrigin.y}, {parsed.physicsdesc.pos.frame.m_fOrigin.z}, " +
-                                //    $"{parsed.physicsdesc.pos.frame.qw}, {parsed.physicsdesc.pos.frame.qx}, {parsed.physicsdesc.pos.frame.qy}, {parsed.physicsdesc.pos.frame.qz});" +
-                                //    Environment.NewLine;
-
-                                //    writer.WriteLine(line);
-                                //}
-
-                                //strsLine += $"     , ({parsed.object_id}, {(uint)STypeString.NAME_STRING}, '{parsed.wdesc._name.m_buffer.Replace("'", "''")}')" + Environment.NewLine;
-
-                                //intsLine += $"     , ({parsed.object_id}, {(uint)STypeInt.ITEM_TYPE_INT}, {(uint)parsed.wdesc._type})" + Environment.NewLine;
-
-                                //if (parsed.objdesc.subpalettes.Count > 0)
-                                //    //intsLine += $"     , ({parsed.object_id}, {(uint)STypeInt.PALETTE_TEMPLATE_INT}, {parsed.objdesc.paletteID})" + Environment.NewLine;
-                                //    didsLine += $"     , ({parsed.object_id}, {(uint)STypeDID.PALETTE_BASE_DID}, {(uint)parsed.objdesc.paletteID})" + Environment.NewLine;
-
-                                //if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_AmmoType) != 0)
-                                //    intsLine += $"     , ({parsed.object_id}, {(uint)STypeInt.AMMO_TYPE_INT}, {(uint)parsed.wdesc._ammoType})" + Environment.NewLine;
-                                //if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_BlipColor) != 0)
-                                //    intsLine += $"     , ({parsed.object_id}, {(uint)STypeInt.RADARBLIP_COLOR_INT}, {parsed.wdesc._blipColor})" + Environment.NewLine;
-                                //if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_Burden) != 0)
-                                //    intsLine += $"     , ({parsed.object_id}, {(uint)STypeInt.ENCUMB_VAL_INT}, {parsed.wdesc._burden})" + Environment.NewLine;
-                                //if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_CombatUse) != 0)
-                                //    intsLine += $"     , ({parsed.object_id}, {(uint)STypeInt.COMBAT_USE_INT}, {parsed.wdesc._combatUse})" + Environment.NewLine;
-                                //if ((parsed.wdesc.header2 & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader2.PWD2_Packed_CooldownDuration) != 0)
-                                //    floatsLine += $"     , ({parsed.object_id}, {(uint)STypeFloat.COOLDOWN_DURATION_FLOAT}, {parsed.wdesc._cooldown_duration})" + Environment.NewLine;
-                                //if ((parsed.wdesc.header2 & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader2.PWD2_Packed_CooldownID) != 0)
-                                //    intsLine += $"     , ({parsed.object_id}, {(uint)STypeInt.SHARED_COOLDOWN_INT}, {parsed.wdesc._cooldown_id})" + Environment.NewLine;
-                                //if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_UIEffects) != 0)
-                                //    intsLine += $"     , ({parsed.object_id}, {(uint)STypeInt.UI_EFFECTS_INT}, {parsed.wdesc._effects})" + Environment.NewLine;
-                                //if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_ContainersCapacity) != 0)
-                                //    intsLine += $"     , ({parsed.object_id}, {(uint)STypeInt.CONTAINERS_CAPACITY_INT}, {parsed.wdesc._containersCapacity})" + Environment.NewLine;
-                                //if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_HookType) != 0)
-                                //    intsLine += $"     , ({parsed.object_id}, {(uint)STypeInt.HOOK_TYPE_INT}, {(uint)parsed.wdesc._hook_type})" + Environment.NewLine;
-                                //if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_HookItemTypes) != 0)
-                                //    intsLine += $"     , ({parsed.object_id}, {(uint)STypeInt.HOOK_ITEM_TYPE_INT}, {parsed.wdesc._hook_item_types})" + Environment.NewLine;
-                                //if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_ItemsCapacity) != 0)
-                                //    intsLine += $"     , ({parsed.object_id}, {(uint)STypeInt.ITEMS_CAPACITY_INT}, {parsed.wdesc._itemsCapacity})" + Environment.NewLine;
-                                //if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_Location) != 0)
-                                //    intsLine += $"     , ({parsed.object_id}, {(uint)STypeInt.CURRENT_WIELDED_LOCATION_INT}, {parsed.wdesc._location})" + Environment.NewLine;
-                                //if ((parsed.wdesc.header & unchecked((uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_MaterialType)) != 0)
-                                //    intsLine += $"     , ({parsed.object_id}, {(uint)STypeInt.MATERIAL_TYPE_INT}, {(uint)parsed.wdesc._material_type})" + Environment.NewLine;
-                                //if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_MaxStackSize) != 0)
-                                //    intsLine += $"     , ({parsed.object_id}, {(uint)STypeInt.MAX_STACK_SIZE_INT}, {parsed.wdesc._maxStackSize})" + Environment.NewLine;
-                                //if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_MaxStructure) != 0)
-                                //    intsLine += $"     , ({parsed.object_id}, {(uint)STypeInt.MAX_STRUCTURE_INT}, {parsed.wdesc._maxStructure})" + Environment.NewLine;
-                                //if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_RadarEnum) != 0)
-                                //    intsLine += $"     , ({parsed.object_id}, {(uint)STypeInt.SHOWABLE_ON_RADAR_INT}, {(uint)parsed.wdesc._radar_enum})" + Environment.NewLine;
-                                //if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_StackSize) != 0)
-                                //    intsLine += $"     , ({parsed.object_id}, {(uint)STypeInt.STACK_SIZE_INT}, {parsed.wdesc._stackSize})" + Environment.NewLine;
-                                //if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_Structure) != 0)
-                                //    intsLine += $"     , ({parsed.object_id}, {(uint)STypeInt.STRUCTURE_INT}, {parsed.wdesc._structure})" + Environment.NewLine;
-                                //if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_TargetType) != 0)
-                                //    intsLine += $"     , ({parsed.object_id}, {(uint)STypeInt.TARGET_TYPE_INT}, {(uint)parsed.wdesc._targetType})" + Environment.NewLine;
-                                //if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_Useability) != 0)
-                                //    intsLine += $"     , ({parsed.object_id}, {(uint)STypeInt.ITEM_USEABLE_INT}, {(uint)parsed.wdesc._useability})" + Environment.NewLine;
-                                //if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_UseRadius) != 0)
-                                //    floatsLine += $"     , ({parsed.object_id}, {(uint)STypeFloat.USE_RADIUS_FLOAT}, {parsed.wdesc._useRadius})" + Environment.NewLine;
-                                //if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_ValidLocations) != 0)
-                                //    intsLine += $"     , ({parsed.object_id}, {(uint)STypeInt.LOCATIONS_INT}, {parsed.wdesc._valid_locations})" + Environment.NewLine;
-                                //if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_Value) != 0)
-                                //    intsLine += $"     , ({parsed.object_id}, {(uint)STypeInt.VALUE_INT}, {parsed.wdesc._value})" + Environment.NewLine;
-                                ////if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_ContainerID) != 0)
-                                //if (((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_ContainerID) != 0) && objectIds.Contains(parsed.wdesc._containerID))
-                                //    iidsLine += $"     , ({parsed.object_id}, {(uint)STypeIID.CONTAINER_IID}, {(uint)parsed.wdesc._containerID})" + Environment.NewLine;
-                                ////{
-                                ////    line = $"{sqlCommand} INTO `ace_object_properties_int` (`aceObjectId`, `intPropertyId`, `propertyValue`)" + Environment.NewLine;
-                                ////    line += $"VALUES ({parsed.object_id}, {(uint)STypeInt.???}, {parsed.wdesc._containerID})" + Environment.NewLine;
-                                ////    line = line.TrimEnd(Environment.NewLine.ToCharArray()) + ";" + Environment.NewLine;
-                                ////    writer.WriteLine(line);
-                                ////}
-                                ////if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_WielderID) != 0)
-                                ////{
-                                ////    line = $"{sqlCommand} INTO `ace_object_properties_int` (`aceObjectId`, `intPropertyId`, `propertyValue`)" + Environment.NewLine;
-                                ////    line += $"VALUES ({parsed.object_id}, {(uint)STypeInt.???}, {parsed.wdesc._wielderID})" + Environment.NewLine;
-                                ////    line = line.TrimEnd(Environment.NewLine.ToCharArray()) + ";" + Environment.NewLine;
-                                ////    writer.WriteLine(line);
-                                ////}
-                                ////if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_WielderID) != 0)
-                                ////    intsLine += $"     , ({parsed.object_id}, {(uint)STypeIID.WIELDER_IID}, {parsed.wdesc._wielderID})" + Environment.NewLine;
-                                //if (((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_WielderID) != 0) && objectIds.Contains(parsed.wdesc._wielderID))
-                                //    iidsLine += $"     , ({parsed.object_id}, {(uint)STypeIID.WIELDER_IID}, {(uint)parsed.wdesc._wielderID})" + Environment.NewLine;
-                                ////if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_HouseOwner) != 0)
-                                ////{
-                                ////    line = $"{sqlCommand} INTO `ace_object_properties_int` (`aceObjectId`, `intPropertyId`, `propertyValue`)" + Environment.NewLine;
-                                ////    line += $"VALUES ({parsed.object_id}, {(uint)STypeInt.???}, {parsed.wdesc._house_owner_iid})" + Environment.NewLine;
-                                ////    line = line.TrimEnd(Environment.NewLine.ToCharArray()) + ";" + Environment.NewLine;
-                                ////    writer.WriteLine(line);
-                                ////}
-                                ////if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_HouseRestrictions) != 0)
-                                ////{
-                                ////    line = $"{sqlCommand} INTO `ace_object_properties_int` (`aceObjectId`, `intPropertyId`, `propertyValue`)" + Environment.NewLine;
-                                ////    line += $"VALUES ({parsed.object_id}, {(uint)STypeInt.???}, {parsed.wdesc.???})" + Environment.NewLine;
-                                ////    line = line.TrimEnd(Environment.NewLine.ToCharArray()) + ";" + Environment.NewLine;
-                                ////    writer.WriteLine(line);
-                                ////}
-                                ////if ((parsed.wdesc.header2 & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader2.PWD2_Packed_PetOwner) != 0)
-                                ////{
-                                ////    line = $"{sqlCommand} INTO `ace_object_properties_int` (`aceObjectId`, `intPropertyId`, `propertyValue`)" + Environment.NewLine;
-                                ////    line += $"VALUES ({parsed.object_id}, {(uint)STypeInt.???}, {parsed.wdesc._pet_owner})" + Environment.NewLine;
-                                ////    line = line.TrimEnd(Environment.NewLine.ToCharArray()) + ";" + Environment.NewLine;
-                                ////    writer.WriteLine(line);
-                                ////}
-                                ////if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_Monarch) != 0)
-                                ////{
-                                ////    line = $"{sqlCommand} INTO `ace_object_properties_int` (`aceObjectId`, `intPropertyId`, `propertyValue`)" + Environment.NewLine;
-                                ////    line += $"VALUES ({parsed.object_id}, {(uint)STypeInt.???}, {parsed.wdesc._monarch})" + Environment.NewLine;
-                                ////    line = line.TrimEnd(Environment.NewLine.ToCharArray()) + ";" + Environment.NewLine;
-                                ////    writer.WriteLine(line);
-                                ////}
-                                ////if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_Workmanship) != 0)
-                                ////{
-                                ////    line = $"{sqlCommand} INTO `ace_object_properties_int` (`aceObjectId`, `intPropertyId`, `propertyValue`)" + Environment.NewLine;
-                                ////    line += $"VALUES ({parsed.object_id}, {(uint)STypeInt.ITEM_WORKMANSHIP_INT}, {parsed.wdesc._workmanship})" + Environment.NewLine;
-                                ////    line = line.TrimEnd(Environment.NewLine.ToCharArray()) + ";" + Environment.NewLine;
-                                ////    writer.WriteLine(line);
-                                ////}
-                                //if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_PluralName) != 0)
-                                //    strsLine += $"     , ({parsed.object_id}, {(uint)STypeString.PLURAL_NAME_STRING}, '{parsed.wdesc._plural_name.m_buffer.Replace("'", "''")}')" + Environment.NewLine;
-                                //if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_Priority) != 0)
-                                //    intsLine += $"     , ({parsed.object_id}, {(uint)STypeInt.CLOTHING_PRIORITY_INT}, {parsed.wdesc._priority})" + Environment.NewLine;
-                                //if ((parsed.physicsdesc.bitfield & (uint)PhysicsDesc.PhysicsDescInfo.DEFAULT_SCRIPT_INTENSITY) != 0)
-                                //    floatsLine += $"     , ({parsed.object_id}, {(uint)STypeFloat.PHYSICS_SCRIPT_INTENSITY_FLOAT}, {parsed.physicsdesc.default_script_intensity})" + Environment.NewLine;
-                                //if ((parsed.physicsdesc.bitfield & (uint)PhysicsDesc.PhysicsDescInfo.ELASTICITY) != 0)
-                                //    floatsLine += $"     , ({parsed.object_id}, {(uint)STypeFloat.ELASTICITY_FLOAT}, {parsed.physicsdesc.elasticity})" + Environment.NewLine;
-                                //if ((parsed.physicsdesc.bitfield & (uint)PhysicsDesc.PhysicsDescInfo.FRICTION) != 0)
-                                //    floatsLine += $"     , ({parsed.object_id}, {(uint)STypeFloat.FRICTION_FLOAT}, {parsed.physicsdesc.friction})" + Environment.NewLine;
-                                //if ((parsed.physicsdesc.bitfield & (uint)PhysicsDesc.PhysicsDescInfo.PARENT) != 0)
-                                //{
-                                //    //line = $"{sqlCommand} INTO `ace_object_properties_int` (`aceObjectId`, `intPropertyId`, `propertyValue`)" + Environment.NewLine;
-                                //    iidsLine += $"     , ({parsed.object_id}, {(uint)STypeIID.OWNER_IID}, {(uint)parsed.physicsdesc.parent_id})" + Environment.NewLine;
-                                //    //line += $"VALUES ({parsed.object_id}, {STypeInt.???}, {parsed.physicsdesc.parent_id})" + Environment.NewLine;
-                                //    //line = line.TrimEnd(Environment.NewLine.ToCharArray()) + ";" + Environment.NewLine;
-                                //    //writer.WriteLine(line);
-
-                                //    //line = $"{sqlCommand} INTO `ace_object_properties_int` (`aceObjectId`, `intPropertyId`, `propertyValue`)" + Environment.NewLine;
-                                //    intsLine += $"     , ({parsed.object_id}, {(uint)STypeInt.PARENT_LOCATION_INT}, {parsed.physicsdesc.location_id})" + Environment.NewLine;
-                                //    //line = line.TrimEnd(Environment.NewLine.ToCharArray()) + ";" + Environment.NewLine;
-                                //    //writer.WriteLine(line);
-                                //}
-                                //if ((parsed.physicsdesc.bitfield & (uint)PhysicsDesc.PhysicsDescInfo.OBJSCALE) != 0)
-                                //    floatsLine += $"     , ({parsed.object_id}, {(uint)STypeFloat.DEFAULT_SCALE_FLOAT}, {parsed.physicsdesc.object_scale})" + Environment.NewLine;
-
-                                //intsLine += $"     , ({parsed.object_id}, {(uint)STypeInt.PHYSICS_STATE_INT}, {(uint)parsed.physicsdesc.state})" + Environment.NewLine;
-                                //if (((uint)parsed.physicsdesc.state & (uint)PhysicsState.STATIC_PS) != 0)
-                                //    boolsLine += $"     , ({parsed.object_id}, {(uint)STypeBool.STUCK_BOOL}, {true})" + Environment.NewLine;
-                                //if (((uint)parsed.physicsdesc.state & (uint)PhysicsState.ETHEREAL_PS) != 0)
-                                //    boolsLine += $"     , ({parsed.object_id}, {(uint)STypeBool.ETHEREAL_BOOL}, {true})" + Environment.NewLine;
-                                //if (((uint)parsed.physicsdesc.state & (uint)PhysicsState.REPORT_COLLISIONS_PS) != 0)
-                                //    boolsLine += $"     , ({parsed.object_id}, {(uint)STypeBool.REPORT_COLLISIONS_BOOL}, {true})" + Environment.NewLine;
-                                //if (((uint)parsed.physicsdesc.state & (uint)PhysicsState.IGNORE_COLLISIONS_PS) != 0)
-                                //    boolsLine += $"     , ({parsed.object_id}, {(uint)STypeBool.IGNORE_COLLISIONS_BOOL}, {true})" + Environment.NewLine;
-                                //if (((uint)parsed.physicsdesc.state & (uint)PhysicsState.NODRAW_PS) != 0)
-                                //    boolsLine += $"     , ({parsed.object_id}, {(uint)STypeBool.NODRAW_BOOL}, {true})" + Environment.NewLine;
-                                //if (((uint)parsed.physicsdesc.state & (uint)PhysicsState.GRAVITY_PS) != 0)
-                                //    boolsLine += $"     , ({parsed.object_id}, {(uint)STypeBool.GRAVITY_STATUS_BOOL}, {true})" + Environment.NewLine;
-                                //if (((uint)parsed.physicsdesc.state & (uint)PhysicsState.LIGHTING_ON_PS) != 0)
-                                //    boolsLine += $"     , ({parsed.object_id}, {(uint)STypeBool.LIGHTS_STATUS_BOOL}, {true})" + Environment.NewLine;
-                                //if (((uint)parsed.physicsdesc.state & (uint)PhysicsState.HIDDEN_PS) != 0)
-                                //    boolsLine += $"     , ({parsed.object_id}, {(uint)STypeBool.VISIBILITY_BOOL}, {true})" + Environment.NewLine;
-                                //if (((uint)parsed.physicsdesc.state & (uint)PhysicsState.SCRIPTED_COLLISION_PS) != 0)
-                                //    boolsLine += $"     , ({parsed.object_id}, {(uint)STypeBool.SCRIPTED_COLLISION_BOOL}, {true})" + Environment.NewLine;
-                                //if (((uint)parsed.physicsdesc.state & (uint)PhysicsState.INELASTIC_PS) != 0)
-                                //    boolsLine += $"     , ({parsed.object_id}, {(uint)STypeBool.INELASTIC_BOOL}, {true})" + Environment.NewLine;
-                                //if (((uint)parsed.physicsdesc.state & (uint)PhysicsState.CLOAKED_PS) != 0)
-                                //    boolsLine += $"     , ({parsed.object_id}, {(uint)STypeBool.HIDDEN_ADMIN_BOOL}, {true})" + Environment.NewLine;
-                                //if (((uint)parsed.physicsdesc.state & (uint)PhysicsState.REPORT_COLLISIONS_AS_ENVIRONMENT_PS) != 0)
-                                //    boolsLine += $"     , ({parsed.object_id}, {(uint)STypeBool.REPORT_COLLISIONS_AS_ENVIRONMENT_BOOL}, {true})" + Environment.NewLine;
-                                //if (((uint)parsed.physicsdesc.state & (uint)PhysicsState.EDGE_SLIDE_PS) != 0)
-                                //    boolsLine += $"     , ({parsed.object_id}, {(uint)STypeBool.ALLOW_EDGE_SLIDE_BOOL}, {true})" + Environment.NewLine;
-                                //if (((uint)parsed.physicsdesc.state & (uint)PhysicsState.FROZEN_PS) != 0)
-                                //    boolsLine += $"     , ({parsed.object_id}, {(uint)STypeBool.IS_FROZEN_BOOL}, {true})" + Environment.NewLine;
-
-                                //if ((parsed.physicsdesc.bitfield & (uint)PhysicsDesc.PhysicsDescInfo.TRANSLUCENCY) != 0)
-                                //    floatsLine += $"     , ({parsed.object_id}, {(uint)STypeFloat.TRANSLUCENCY_FLOAT}, {parsed.physicsdesc.translucency})" + Environment.NewLine;
-                                ////if ((parsed.physicsdesc.bitfield & (uint)PhysicsDesc.PhysicsDescInfo.VELOCITY) != 0)
-                                ////{
-                                ////    line = $"{sqlCommand} INTO `ace_object_properties_double` (`aceObjectId`, `dblPropertyId`, `propertyValue`)" + Environment.NewLine;
-                                ////    line += $"VALUES ({parsed.object_id}, {(uint)STypeFloat.MAXIMUM_VELOCITY_FLOAT}, {parsed.physicsdesc.velocity})" + Environment.NewLine;
-                                ////    line = line.TrimEnd(Environment.NewLine.ToCharArray()) + ";" + Environment.NewLine;
-                                ////    writer.WriteLine(line);
-                                ////}
-
-                                //strsLine += $"     , ({parsed.object_id}, {(uint)STypeString.NAME_STRING}, '{parsed.wdesc._name.m_buffer.Replace("'", "''")}')" + Environment.NewLine;
-
                                 if (parsed.i_prof._strStatsTable.hashTable.Count > 0)
                                 {
                                     foreach (var stat in parsed.i_prof._strStatsTable.hashTable)
@@ -1170,7 +837,6 @@ namespace aclogview
                                 {
                                     foreach (var stat in parsed.i_prof._didStatsTable.hashTable)
                                     {
-                                        //strsLine += $"     , ({parsed.i_objid}, {(uint)stat.Key}, '{stat.Value.m_buffer?.Replace("'", "''")}')" + Environment.NewLine;
                                         didsLine += $"     , ({parsed.i_objid}, {(uint)stat.Key}, {(uint)stat.Value})" + Environment.NewLine;
                                     }
                                 }
@@ -1179,7 +845,6 @@ namespace aclogview
                                 {
                                     foreach (var stat in parsed.i_prof._intStatsTable.hashTable)
                                     {
-                                        //strsLine += $"     , ({parsed.i_objid}, {(uint)stat.Key}, '{stat.Value.m_buffer?.Replace("'", "''")}')" + Environment.NewLine;
                                         intsLine += $"     , ({parsed.i_objid}, {(uint)stat.Key}, {(uint)stat.Value})" + Environment.NewLine;
                                     }
                                 }
@@ -1188,7 +853,6 @@ namespace aclogview
                                 {
                                     foreach (var stat in parsed.i_prof._int64StatsTable.hashTable)
                                     {
-                                        //strsLine += $"     , ({parsed.i_objid}, {(uint)stat.Key}, '{stat.Value.m_buffer?.Replace("'", "''")}')" + Environment.NewLine;
                                         bigintsLine += $"     , ({parsed.i_objid}, {(uint)stat.Key}, {(uint)stat.Value})" + Environment.NewLine;
                                     }
                                 }
@@ -1197,7 +861,6 @@ namespace aclogview
                                 {
                                     foreach (var stat in parsed.i_prof._floatStatsTable.hashTable)
                                     {
-                                        //strsLine += $"     , ({parsed.i_objid}, {(uint)stat.Key}, '{stat.Value.m_buffer?.Replace("'", "''")}')" + Environment.NewLine;
                                         floatsLine += $"     , ({parsed.i_objid}, {(uint)stat.Key}, {(float)stat.Value})" + Environment.NewLine;
                                     }
                                 }
@@ -1206,7 +869,6 @@ namespace aclogview
                                 {
                                     foreach (var stat in parsed.i_prof._boolStatsTable.hashTable)
                                     {
-                                        //strsLine += $"     , ({parsed.i_objid}, {(uint)stat.Key}, '{stat.Value.m_buffer?.Replace("'", "''")}')" + Environment.NewLine;
                                         boolsLine += $"     , ({parsed.i_objid}, {(uint)stat.Key}, {(uint)stat.Value})" + Environment.NewLine;
                                     }
                                 }
@@ -1215,17 +877,12 @@ namespace aclogview
                                 {
                                     foreach (var stat in parsed.i_prof._spellsTable.list)
                                     {
-                                        //strsLine += $"     , ({parsed.i_objid}, {(uint)stat.Key}, '{stat.Value.m_buffer?.Replace("'", "''")}')" + Environment.NewLine;
                                         spellsLine += $"     , ({parsed.i_objid}, {(uint)stat})" + Environment.NewLine;
                                     }
                                 }
 
                                 if ((parsed.i_prof.header & (uint)CM_Examine.AppraisalProfile.AppraisalProfilePackHeader.Packed_WeaponProfile) != 0)
                                 {
-                                    //foreach (var stat in parsed.i_prof._intStatsTable.hashTable)
-                                    //{
-                                    //strsLine += $"     , ({parsed.i_objid}, {(uint)stat.Key}, '{stat.Value.m_buffer?.Replace("'", "''")}')" + Environment.NewLine;
-                                    //intsLine += $"     , ({parsed.i_objid}, {(uint)stat.Key}, {(uint)stat.Value})" + Environment.NewLine;
                                     intsLine += $"     , ({parsed.i_objid}, {(uint)STypeInt.DAMAGE_TYPE_INT}, {(uint)parsed.i_prof._weaponProfileTable._damage_type})" + Environment.NewLine;
                                     intsLine += $"     , ({parsed.i_objid}, {(uint)STypeInt.WEAPON_TIME_INT}, {(uint)parsed.i_prof._weaponProfileTable._weapon_time})" + Environment.NewLine;
                                     intsLine += $"     , ({parsed.i_objid}, {(uint)STypeInt.WEAPON_SKILL_INT}, {(uint)parsed.i_prof._weaponProfileTable._weapon_skill})" + Environment.NewLine;
@@ -1236,7 +893,6 @@ namespace aclogview
                                     floatsLine += $"     , ({parsed.i_objid}, {(uint)STypeFloat.MAXIMUM_VELOCITY_FLOAT}, {(float)parsed.i_prof._weaponProfileTable._max_velocity})" + Environment.NewLine;
                                     floatsLine += $"     , ({parsed.i_objid}, {(uint)STypeFloat.WEAPON_OFFENSE_FLOAT}, {(float)parsed.i_prof._weaponProfileTable._weapon_offense})" + Environment.NewLine;
                                     //intsLine += $"     , ({parsed.i_objid}, {(uint)STypeInt.???}, {(uint)parsed.i_prof._weaponProfileTable._max_velocity_estimated})" + Environment.NewLine;
-                                    //}
                                 }
 
                                 if ((parsed.i_prof.header & (uint)CM_Examine.AppraisalProfile.AppraisalProfilePackHeader.Packed_HookProfile) != 0)
@@ -1344,79 +1000,12 @@ namespace aclogview
                                 }
                                 if (attribute2ndsLine != "")
                                 {
-                                    //attribute2ndsLine = $"{sqlCommand} INTO `ace_object_properties_attribute2nd` (`aceObjectId`, `attribute2ndId`, `attribute2ndCurrent`)" + Environment.NewLine
-                                    //attribute2ndsLine = $"{sqlCommand} INTO `ace_object_properties_attribute2nd` (`aceObjectId`, `attribute2ndId`, `attribute2ndRanks`)" + Environment.NewLine
                                     attribute2ndsLine = $"{sqlCommand} INTO `ace_object_properties_attribute2nd` (`aceObjectId`, `attribute2ndId`, `attribute2ndValue`)" + Environment.NewLine
                                         + "VALUES " + attribute2ndsLine.TrimStart("     ,".ToCharArray());
                                     attribute2ndsLine = attribute2ndsLine.TrimEnd(Environment.NewLine.ToCharArray()) + ";" + Environment.NewLine;
                                     writer.WriteLine(attribute2ndsLine);
                                 }
 
-                                //bool once = false;
-                                //if (parsed.objdesc.subpalettes.Count > 0)
-                                //{
-                                //    line = $"{sqlCommand} INTO `ace_object_palette_change` (`aceObjectId`, `subPaletteId`, `offset`, `length`)" + Environment.NewLine;
-
-                                //    foreach (var subPalette in parsed.objdesc.subpalettes)
-                                //    {
-                                //        if (once)
-                                //        {
-                                //            line += $"     , ({parsed.object_id}, {subPalette.subID}, {subPalette.offset}, {subPalette.numcolors})" + Environment.NewLine;
-                                //        }
-                                //        else
-                                //        {
-                                //            line += $"VALUES ({parsed.object_id}, {subPalette.subID}, {subPalette.offset}, {subPalette.numcolors})" + Environment.NewLine;
-                                //            once = true;
-                                //        }
-                                //    }
-
-                                //    line = line.TrimEnd(Environment.NewLine.ToCharArray()) + ";" + Environment.NewLine;
-                                //    writer.WriteLine(line);
-                                //}
-
-                                //once = false;
-                                //if (parsed.objdesc.tmChanges.Count > 0)
-                                //{
-                                //    line = $"{sqlCommand} INTO `ace_object_texture_map_change` (`aceObjectId`, `index`, `oldId`, `newId`)" + Environment.NewLine;
-
-                                //    foreach (var texture in parsed.objdesc.tmChanges)
-                                //    {
-                                //        if (once)
-                                //        {
-                                //            line += $"     , ({parsed.object_id}, {texture.part_index}, {texture.old_tex_id}, {texture.new_tex_id})" + Environment.NewLine;
-                                //        }
-                                //        else
-                                //        {
-                                //            line += $"VALUES ({parsed.object_id}, {texture.part_index}, {texture.old_tex_id}, {texture.new_tex_id})" + Environment.NewLine;
-                                //            once = true;
-                                //        }
-                                //    }
-
-                                //    line = line.TrimEnd(Environment.NewLine.ToCharArray()) + ";" + Environment.NewLine;
-                                //    writer.WriteLine(line);
-                                //}
-
-                                //once = false;
-                                //if (parsed.objdesc.apChanges.Count > 0)
-                                //{
-                                //    line = $"{sqlCommand} INTO `ace_object_animation_change` (`aceObjectId`, `index`, `animationId`)" + Environment.NewLine;
-
-                                //    foreach (var animation in parsed.objdesc.apChanges)
-                                //    {
-                                //        if (once)
-                                //        {
-                                //            line += $"     , ({parsed.object_id}, {animation.part_index}, {animation.part_id})" + Environment.NewLine;
-                                //        }
-                                //        else
-                                //        {
-                                //            line += $"VALUES ({parsed.object_id}, {animation.part_index}, {animation.part_id})" + Environment.NewLine;
-                                //            once = true;
-                                //        }
-                                //    }
-
-                                //    line = line.TrimEnd(Environment.NewLine.ToCharArray()) + ";" + Environment.NewLine;
-                                //    writer.WriteLine(line);
-                                //}
                             }
                         }
                     }
