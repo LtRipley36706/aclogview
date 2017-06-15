@@ -861,8 +861,9 @@ namespace aclogview
                                 {
                                     foreach (var stat in parsed.i_prof._floatStatsTable.hashTable)
                                     {
-                                        if (stat.Value.ToString() == "∞")
-                                            floatsLine += $"     , ({parsed.i_objid}, {(uint)stat.Key}, {(float)-1})" + Environment.NewLine;
+                                        //if (stat.Value.ToString() == "∞")
+                                        if (float.IsInfinity((float)stat.Value))
+                                            floatsLine += $"     , ({parsed.i_objid}, {(uint)stat.Key}, {(float)Convert.ToDouble(stat.Value.ToString().Substring(0, 5))})" + Environment.NewLine;
                                         else
                                             floatsLine += $"     , ({parsed.i_objid}, {(uint)stat.Key}, {(float)stat.Value})" + Environment.NewLine;
                                     }
@@ -1454,11 +1455,11 @@ namespace aclogview
                 else if (parsed.wdesc._type == ITEM_TYPE.TYPE_CONTAINER) // HOOKS AND STORAGE
                 {
                     if (
-                        parsed.wdesc._wcid == 9686 && parsed.wdesc._name.ToString().Contains("Hook") || // W_HOOK_CLASS
-                        parsed.wdesc._wcid == 11697 && parsed.wdesc._name.ToString().Contains("Hook") || // W_HOOK_FLOOR_CLASS
-                        parsed.wdesc._wcid == 11698 && parsed.wdesc._name.ToString().Contains("Hook") || // W_HOOK_CEILING_CLASS
-                        parsed.wdesc._wcid == 12678 && parsed.wdesc._name.ToString().Contains("Hook") || // W_HOOK_ROOF_CLASS
-                        parsed.wdesc._wcid == 12679 && parsed.wdesc._name.ToString().Contains("Hook") // W_HOOK_YARD_CLASS
+                        parsed.wdesc._wcid == 9686 && parsed.wdesc._name.m_buffer.Contains("Hook") || // W_HOOK_CLASS
+                        parsed.wdesc._wcid == 11697 && parsed.wdesc._name.m_buffer.Contains("Hook") || // W_HOOK_FLOOR_CLASS
+                        parsed.wdesc._wcid == 11698 && parsed.wdesc._name.m_buffer.Contains("Hook") || // W_HOOK_CEILING_CLASS
+                        parsed.wdesc._wcid == 12678 && parsed.wdesc._name.m_buffer.Contains("Hook") || // W_HOOK_ROOF_CLASS
+                        parsed.wdesc._wcid == 12679 && parsed.wdesc._name.m_buffer.Contains("Hook") // W_HOOK_YARD_CLASS
                         )
                     {
                         fileToPutItIn = "HouseHooks";
@@ -2060,6 +2061,11 @@ namespace aclogview
                     fileToPutItIn = weeniefileToPutItIn + "-contained";
                     addIt = true;
                 }
+                else if (objectIds.Contains(parsed.physicsdesc.parent_id))
+                {
+                    fileToPutItIn = weeniefileToPutItIn + "-children";
+                    addIt = true;
+                }
 
                 // de-dupe based on position and wcid
                 if (addIt && !PositionRecorded(parsed, processedWeeniePositions[parsed.wdesc._wcid], parsed.physicsdesc.pos, margin))
@@ -2235,8 +2241,10 @@ namespace aclogview
                                 "`physicsDescriptionFlag`" +
                                 ")" + Environment.NewLine + "VALUES (" +
 
-                                $"{parsed.object_id}, {parsed.wdesc.header}, " +
-                                $"{parsed.wdesc._wcid}, {parsed.wdesc._bitfield}, "; //+
+                                //$"{parsed.object_id}, {parsed.wdesc.header}, " +
+                                //$"{parsed.wdesc._wcid}, {parsed.wdesc._bitfield}, "; //+
+                                $"{parsed.object_id}, {parsed.wdesc._bitfield}, " +
+                                $"{parsed.wdesc._wcid}, {parsed.wdesc.header}, "; //+
                                 //$"{parsed.wdesc._iconID}, ";
                                 didsLine += $"     , ({parsed.object_id}, {(uint)STypeDID.ICON_DID}, {(uint)parsed.wdesc._iconID})" + Environment.NewLine;
                                 if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_IconOverlay) != 0)
@@ -2742,9 +2750,11 @@ namespace aclogview
                                 "`physicsDescriptionFlag`" +
                                 ")" + Environment.NewLine + "VALUES (" +
 
-                                $"{parsed.wdesc._wcid}, {parsed.wdesc.header}, " +
-                                $"{parsed.wdesc._wcid}, {parsed.wdesc._bitfield}, "; //+
-                                                                                     //$"{parsed.wdesc._iconID}, ";
+                            //$"{parsed.wdesc._wcid}, {parsed.wdesc.header}, " +
+                            //$"{parsed.wdesc._wcid}, {parsed.wdesc._bitfield}, "; //+
+                            $"{parsed.wdesc._wcid}, {parsed.wdesc._bitfield}, " +
+                            $"{parsed.wdesc._wcid}, {parsed.wdesc.header}, "; //+
+                            //$"{parsed.wdesc._iconID}, ";
                             didsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeDID.ICON_DID}, {(uint)parsed.wdesc._iconID})" + Environment.NewLine;
                             if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_IconOverlay) != 0)
                                 //    line += $"{parsed.wdesc._iconOverlayID}, ";
