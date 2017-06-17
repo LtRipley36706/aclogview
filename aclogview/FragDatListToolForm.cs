@@ -861,7 +861,6 @@ namespace aclogview
                                 {
                                     foreach (var stat in parsed.i_prof._floatStatsTable.hashTable)
                                     {
-                                        //if (stat.Value.ToString() == "∞")
                                         if (float.IsInfinity((float)stat.Value))
                                             floatsLine += $"     , ({parsed.i_objid}, {(uint)stat.Key}, {(float)Convert.ToDouble(stat.Value.ToString().Substring(0, 5))})" + Environment.NewLine;
                                         else
@@ -891,7 +890,7 @@ namespace aclogview
                                     intsLine += $"     , ({parsed.i_objid}, {(uint)STypeInt.DAMAGE_TYPE_INT}, {(uint)parsed.i_prof._weaponProfileTable._damage_type})" + Environment.NewLine;
                                     intsLine += $"     , ({parsed.i_objid}, {(uint)STypeInt.WEAPON_TIME_INT}, {(uint)parsed.i_prof._weaponProfileTable._weapon_time})" + Environment.NewLine;
                                     intsLine += $"     , ({parsed.i_objid}, {(uint)STypeInt.WEAPON_SKILL_INT}, {(uint)parsed.i_prof._weaponProfileTable._weapon_skill})" + Environment.NewLine;
-                                    intsLine += $"     , ({parsed.i_objid}, {(uint)STypeInt.DAMAGE_INT}, {(uint)parsed.i_prof._weaponProfileTable._damage_type})" + Environment.NewLine;
+                                    intsLine += $"     , ({parsed.i_objid}, {(uint)STypeInt.DAMAGE_INT}, {(uint)parsed.i_prof._weaponProfileTable._weapon_damage})" + Environment.NewLine;
                                     floatsLine += $"     , ({parsed.i_objid}, {(uint)STypeFloat.DAMAGE_VARIANCE_FLOAT}, {(float)parsed.i_prof._weaponProfileTable._damage_variance})" + Environment.NewLine;
                                     floatsLine += $"     , ({parsed.i_objid}, {(uint)STypeFloat.DAMAGE_MOD_FLOAT}, {(float)parsed.i_prof._weaponProfileTable._damage_mod})" + Environment.NewLine;
                                     floatsLine += $"     , ({parsed.i_objid}, {(uint)STypeFloat.WEAPON_LENGTH_FLOAT}, {(float)parsed.i_prof._weaponProfileTable._weapon_length})" + Environment.NewLine;
