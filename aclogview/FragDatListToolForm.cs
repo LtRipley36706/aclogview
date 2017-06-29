@@ -1638,8 +1638,10 @@ namespace aclogview
                     else if (parsed.wdesc._name.m_buffer.Contains("Gen")
                         )
                     {
-                        fileToPutItIn = "Generators";
-                        addIt = true;
+                        // fileToPutItIn = "Generators";
+                        // addIt = true;
+                        weeniefileToPutItIn = "Generators";
+                        addWeenie = true;
                     }
                     //else if (
                     //    parsed.wdesc._name.m_buffer.Contains("Bolt")
@@ -1669,8 +1671,10 @@ namespace aclogview
                     //}
                     else if (parsed.wdesc._name.m_buffer.Contains("Generator"))
                     {
-                        fileToPutItIn = "Generators";
-                        addIt = true;
+                        // fileToPutItIn = "Generators";
+                        // addIt = true;
+                        weeniefileToPutItIn = "Generators";
+                        addWeenie = true;
                     }
                     //else if (parsed.wdesc._name.m_buffer.Contains("Rabbit"))
                     //{
