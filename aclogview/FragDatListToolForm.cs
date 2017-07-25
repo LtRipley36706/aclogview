@@ -3080,8 +3080,8 @@ namespace aclogview
                                     boolsLine += $"     , ({parsed.object_id}, {(uint)STypeBool.IGNORE_HOUSE_BARRIERS_BOOL}, {true})" + Environment.NewLine;
                                 if (((uint)parsed.wdesc._bitfield & (uint)PublicWeenieDesc.BitfieldIndex.BF_INSCRIBABLE) != 0)
                                     boolsLine += $"     , ({parsed.object_id}, {(uint)STypeBool.INSCRIBABLE_BOOL}, {true})" + Environment.NewLine;
-                                if (((uint)parsed.wdesc._bitfield & (uint)PublicWeenieDesc.BitfieldIndex.BF_PLAYER_KILLER) != 0)
-                                    boolsLine += $"     , ({parsed.object_id}, {(uint)STypeBool.PK_KILLER_BOOL}, {true})" + Environment.NewLine;
+                                //if (((uint)parsed.wdesc._bitfield & (uint)PublicWeenieDesc.BitfieldIndex.BF_PLAYER_KILLER) != 0)
+                                //    boolsLine += $"     , ({parsed.object_id}, {(uint)STypeBool.PK_KILLER_BOOL}, {true})" + Environment.NewLine;
                                 if (((uint)parsed.wdesc._bitfield & (uint)PublicWeenieDesc.BitfieldIndex.BF_REQUIRES_PACKSLOT) != 0)
                                     boolsLine += $"     , ({parsed.object_id}, {(uint)STypeBool.REQUIRES_BACKPACK_SLOT_BOOL}, {true})" + Environment.NewLine;
                                 if (((uint)parsed.wdesc._bitfield & (uint)PublicWeenieDesc.BitfieldIndex.BF_RETAINED) != 0)
@@ -3090,8 +3090,8 @@ namespace aclogview
                                     boolsLine += $"     , ({parsed.object_id}, {(uint)STypeBool.STUCK_BOOL}, {true})" + Environment.NewLine;
                                 if (((uint)parsed.wdesc._bitfield & (uint)PublicWeenieDesc.BitfieldIndex.BF_UI_HIDDEN) != 0)
                                     boolsLine += $"     , ({parsed.object_id}, {(uint)STypeBool.UI_HIDDEN_BOOL}, {true})" + Environment.NewLine;
-                                if (((uint)parsed.wdesc._bitfield & (uint)PublicWeenieDesc.BitfieldIndex.BF_VENDOR) != 0)
-                                    boolsLine += $"     , ({parsed.object_id}, {(uint)STypeBool.VENDOR_SERVICE_BOOL}, {true})" + Environment.NewLine;
+                                //if (((uint)parsed.wdesc._bitfield & (uint)PublicWeenieDesc.BitfieldIndex.BF_VENDOR) != 0)
+                                //    boolsLine += $"     , ({parsed.object_id}, {(uint)STypeBool.VENDOR_SERVICE_BOOL}, {true})" + Environment.NewLine;
                                 if (((uint)parsed.wdesc._bitfield & (uint)PublicWeenieDesc.BitfieldIndex.BF_WIELD_LEFT) != 0)
                                     boolsLine += $"     , ({parsed.object_id}, {(uint)STypeBool.AUTOWIELD_LEFT_BOOL}, {true})" + Environment.NewLine;
                                 if (((uint)parsed.wdesc._bitfield & (uint)PublicWeenieDesc.BitfieldIndex.BF_WIELD_ON_USE) != 0)
