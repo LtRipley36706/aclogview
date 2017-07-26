@@ -426,6 +426,9 @@ namespace aclogview
                 Dictionary<uint, string> appraisalObjectsCatagoryMap = new Dictionary<uint, string>();
                 Dictionary<uint, uint> appraisalObjectToWeenieId = new Dictionary<uint, uint>();
 
+                Dictionary<uint, uint> staticObjectsWeenieType = new Dictionary<uint, uint>();
+                Dictionary<uint, uint> weeniesWeenieType = new Dictionary<uint, uint>();
+
                 while (true)
                 {
                     if (searchAborted || Disposing || IsDisposed)
@@ -459,7 +462,7 @@ namespace aclogview
                             {
                                 var parsed = CM_Physics.CreateObject.read(fragDataReader);
 
-                                CreateStaticObjectsList(parsed, objectIds, staticObjects, weenieIds, weenies, processedWeeniePositions, appraisalObjectsCatagoryMap, appraisalObjectToWeenieId);
+                                CreateStaticObjectsList(parsed, objectIds, staticObjects, weenieIds, weenies, processedWeeniePositions, appraisalObjectsCatagoryMap, appraisalObjectToWeenieId, weeniesWeenieType, staticObjectsWeenieType);
 
                                 //totalHits++;
 
@@ -541,7 +544,7 @@ namespace aclogview
                             {
                                 var parsed = CM_Physics.CreateObject.read(fragDataReader);
 
-                                CreateStaticObjectsList(parsed, objectIds, staticObjects, weenieIds, weenies, processedWeeniePositions, appraisalObjectsCatagoryMap, appraisalObjectToWeenieId);                                      
+                                CreateStaticObjectsList(parsed, objectIds, staticObjects, weenieIds, weenies, processedWeeniePositions, appraisalObjectsCatagoryMap, appraisalObjectToWeenieId, weeniesWeenieType, staticObjectsWeenieType);                                      
                             }
                         }
                         catch (EndOfStreamException) // This can happen when a frag is incomplete and we try to parse it
@@ -597,11 +600,11 @@ namespace aclogview
 
                 }
 
-                WriteWeenieData(weenies, txtOutputFolder.Text);
+                WriteWeenieData(weenies, txtOutputFolder.Text, weeniesWeenieType);
 
                 WriteWeenieAppraisalObjectData(appraisalObjects, appraisalObjectIds, appraisalObjectToWeenieId, txtOutputFolder.Text);
 
-                WriteStaticObjectData(staticObjects, objectIds, txtOutputFolder.Text);
+                WriteStaticObjectData(staticObjects, objectIds, txtOutputFolder.Text, staticObjectsWeenieType);
 
                 WriteAppraisalObjectData(appraisalObjects, appraisalObjectIds, appraisalObjectToWeenieId, txtOutputFolder.Text);
 
@@ -1378,7 +1381,7 @@ namespace aclogview
             }
         }
 
-        private void CreateStaticObjectsList(CM_Physics.CreateObject parsed, List<uint> objectIds, Dictionary<string, List<CM_Physics.CreateObject>> staticObjects, List<uint> weenieIds, Dictionary<string, List<CM_Physics.CreateObject>> weenies, Dictionary<uint, List<Position>> processedWeeniePositions, Dictionary<uint, string> appraisalObjectsCatagoryMap, Dictionary<uint, uint> appraisalObjectToWeenieId)
+        private void CreateStaticObjectsList(CM_Physics.CreateObject parsed, List<uint> objectIds, Dictionary<string, List<CM_Physics.CreateObject>> staticObjects, List<uint> weenieIds, Dictionary<string, List<CM_Physics.CreateObject>> weenies, Dictionary<uint, List<Position>> processedWeeniePositions, Dictionary<uint, string> appraisalObjectsCatagoryMap, Dictionary<uint, uint> appraisalObjectToWeenieId, Dictionary<uint, uint> weeniesWeenieType, Dictionary<uint, uint> staticObjectsWeenieType)
         {
             try
             {
@@ -1391,6 +1394,7 @@ namespace aclogview
                 bool addWeenie = false;
                 string fileToPutItIn = "Other";
                 string weeniefileToPutItIn = "OtherWeenies";
+                WeenieType weenieType = WeenieType.Generic_WeenieType;
                 float margin = 0.02f;
 
                 // if ((parsed.physicsdesc.pos.objcell_id >> 16) >= 56163 && (parsed.physicsdesc.pos.objcell_id >> 16) <= 56419)
@@ -1399,41 +1403,49 @@ namespace aclogview
                 if ((parsed.wdesc._bitfield & (uint)CM_Physics.PublicWeenieDesc.BitfieldIndex.BF_LIFESTONE) != 0)
                 {
                     fileToPutItIn = "Lifestones";
+                    weenieType = WeenieType.LifeStone_WeenieType;
                     addIt = true;
                 }
                 else if ((parsed.wdesc._bitfield & (uint)CM_Physics.PublicWeenieDesc.BitfieldIndex.BF_BINDSTONE) != 0)
                 {
                     fileToPutItIn = "Bindstones";
+                    weenieType = WeenieType.AllegianceBindstone_WeenieType;
                     addIt = true;
                 }
                 else if (parsed.wdesc._wcid == 1)
                 {
                     weeniefileToPutItIn = "Players";
+                    weenieType = WeenieType.Creature_WeenieType;
                     addWeenie = true;
                 }
                 else if ((parsed.wdesc._bitfield & (uint)CM_Physics.PublicWeenieDesc.BitfieldIndex.BF_PKSWITCH) != 0)
                 {
                     fileToPutItIn = "PKSwitches";
+                    weenieType = WeenieType.PKModifier_WeenieType;
                     addIt = true;
                 }
                 else if ((parsed.wdesc._bitfield & (uint)CM_Physics.PublicWeenieDesc.BitfieldIndex.BF_NPKSWITCH) != 0)
                 {
                     fileToPutItIn = "NPKSwitches";
+                    weenieType = WeenieType.PKModifier_WeenieType;
                     addIt = true;
                 }
                 else if ((parsed.wdesc._bitfield & (uint)CM_Physics.PublicWeenieDesc.BitfieldIndex.BF_LOCKPICK) != 0)
                 {
                     weeniefileToPutItIn = "Lockpicks";
+                    weenieType = WeenieType.Lockpick_WeenieType;
                     addWeenie = true;
                 }
                 else if ((parsed.wdesc._bitfield & (uint)CM_Physics.PublicWeenieDesc.BitfieldIndex.BF_FOOD) != 0)
                 {
                     weeniefileToPutItIn = "FoodObjects";
+                    weenieType = WeenieType.Food_WeenieType;
                     addWeenie = true;
                 }
                 else if ((parsed.wdesc._bitfield & (uint)CM_Physics.PublicWeenieDesc.BitfieldIndex.BF_HEALER) != 0)
                 {
                     weeniefileToPutItIn = "Healers";
+                    weenieType = WeenieType.Healer_WeenieType;
                     addWeenie = true;
                 }
                 else if ((parsed.wdesc._bitfield & (uint)CM_Physics.PublicWeenieDesc.BitfieldIndex.BF_BOOK) != 0)
@@ -1441,21 +1453,25 @@ namespace aclogview
                     if (parsed.wdesc._name.m_buffer.Contains("Statue"))
                     {
                         fileToPutItIn = "BooksStatues";
+                        weenieType = WeenieType.Book_WeenieType;
                         addIt = true;
                     }
                     else if (parsed.wdesc._name.m_buffer.Contains("Scroll"))
                     {
                         weeniefileToPutItIn = "BooksScrolls";
+                        weenieType = WeenieType.Scroll_WeenieType;
                         addWeenie = true;
                     }
                     else if (parsed.wdesc._name.m_buffer.Contains("Pack"))
                     {
                         weeniefileToPutItIn = "BooksPackToys";
+                        weenieType = WeenieType.Book_WeenieType;
                         addWeenie = true;
                     }
                     else if (parsed.wdesc._wcid == 9002)
                     {
                         fileToPutItIn = "BooksShardVigil";
+                        weenieType = WeenieType.Book_WeenieType;
                         addIt = true;
                     }
                     else if (parsed.wdesc._wcid == 12774
@@ -1463,16 +1479,19 @@ namespace aclogview
                         )
                     {
                         fileToPutItIn = "HouseBooks";
+                        weenieType = WeenieType.Book_WeenieType;
                         addIt = true;
                     }
                     else if (parsed.object_id < 0x80000000)
                     {
                         fileToPutItIn = "BooksStatics";
+                        weenieType = WeenieType.Book_WeenieType;
                         addIt = true;
                     }
                     else
                     {
                         weeniefileToPutItIn = "Books";
+                        weenieType = WeenieType.Book_WeenieType;
                         addWeenie = true;
                     }
                 }
@@ -1485,6 +1504,7 @@ namespace aclogview
                         )
                     {
                         fileToPutItIn = "HousePortals";
+                        weenieType = WeenieType.HousePortal_WeenieType;
                         parsed.wdesc._bitfield = 262164; // error correct
                         parsed.wdesc.header = 41943088; // error correct
                         addIt = true;
@@ -1492,56 +1512,67 @@ namespace aclogview
                     else if (parsed.wdesc._wcid == 1955)
                     {
                         weeniefileToPutItIn = "PortalsSummoned";
+                        weenieType = WeenieType.Portal_WeenieType;
                         addWeenie = true;
                     }
                     else if (parsed.wdesc._name.m_buffer.Contains("Town Network"))
                     {
                         fileToPutItIn = "PortalsTownNetwork";
+                        weenieType = WeenieType.Portal_WeenieType;
                         addIt = true;
                     }
                     else if (parsed.wdesc._name.m_buffer.Contains("Floating City"))
                     {
                         fileToPutItIn = "PortalsFloatingCity";
+                        weenieType = WeenieType.Portal_WeenieType;
                         addIt = true;
                     }
                     else if (parsed.wdesc._name.m_buffer.Contains("Humming Crystal"))
                     {
                         fileToPutItIn = "PortalsHummingCrystal";
+                        weenieType = WeenieType.Portal_WeenieType;
                         addIt = true;
                     }
                     else if (parsed.wdesc._name.m_buffer.Contains("The Orphanage"))
                     {
                         fileToPutItIn = "PortalsTheOrphanage";
+                        weenieType = WeenieType.Portal_WeenieType;
                         addIt = true;
                     }
                     else if (parsed.wdesc._name.m_buffer.Contains("Golem Sanctum"))
                     {
                         fileToPutItIn = "PortalsGolemSanctum";
+                        weenieType = WeenieType.Portal_WeenieType;
                         addIt = true;
                     }
                     else if (parsed.wdesc._name.m_buffer.Contains("Destroyed"))
                     {
                         fileToPutItIn = "PortalsDestroyed";
+                        weenieType = WeenieType.Portal_WeenieType;
                         addIt = true;
                     }
                     else if (parsed.wdesc._name.m_buffer.Contains("Meeting Hall"))
                     {
                         fileToPutItIn = "PortalsMeetingHall";
+                        weenieType = WeenieType.Portal_WeenieType;
                         addIt = true;
                     }
                     else if (parsed.wdesc._name.m_buffer.Contains("Portal to"))
                     {
                         fileToPutItIn = "PortalsPortalto";
+                        weenieType = WeenieType.Portal_WeenieType;
                         addIt = true;
                     }
                     else if (parsed.wdesc._name.m_buffer.Contains("Portal"))
                     {
                         fileToPutItIn = "PortalsPortal";
+                        weenieType = WeenieType.Portal_WeenieType;
                         addIt = true;
                     }
                     else
                     {
                         fileToPutItIn = "Portals";
+                        weenieType = WeenieType.Portal_WeenieType;
                         addIt = true;
                     }
                 }
@@ -1551,6 +1582,7 @@ namespace aclogview
                         )
                     {
                         fileToPutItIn = "DoorsAluvianHouse";
+                        weenieType = WeenieType.Door_WeenieType;
                         parsed.physicsdesc.setup_id = 33561087; // error correct
                         parsed.physicsdesc.mtable_id = 150995458; // error correct
                         addIt = true;
@@ -1558,16 +1590,19 @@ namespace aclogview
                     else if (parsed.wdesc._wcid == 15451)
                     {
                         fileToPutItIn = "DoorsApartments";
+                        weenieType = WeenieType.Door_WeenieType;
                         addIt = true;
                     }
                     else if (parsed.wdesc._wcid == 577)
                     {
                         fileToPutItIn = "DoorsPrison10";
+                        weenieType = WeenieType.Door_WeenieType;
                         addIt = true;
                     }
                     else
                     {
                         fileToPutItIn = "Doors";
+                        weenieType = WeenieType.Door_WeenieType;
                         addIt = true;
                     }
                 }
@@ -1578,6 +1613,7 @@ namespace aclogview
                         )
                     {
                         fileToPutItIn = "VendorsSpecialNPCs";
+                        weenieType = WeenieType.Vendor_WeenieType;
                         addIt = true;
                         margin = 15f;
                     }
@@ -1586,12 +1622,14 @@ namespace aclogview
                         )
                     {
                         weeniefileToPutItIn = "VendorsOlthoiPlayers";
+                        weenieType = WeenieType.Vendor_WeenieType;
                         addWeenie = true;
                     }
                     else if (parsed.wdesc._name.m_buffer.Contains("Crier")
                         && parsed.wdesc._blipColor == 8)
                     {
                         fileToPutItIn = "VendorsTownCriers";
+                        weenieType = WeenieType.Vendor_WeenieType;
                         addIt = true;
                         margin = 20f;
                     }
@@ -1612,17 +1650,20 @@ namespace aclogview
                         )
                     {
                         weeniefileToPutItIn = "VendorsPets";
+                        weenieType = WeenieType.Vendor_WeenieType;
                         addWeenie = true;
                     }
                     else if (parsed.wdesc._blipColor == 8)
                     {
                         fileToPutItIn = "VendorsNPCs";
+                        weenieType = WeenieType.Vendor_WeenieType;
                         addIt = true;
                         margin = 15f;
                     }
                     else
                     {
                         fileToPutItIn = "Vendors";
+                        weenieType = WeenieType.Vendor_WeenieType;
                         margin = 15f;
                         addIt = true;
                     }
@@ -1630,6 +1671,7 @@ namespace aclogview
                 else if (parsed.wdesc._wcid == 4)
                 {
                     weeniefileToPutItIn = "Admins";
+                    weenieType = WeenieType.Admin_WeenieType;
                     addWeenie = true;
                 }
                 else if (parsed.wdesc._type == ITEM_TYPE.TYPE_MISC) // HOUSE OBJECTS
@@ -1667,6 +1709,7 @@ namespace aclogview
                            )
                     {
                         fileToPutItIn = "HouseObjects";
+                        weenieType = WeenieType.House_WeenieType;
                         addIt = true;
                     }
                     //else if (parsed.wdesc._name.m_buffer.Contains("Essence"))
@@ -1686,11 +1729,13 @@ namespace aclogview
                         )
                     {
                         fileToPutItIn = "MiscBuildingSigns";
+                        weenieType = WeenieType.Book_WeenieType;
                         addIt = true;
                     }
                     else if (parsed.wdesc._name.m_buffer.Contains("Residential Halls"))
                     {
                         fileToPutItIn = "MiscResidentialHallSigns";
+                        weenieType = WeenieType.Book_WeenieType;
                         addIt = true;
                     }
                     else if (parsed.wdesc._name.m_buffer.Contains("Court")
@@ -1706,28 +1751,33 @@ namespace aclogview
                         )
                     {
                         fileToPutItIn = "MiscResidentialHallSigns";
+                        weenieType = WeenieType.Book_WeenieType;
                         addIt = true;
                     }
                     else if (parsed.wdesc._name.m_buffer.Contains("Festival Stone"))
                     {
                         fileToPutItIn = "MiscFestivalStones";
+                        weenieType = WeenieType.Book_WeenieType;
                         addIt = true;
                     }
                     else if (parsed.physicsdesc.setup_id == 33557463
                         )
                     {
                         fileToPutItIn = "MiscSettlementMarkers";
+                        weenieType = WeenieType.Book_WeenieType;
                         parsed.physicsdesc.bitfield = 32769; // error correct
                         addIt = true;
                     }
                     else if (parsed.object_id < 0x80000000)
                     {
                         fileToPutItIn = "MiscStaticsObjects";
+                        weenieType = WeenieType.Generic_WeenieType;
                         addIt = true;
                     }
                     else
                     {
                         weeniefileToPutItIn = "MiscObjects";
+                        weenieType = WeenieType.Generic_WeenieType;
                         addWeenie = true;
                     }
                 }
@@ -1740,6 +1790,7 @@ namespace aclogview
                                             )
                     {
                         fileToPutItIn = "HousePortals";
+                        weenieType = WeenieType.HousePortal_WeenieType;
                         parsed.wdesc._bitfield = 262164; // error correct
                         parsed.wdesc.header = 41943088; // error correct
                         addIt = true;
@@ -1747,56 +1798,67 @@ namespace aclogview
                     else if (parsed.wdesc._wcid == 1955)
                     {
                         weeniefileToPutItIn = "PortalsSummoned";
+                        weenieType = WeenieType.Portal_WeenieType;
                         addWeenie = true;
                     }
                     else if (parsed.wdesc._name.m_buffer.Contains("Town Network"))
                     {
                         fileToPutItIn = "PortalsTownNetwork";
+                        weenieType = WeenieType.Portal_WeenieType;
                         addIt = true;
                     }
                     else if (parsed.wdesc._name.m_buffer.Contains("Floating City"))
                     {
                         fileToPutItIn = "PortalsFloatingCity";
+                        weenieType = WeenieType.Portal_WeenieType;
                         addIt = true;
                     }
                     else if (parsed.wdesc._name.m_buffer.Contains("Humming Crystal"))
                     {
                         fileToPutItIn = "PortalsHummingCrystal";
+                        weenieType = WeenieType.Portal_WeenieType;
                         addIt = true;
                     }
                     else if (parsed.wdesc._name.m_buffer.Contains("The Orphanage"))
                     {
                         fileToPutItIn = "PortalsTheOrphanage";
+                        weenieType = WeenieType.Portal_WeenieType;
                         addIt = true;
                     }
                     else if (parsed.wdesc._name.m_buffer.Contains("Golem Sanctum"))
                     {
                         fileToPutItIn = "PortalsGolemSanctum";
+                        weenieType = WeenieType.Portal_WeenieType;
                         addIt = true;
                     }
                     else if (parsed.wdesc._name.m_buffer.Contains("Destroyed"))
                     {
                         fileToPutItIn = "PortalsDestroyed";
+                        weenieType = WeenieType.Portal_WeenieType;
                         addIt = true;
                     }
                     else if (parsed.wdesc._name.m_buffer.Contains("Meeting Hall"))
                     {
                         fileToPutItIn = "PortalsMeetingHall";
+                        weenieType = WeenieType.Portal_WeenieType;
                         addIt = true;
                     }
                     else if (parsed.wdesc._name.m_buffer.Contains("Portal to"))
                     {
                         fileToPutItIn = "PortalsPortalto";
+                        weenieType = WeenieType.Portal_WeenieType;
                         addIt = true;
                     }
                     else if (parsed.wdesc._name.m_buffer.Contains("Portal"))
                     {
                         fileToPutItIn = "PortalsPortal";
+                        weenieType = WeenieType.Portal_WeenieType;
                         addIt = true;
                     }
                     else
                     {
                         fileToPutItIn = "Portals";
+                        weenieType = WeenieType.Portal_WeenieType;
                         addIt = true;
                     }
                 }
@@ -1811,6 +1873,7 @@ namespace aclogview
                         )
                     {
                         fileToPutItIn = "HouseHooks";
+                        weenieType = WeenieType.Hook_WeenieType;
                         addIt = true;
                     }
                     else if (
@@ -1822,6 +1885,7 @@ namespace aclogview
                             )
                     {
                         weeniefileToPutItIn = "HouseHooks";
+                        weenieType = WeenieType.Hook_WeenieType;
                         if (parsed.wdesc._wcid == 9686)
                             parsed.wdesc._name.m_buffer = "Wall Hook";
                         if (parsed.wdesc._wcid == 11697)
@@ -1839,11 +1903,13 @@ namespace aclogview
                             )
                     {
                         fileToPutItIn = "HouseStorage";
+                        weenieType = WeenieType.Storage_WeenieType;
                         addIt = true;
                     }
                     else if (parsed.wdesc._wcid == 21)
                     {
                         weeniefileToPutItIn = "ContainersCorpses";
+                        weenieType = WeenieType.Corpse_WeenieType;
                         addWeenie = true;
                     }
                     //else if (parsed.wdesc._name.m_buffer.Contains("Corpse"))
@@ -1854,6 +1920,7 @@ namespace aclogview
                     else if (parsed.wdesc._name.m_buffer.Contains("Standing Stone"))
                     {
                         fileToPutItIn = "ContainersStandingStones";
+                        weenieType = WeenieType.Container_WeenieType;
                         addIt = true;
                     }
                     else if (parsed.wdesc._name.m_buffer.Contains("Pack")
@@ -1863,6 +1930,7 @@ namespace aclogview
                         )
                     {
                         weeniefileToPutItIn = "ContainersPacks";
+                        weenieType = WeenieType.Container_WeenieType;
                         addWeenie = true;
                     }
                     else if (
@@ -1888,16 +1956,19 @@ namespace aclogview
                         )
                     {
                         fileToPutItIn = "ContainersChests";
+                        weenieType = WeenieType.Container_WeenieType;
                         addIt = true;
                     }
                     else if (parsed.object_id < 0x80000000)
                     {
                         fileToPutItIn = "ContainersStatics";
+                        weenieType = WeenieType.Container_WeenieType;
                         addIt = true;
                     }
                     else
                     {
                         weeniefileToPutItIn = "Containers";
+                        weenieType = WeenieType.Container_WeenieType;
                         addWeenie = true;
                     }
                 }
@@ -1956,6 +2027,7 @@ namespace aclogview
                         )
                     {
                         fileToPutItIn = "HouseSlumLords";
+                        weenieType = WeenieType.SlumLord_WeenieType;
                         if (parsed.wdesc._name.m_buffer.Contains("'s Cottage"))
                             parsed.wdesc._name.m_buffer = "Cottage";
                         if (parsed.wdesc._name.m_buffer.Contains("'s Villa"))
@@ -1977,11 +2049,13 @@ namespace aclogview
                         )
                     {
                         fileToPutItIn = "FakeSlumLords";
+                        weenieType = WeenieType.SlumLord_WeenieType;
                         addIt = true;
                     }
                     else if (parsed.wdesc._wcid == 10762)
                     {
                         fileToPutItIn = "HousePortalLinkspots";
+                        weenieType = WeenieType.Generic_WeenieType;
                         addIt = true;
                     }
                     else if (parsed.wdesc._name.m_buffer.Contains("Gen")
@@ -1990,6 +2064,7 @@ namespace aclogview
                         // fileToPutItIn = "Generators";
                         // addIt = true;
                         weeniefileToPutItIn = "Generators";
+                        weenieType = WeenieType.Generic_WeenieType;
                         addWeenie = true;
                     }
                     //else if (
@@ -2023,6 +2098,7 @@ namespace aclogview
                         // fileToPutItIn = "Generators";
                         // addIt = true;
                         weeniefileToPutItIn = "Generators";
+                        weenieType = WeenieType.Generic_WeenieType;
                         addWeenie = true;
                     }
                     //else if (parsed.wdesc._name.m_buffer.Contains("Rabbit"))
@@ -2033,11 +2109,13 @@ namespace aclogview
                     else if (parsed.object_id < 0x80000000)
                     {
                         fileToPutItIn = "UndefStatics";
+                        weenieType = WeenieType.Generic_WeenieType;
                         addIt = true;
                     }
                     else
                     {
                         weeniefileToPutItIn = "UndefObjects";
+                        weenieType = WeenieType.Generic_WeenieType;
                         addWeenie = true;
                     }
                 }
@@ -2046,37 +2124,44 @@ namespace aclogview
                     if (parsed.wdesc._name.m_buffer.Contains("Statue"))
                     {
                         fileToPutItIn = "WriteablesStatues";
+                        weenieType = WeenieType.Book_WeenieType;
                         addIt = true;
                     }
                     else if (parsed.wdesc._name.m_buffer.Contains("Scroll"))
                     {
                         weeniefileToPutItIn = "WriteablesScrolls";
+                        weenieType = WeenieType.Scroll_WeenieType;
                         addWeenie = true;
                     }
                     else if (parsed.wdesc._name.m_buffer.Contains("Pack"))
                     {
                         weeniefileToPutItIn = "WriteablesPackToys";
+                        weenieType = WeenieType.Book_WeenieType;
                         addWeenie = true;
                     }
                     else if (parsed.wdesc._wcid == 9002)
                     {
                         fileToPutItIn = "WriteablesShardVigil";
+                        weenieType = WeenieType.Book_WeenieType;
                         addIt = true;
                     }
                     else if (parsed.object_id < 0x80000000)
                     {
                         fileToPutItIn = "WritableStaticsObjects";
+                        weenieType = WeenieType.Book_WeenieType;
                         addIt = true;
                     }
                     else
                     {
                         weeniefileToPutItIn = "WritableObjects";
+                        weenieType = WeenieType.Book_WeenieType;
                         addWeenie = true;
                     }
                 }
                 else if (parsed.wdesc._type == ITEM_TYPE.TYPE_LIFESTONE)
                 {
                     fileToPutItIn = "Lifestones";
+                    weenieType = WeenieType.LifeStone_WeenieType;
                     addIt = true;
                 }
                 ////else if ((parsed.wdesc._name.m_buffer.Contains("Scrivener")
@@ -2136,6 +2221,7 @@ namespace aclogview
                         )
                     {
                         fileToPutItIn = "CreaturesSpecialNPCs";
+                        weenieType = WeenieType.Creature_WeenieType;
                         addIt = true;
                         margin = 15f;
                     }
@@ -2144,12 +2230,14 @@ namespace aclogview
                         )
                     {
                         weeniefileToPutItIn = "CreaturesOlthoiPlayers";
+                        weenieType = WeenieType.Creature_WeenieType;
                         addWeenie = true;
                     }
                     else if (parsed.wdesc._name.m_buffer.Contains("Crier")
                         && parsed.wdesc._blipColor == 8)
                     {
                         fileToPutItIn = "CreaturesTownCriers";
+                        weenieType = WeenieType.Creature_WeenieType;
                         addIt = true;
                         margin = 20f;
                     }
@@ -2170,22 +2258,26 @@ namespace aclogview
                         )
                     {
                         weeniefileToPutItIn = "CreaturesPets";
+                        weenieType = WeenieType.Pet_WeenieType;
                         addWeenie = true;
                     }
                     else if (parsed.wdesc._blipColor == 8)
                     {
                         fileToPutItIn = "CreaturesNPCs";
+                        weenieType = WeenieType.Creature_WeenieType;
                         addIt = true;
                         margin = 15f;
                     }
                     else if (parsed.wdesc._blipColor == 2)
                     {
                         weeniefileToPutItIn = "CreaturesMonsters";
+                        weenieType = WeenieType.Creature_WeenieType;
                         addWeenie = true;
                     }
                     else if (parsed.object_id < 0x80000000)
                     {
                         fileToPutItIn = "CreaturesNPCStatics";
+                        weenieType = WeenieType.Creature_WeenieType;
                         addIt = true;
                     }
                     else if (parsed.wdesc._name.m_buffer.Contains("Statue")
@@ -2255,130 +2347,155 @@ namespace aclogview
                         )
                     {
                         fileToPutItIn = "CreaturesOtherNPCs";
+                        weenieType = WeenieType.Creature_WeenieType;
                         margin = 20f;
                         addIt = true;
                     }
                     else if (parsed.wdesc._name.m_buffer.Contains("Exploration Marker"))
                     {
                         fileToPutItIn = "CreaturesExplorationMarkers";
+                        weenieType = WeenieType.Creature_WeenieType;
                         margin = 20f;
                         addIt = true;
                     }
                     else if (parsed.wdesc._name.m_buffer.Contains("Mysterious Hatch"))
                     {
                         fileToPutItIn = "CreaturesHatches";
+                        weenieType = WeenieType.Creature_WeenieType;
                         margin = 20f;
                         addIt = true;
                     }
                     else
                     {
                         weeniefileToPutItIn = "CreaturesUnsorted";
+                        weenieType = WeenieType.Creature_WeenieType;
                         addWeenie = true;
                     }
                 }
                 else if (parsed.object_id < 0x80000000)
                 {
                     fileToPutItIn = "LandscapeStatics";
+                    weenieType = WeenieType.Generic_WeenieType;
                     addIt = true;
                 }
                 else if (parsed.wdesc._type == ITEM_TYPE.TYPE_ARMOR)
                 {
                     weeniefileToPutItIn = "Armor";
+                    weenieType = WeenieType.Generic_WeenieType;
                     addWeenie = true;
                 }
                 else if (parsed.wdesc._type == ITEM_TYPE.TYPE_MELEE_WEAPON)
                 {
                     weeniefileToPutItIn = "MeleeWeapons";
+                    weenieType = WeenieType.MeleeWeapon_WeenieType;
                     addWeenie = true;
                 }
                 else if (parsed.wdesc._type == ITEM_TYPE.TYPE_CLOTHING)
                 {
                     weeniefileToPutItIn = "Clothing";
+                    weenieType = WeenieType.Clothing_WeenieType;
                     addWeenie = true;
                 }
                 else if (parsed.wdesc._type == ITEM_TYPE.TYPE_JEWELRY)
                 {
                     weeniefileToPutItIn = "Jewelry";
+                    weenieType = WeenieType.Generic_WeenieType;
                     addWeenie = true;
                 }
                 else if (parsed.wdesc._type == ITEM_TYPE.TYPE_FOOD)
                 {
                     weeniefileToPutItIn = "Food";
+                    weenieType = WeenieType.Food_WeenieType;
                     addWeenie = true;
                 }
                 else if (parsed.wdesc._type == ITEM_TYPE.TYPE_MONEY)
                 {
                     weeniefileToPutItIn = "Money";
+                    weenieType = WeenieType.Coin_WeenieType;
                     addWeenie = true;
                 }
                 else if (parsed.wdesc._type == ITEM_TYPE.TYPE_MISSILE_WEAPON)
                 {
                     weeniefileToPutItIn = "MissileWeapons";
+                    weenieType = WeenieType.MissileLauncher_WeenieType;
                     addWeenie = true;
                 }
                 else if (parsed.wdesc._type == ITEM_TYPE.TYPE_GEM)
                 {
                     weeniefileToPutItIn = "Gems";
+                    weenieType = WeenieType.Gem_WeenieType;
                     addWeenie = true;
                 }
                 else if (parsed.wdesc._type == ITEM_TYPE.TYPE_SPELL_COMPONENTS)
                 {
                     weeniefileToPutItIn = "SpellComponents";
+                    weenieType = WeenieType.SpellComponent_WeenieType;
                     addWeenie = true;
                 }
                 else if (parsed.wdesc._type == ITEM_TYPE.TYPE_KEY)
                 {
                     weeniefileToPutItIn = "Keys";
+                    weenieType = WeenieType.Key_WeenieType;
                     addWeenie = true;
                 }
                 else if (parsed.wdesc._type == ITEM_TYPE.TYPE_CASTER)
                 {
                     weeniefileToPutItIn = "Casters";
+                    weenieType = WeenieType.Caster_WeenieType;
                     addWeenie = true;
                 }
                 else if (parsed.wdesc._type == ITEM_TYPE.TYPE_MANASTONE)
                 {
                     weeniefileToPutItIn = "ManaStones";
+                    weenieType = WeenieType.ManaStone_WeenieType;
                     addWeenie = true;
                 }
                 else if (parsed.wdesc._type == ITEM_TYPE.TYPE_PROMISSORY_NOTE)
                 {
                     weeniefileToPutItIn = "PromissoryNotes";
+                    weenieType = WeenieType.Generic_WeenieType;
                     addWeenie = true;
                 }
                 else if (parsed.wdesc._type == ITEM_TYPE.TYPE_CRAFT_ALCHEMY_BASE)
                 {
                     weeniefileToPutItIn = "CraftAlchemyBase";
+                    weenieType = WeenieType.Generic_WeenieType;
                     addWeenie = true;
                 }
                 else if (parsed.wdesc._type == ITEM_TYPE.TYPE_CRAFT_ALCHEMY_INTERMEDIATE)
                 {
                     weeniefileToPutItIn = "CraftAlchemyIntermediate";
+                    weenieType = WeenieType.Generic_WeenieType;
                     addWeenie = true;
                 }
                 else if (parsed.wdesc._type == ITEM_TYPE.TYPE_CRAFT_COOKING_BASE)
                 {
                     weeniefileToPutItIn = "CraftCookingBase";
+                    weenieType = WeenieType.Generic_WeenieType;
                     addWeenie = true;
                 }
                 else if (parsed.wdesc._type == ITEM_TYPE.TYPE_CRAFT_FLETCHING_BASE)
                 {
                     weeniefileToPutItIn = "CraftFletchingBase";
+                    weenieType = WeenieType.Generic_WeenieType;
                     addWeenie = true;
                 }
                 else if (parsed.wdesc._type == ITEM_TYPE.TYPE_CRAFT_FLETCHING_INTERMEDIATE)
                 {
                     weeniefileToPutItIn = "CraftFletchingIntermediate";
+                    weenieType = WeenieType.Generic_WeenieType;
                     addWeenie = true;
                 }
                 else if (parsed.wdesc._type == ITEM_TYPE.TYPE_TINKERING_TOOL)
                 {
                     weeniefileToPutItIn = "TinkeringTools";
+                    weenieType = WeenieType.CraftTool_WeenieType;
                     addWeenie = true;
                 }
                 else if (parsed.wdesc._type == ITEM_TYPE.TYPE_TINKERING_MATERIAL)
                 {
                     weeniefileToPutItIn = "TinkeringMaterials";
+                    weenieType = WeenieType.Generic_WeenieType;
                     addWeenie = true;
                 }
                 //else if (parsed.wdesc._type == ITEM_TYPE.TYPE_USELESS)
@@ -2390,11 +2507,13 @@ namespace aclogview
                     )
                 {
                     weeniefileToPutItIn = "ItemsUnsorted";
+                    weenieType = WeenieType.Generic_WeenieType;
                     addWeenie = true;
                 }
                 else
                 {
                     weeniefileToPutItIn = "OtherObjects";
+                    weenieType = WeenieType.Generic_WeenieType;
                     addWeenie = true;
                 }
 
@@ -2435,6 +2554,9 @@ namespace aclogview
                             appraisalObjectsCatagoryMap.Add(parsed.object_id, fileToPutItIn);
                         if (!appraisalObjectToWeenieId.ContainsKey(parsed.object_id))
                             appraisalObjectToWeenieId.Add(parsed.object_id, parsed.wdesc._wcid);
+
+                        if (!weeniesWeenieType.ContainsKey(parsed.wdesc._wcid))
+                            weeniesWeenieType.Add(parsed.wdesc._wcid, (uint)weenieType);
                     }
 
                     if (!staticObjects.ContainsKey(fileToPutItIn))
@@ -2445,6 +2567,9 @@ namespace aclogview
 
                     if (!appraisalObjectsCatagoryMap.ContainsKey(parsed.object_id))
                         appraisalObjectsCatagoryMap.Add(parsed.object_id, fileToPutItIn);
+
+                    if (!staticObjectsWeenieType.ContainsKey(parsed.object_id))
+                        staticObjectsWeenieType.Add(parsed.object_id, (uint)weenieType);
 
                     processedWeeniePositions[parsed.wdesc._wcid].Add(parsed.physicsdesc.pos);
 
@@ -2464,6 +2589,9 @@ namespace aclogview
                             appraisalObjectsCatagoryMap.Add(parsed.object_id, weeniefileToPutItIn);
                         if (!appraisalObjectToWeenieId.ContainsKey(parsed.object_id))
                             appraisalObjectToWeenieId.Add(parsed.object_id, parsed.wdesc._wcid);
+
+                        if (!weeniesWeenieType.ContainsKey(parsed.wdesc._wcid))
+                            weeniesWeenieType.Add(parsed.wdesc._wcid, (uint)weenieType);
 
                         totalHits++;
                     }
@@ -2699,7 +2827,7 @@ namespace aclogview
             }
         }
 
-        private void WriteStaticObjectData(Dictionary<string, List<CM_Physics.CreateObject>> staticObjects, List<uint> objectIds, string outputFolder)
+        private void WriteStaticObjectData(Dictionary<string, List<CM_Physics.CreateObject>> staticObjects, List<uint> objectIds, string outputFolder, Dictionary<uint, uint> staticObjectsWeenieType)
         {
             string staticFolder = Path.Combine(outputFolder, "2-objects");
 
@@ -3099,6 +3227,13 @@ namespace aclogview
                                 //if (((uint)parsed.wdesc._bitfield & (uint)PublicWeenieDesc.BitfieldIndex.BF_ADMIN) != 0)
                                 //    boolsLine += $"     , ({parsed.object_id}, {(uint)STypeBool.IS_ADMIN_BOOL}, {true})" + Environment.NewLine;
 
+                                if (staticObjectsWeenieType.ContainsKey(parsed.object_id))
+                                {
+                                    uint weenieType;
+                                    staticObjectsWeenieType.TryGetValue(parsed.object_id, out weenieType);
+                                    intsLine += $"     , ({parsed.object_id}, {(uint)9007}, {weenieType})" + Environment.NewLine;
+                                }
+                                    
                                 if (strsLine != "")
                                 {
                                     strsLine = $"{sqlCommand} INTO `ace_object_properties_string` (`aceObjectId`, `strPropertyId`, `propertyValue`)" + Environment.NewLine
@@ -3226,7 +3361,7 @@ namespace aclogview
             }
         }
 
-        private void WriteWeenieData(Dictionary<string, List<CM_Physics.CreateObject>> weenies, string outputFolder)
+        private void WriteWeenieData(Dictionary<string, List<CM_Physics.CreateObject>> weenies, string outputFolder, Dictionary<uint, uint> weeniesWeenieType)
         {
             string templateFolder = Path.Combine(outputFolder, "1-weenies");
 
@@ -3616,6 +3751,13 @@ namespace aclogview
                                 boolsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeBool.WIELD_ON_USE_BOOL}, {true})" + Environment.NewLine;
                             //if (((uint)parsed.wdesc._bitfield & (uint)PublicWeenieDesc.BitfieldIndex.BF_ADMIN) != 0)
                             //    boolsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeBool.IS_ADMIN_BOOL}, {true})" + Environment.NewLine;
+
+                            if (weeniesWeenieType.ContainsKey(parsed.wdesc._wcid))
+                            {
+                                uint weenieType = 0;
+                                weeniesWeenieType.TryGetValue(parsed.wdesc._wcid, out weenieType);
+                                intsLine += $"     , ({parsed.wdesc._wcid}, {(uint)9007}, {weenieType})" + Environment.NewLine;
+                            }
 
                             if (strsLine != "")
                             {
