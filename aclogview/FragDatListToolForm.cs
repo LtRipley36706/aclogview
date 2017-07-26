@@ -1743,7 +1743,7 @@ namespace aclogview
                         || parsed.wdesc._name.m_buffer.Contains("SylvanDwellings")
                         || parsed.wdesc._name.m_buffer.Contains("Veranda")
                         || parsed.wdesc._name.m_buffer.Contains("Gate")
-                        || parsed.wdesc._name.m_buffer.Contains("Yard")
+                        || (parsed.wdesc._name.m_buffer.Contains("Yard") && !parsed.wdesc._name.m_buffer.Contains("Balloons"))
                         || parsed.wdesc._name.m_buffer.Contains("Gardens")
                         || parsed.wdesc._name.m_buffer.Contains("Lodge")
                         || parsed.wdesc._name.m_buffer.Contains("Grotto")
