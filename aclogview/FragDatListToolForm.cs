@@ -875,7 +875,7 @@ namespace aclogview
 
         private void WriteAppraisalObjectData(Dictionary<string, List<CM_Examine.SetAppraiseInfo>> appraisalObjects, List<uint> appraisalObjectIds, Dictionary<uint, uint> appraisalObjectToWeenieId, string outputFolder)
         {
-            string staticFolder = Path.Combine(outputFolder, "3-apprasialobjects");
+            string staticFolder = Path.Combine(outputFolder, "4-apprasialobjects");
 
             //string sqlCommand = "INSERT";
             string sqlCommand = "REPLACE";
@@ -1129,7 +1129,7 @@ namespace aclogview
 
         private void WriteWeenieAppraisalObjectData(Dictionary<string, List<CM_Examine.SetAppraiseInfo>> appraisalObjects, List<uint> appraisalObjectIds, Dictionary<uint, uint> appraisalObjectToWeenieId, string outputFolder)
         {
-            string staticFolder = Path.Combine(outputFolder, "3-weenieapprasialobjects");
+            string staticFolder = Path.Combine(outputFolder, "2-weenieapprasialobjects");
 
             //string sqlCommand = "INSERT";
             string sqlCommand = "REPLACE";
@@ -2829,7 +2829,7 @@ namespace aclogview
 
         private void WriteStaticObjectData(Dictionary<string, List<CM_Physics.CreateObject>> staticObjects, List<uint> objectIds, string outputFolder, Dictionary<uint, uint> staticObjectsWeenieType)
         {
-            string staticFolder = Path.Combine(outputFolder, "2-objects");
+            string staticFolder = Path.Combine(outputFolder, "3-objects");
 
             string sqlCommand = "INSERT";
             //string sqlCommand = "REPLACE";
