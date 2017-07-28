@@ -1956,7 +1956,7 @@ namespace aclogview
                         )
                     {
                         fileToPutItIn = "ContainersChests";
-                        weenieType = WeenieType.Container_WeenieType;
+                        weenieType = WeenieType.Chest_WeenieType;
                         addIt = true;
                     }
                     else if (parsed.object_id < 0x80000000)
