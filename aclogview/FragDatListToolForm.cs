@@ -2127,7 +2127,11 @@ namespace aclogview
                         weenieType = WeenieType.Book_WeenieType;
                         addIt = true;
                     }
-                    else if (parsed.wdesc._name.m_buffer.Contains("Scroll"))
+                    else if (parsed.wdesc._name.m_buffer.Contains("Scroll")
+                        || parsed.wdesc._name.m_buffer.Contains("Aura")
+                        || parsed.wdesc._name.m_buffer.Contains("Recall")
+                        || parsed.wdesc._name.m_buffer.Contains("Inscription")
+                        )
                     {
                         weeniefileToPutItIn = "WriteablesScrolls";
                         weenieType = WeenieType.Scroll_WeenieType;
