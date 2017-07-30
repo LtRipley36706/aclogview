@@ -1740,9 +1740,9 @@ namespace aclogview
                     }
                     else if (parsed.wdesc._name.m_buffer.Contains("Deed"))
                     {
-                        fileToPutItIn = "HouseDeeds";
+                        weeniefileToPutItIn = "HouseDeeds";
                         weenieType = WeenieType.Deed_WeenieType;
-                        addIt = true;
+                        addWeenie = true;
                     }
                     else if (parsed.wdesc._name.m_buffer.Contains("Court")
                         || parsed.wdesc._name.m_buffer.Contains("Dwellings")
