@@ -889,6 +889,10 @@ namespace aclogview
             {
                 foreach (var parsed in appraisalObjects[key])
                 {
+
+                    if (parsed.i_objid < 65535)
+                        continue;
+
                     try
                     {
                         if (!fileCount.ContainsKey(key))
@@ -1143,6 +1147,10 @@ namespace aclogview
             {
                 foreach (var parsed in appraisalObjects[key])
                 {
+
+                    if (parsed.i_objid > 65535)
+                        continue;
+
                     try
                     {
                         if (!fileCount.ContainsKey(key))
