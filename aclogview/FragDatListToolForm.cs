@@ -1738,6 +1738,12 @@ namespace aclogview
                         weenieType = WeenieType.Book_WeenieType;
                         addIt = true;
                     }
+                    else if (parsed.wdesc._name.m_buffer.Contains("Deed"))
+                    {
+                        fileToPutItIn = "HouseDeeds";
+                        weenieType = WeenieType.Deed_WeenieType;
+                        addIt = true;
+                    }
                     else if (parsed.wdesc._name.m_buffer.Contains("Court")
                         || parsed.wdesc._name.m_buffer.Contains("Dwellings")
                         || parsed.wdesc._name.m_buffer.Contains("SylvanDwellings")
@@ -2106,6 +2112,42 @@ namespace aclogview
                     //    fileToPutItIn = "UndefRabbits";
                     //    addIt = true;
                     //}
+                    else if (
+                           parsed.wdesc._name.m_buffer.Contains("Bolt")
+                        || parsed.wdesc._name.m_buffer.Contains("wave")
+                        || parsed.wdesc._name.m_buffer.Contains("Wave")
+                        || parsed.wdesc._name.m_buffer.Contains("Blast")
+                        || parsed.wdesc._name.m_buffer.Contains("Ring")
+                        || parsed.wdesc._name.m_buffer.Contains("Stream")
+                        || parsed.wdesc._name.m_buffer.Contains("Fist")
+                        // || parsed.wdesc._name.m_buffer.Contains("Missile")
+                        // || parsed.wdesc._name.m_buffer.Contains("Egg")
+                        || parsed.wdesc._name.m_buffer.Contains("Death")
+                        || parsed.wdesc._name.m_buffer.Contains("Fury")
+                         || parsed.wdesc._name.m_buffer.Contains("Wind")
+                        || parsed.wdesc._name.m_buffer.Contains("Flaming Skull")
+                         || parsed.wdesc._name.m_buffer.Contains("Edge")
+                        // || parsed.wdesc._name.m_buffer.Contains("Snowball")
+                        || parsed.wdesc._name.m_buffer.Contains("Bomb")
+                        || parsed.wdesc._name.m_buffer.Contains("Blade")
+                        || parsed.wdesc._name.m_buffer.Contains("Stalactite")
+                        || parsed.wdesc._name.m_buffer.Contains("Boulder")
+                        || parsed.wdesc._name.m_buffer.Contains("Whirlwind")
+                    )
+                    {
+                        weeniefileToPutItIn = "ProjectileSpellObjects";
+                        weenieType = WeenieType.ProjectileSpell_WeenieType;
+                        addWeenie = true;
+                    }
+                    else if (parsed.wdesc._name.m_buffer.Contains("Missile")
+                            || parsed.wdesc._name.m_buffer.Contains("Egg")
+                            || parsed.wdesc._name.m_buffer.Contains("Snowball")
+                    )
+                    {
+                        weeniefileToPutItIn = "MissileObjects";
+                        weenieType = WeenieType.Missile_WeenieType;
+                        addWeenie = true;
+                    }
                     else if (parsed.object_id < 0x80000000)
                     {
                         fileToPutItIn = "UndefStatics";
@@ -2369,6 +2411,18 @@ namespace aclogview
                         margin = 20f;
                         addIt = true;
                     }
+                    else if (parsed.wdesc._name.m_buffer.Contains("Cow") && !parsed.wdesc._name.m_buffer.Contains("Auroch"))
+                    {
+                        weeniefileToPutItIn = "CreaturesCows";
+                        weenieType = WeenieType.Cow_WeenieType;
+                        addWeenie = true;
+                    }
+                    //else if (parsed.wdesc._name.m_buffer.Contains("Auroch"))
+                    //{
+                    //    weeniefileToPutItIn = "CreaturesAurochs";
+                    //    weenieType = WeenieType.Cow_WeenieType;
+                    //    addWeenie = true;
+                    //}
                     else
                     {
                         weeniefileToPutItIn = "CreaturesUnsorted";
@@ -2385,7 +2439,7 @@ namespace aclogview
                 else if (parsed.wdesc._type == ITEM_TYPE.TYPE_ARMOR)
                 {
                     weeniefileToPutItIn = "Armor";
-                    weenieType = WeenieType.Generic_WeenieType;
+                    weenieType = WeenieType.Clothing_WeenieType;
                     addWeenie = true;
                 }
                 else if (parsed.wdesc._type == ITEM_TYPE.TYPE_MELEE_WEAPON)
@@ -2403,7 +2457,7 @@ namespace aclogview
                 else if (parsed.wdesc._type == ITEM_TYPE.TYPE_JEWELRY)
                 {
                     weeniefileToPutItIn = "Jewelry";
-                    weenieType = WeenieType.Generic_WeenieType;
+                    weenieType = WeenieType.Clothing_WeenieType;
                     addWeenie = true;
                 }
                 else if (parsed.wdesc._type == ITEM_TYPE.TYPE_FOOD)
@@ -2512,6 +2566,21 @@ namespace aclogview
                 {
                     weeniefileToPutItIn = "ItemsUnsorted";
                     weenieType = WeenieType.Generic_WeenieType;
+                    addWeenie = true;
+                }
+                else if (parsed.wdesc._name.m_buffer.Contains("Light")
+                    || parsed.wdesc._name.m_buffer.Contains("Lantern")
+                    || parsed.wdesc._name.m_buffer.Contains("Candelabra")
+                    || parsed.wdesc._name.m_buffer.Contains("Stove")
+                    || parsed.wdesc._name.m_buffer.Contains("Flame")
+                    || parsed.wdesc._name.m_buffer.Contains("Lamp")
+                    || parsed.wdesc._name.m_buffer.Contains("Chandelier")
+                    || parsed.wdesc._name.m_buffer.Contains("Torch")
+                    || parsed.wdesc._name.m_buffer.Contains("Hearth")
+                    )
+                {
+                    weeniefileToPutItIn = "LightSourceObjects";
+                    weenieType = WeenieType.LightSource_WeenieType;
                     addWeenie = true;
                 }
                 else
