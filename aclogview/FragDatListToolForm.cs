@@ -2411,7 +2411,7 @@ namespace aclogview
                         margin = 20f;
                         addIt = true;
                     }
-                    else if (parsed.wdesc._name.m_buffer.Contains("Cow") && !parsed.wdesc._name.m_buffer.Contains("Auroch"))
+                    else if (parsed.wdesc._name.m_buffer.Contains("Cow") && !parsed.wdesc._name.m_buffer.Contains("Auroch") && !parsed.wdesc._name.m_buffer.Contains("Snowman"))
                     {
                         weeniefileToPutItIn = "CreaturesCows";
                         weenieType = WeenieType.Cow_WeenieType;
