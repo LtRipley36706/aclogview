@@ -1026,8 +1026,11 @@ namespace aclogview
                                 {
                                     if (parsed.i_prof.success_flag == 0)
                                     {
-                                        attribute2ndsLine += $"     , ({parsed.i_objid}, {(uint)STypeAttribute2nd.HEALTH_ATTRIBUTE_2ND}, {(uint)parsed.i_prof._creatureProfileTable._health})" + Environment.NewLine;
+                                        ////attribute2ndsLine += $"     , ({parsed.i_objid}, {(uint)STypeAttribute2nd.HEALTH_ATTRIBUTE_2ND}, {(uint)parsed.i_prof._creatureProfileTable._health})" + Environment.NewLine;
                                         attribute2ndsLine += $"     , ({parsed.i_objid}, {(uint)STypeAttribute2nd.MAX_HEALTH_ATTRIBUTE_2ND}, {(uint)parsed.i_prof._creatureProfileTable._max_health})" + Environment.NewLine;
+
+                                        ////attribute2ndsLine += $"     , ({parsed.i_objid}, {(uint)STypeAttribute2nd.HEALTH_ATTRIBUTE_2ND}, {(uint)parsed.i_prof._creatureProfileTable._health})" + Environment.NewLine;
+                                        ////attribute2ndsLine += $"     , ({parsed.i_objid}, {(uint)64}, {(uint)parsed.i_prof._creatureProfileTable._max_health})" + Environment.NewLine;
                                     }
                                     else
                                     {
@@ -1039,13 +1042,29 @@ namespace aclogview
                                         attributesLine += $"     , ({parsed.i_objid}, {(uint)STypeAttribute.SELF_ATTRIBUTE}, {(uint)parsed.i_prof._creatureProfileTable._self})" + Environment.NewLine;
 
 
-                                        attribute2ndsLine += $"     , ({parsed.i_objid}, {(uint)STypeAttribute2nd.HEALTH_ATTRIBUTE_2ND}, {(uint)parsed.i_prof._creatureProfileTable._health})" + Environment.NewLine;
-                                        attribute2ndsLine += $"     , ({parsed.i_objid}, {(uint)STypeAttribute2nd.STAMINA_ATTRIBUTE_2ND}, {(uint)parsed.i_prof._creatureProfileTable._stamina})" + Environment.NewLine;
-                                        attribute2ndsLine += $"     , ({parsed.i_objid}, {(uint)STypeAttribute2nd.MANA_ATTRIBUTE_2ND}, {(uint)parsed.i_prof._creatureProfileTable._mana})" + Environment.NewLine;
+                                        ////attribute2ndsLine += $"     , ({parsed.i_objid}, {(uint)STypeAttribute2nd.HEALTH_ATTRIBUTE_2ND}, {(uint)parsed.i_prof._creatureProfileTable._health})" + Environment.NewLine;
+                                        ////attribute2ndsLine += $"     , ({parsed.i_objid}, {(uint)STypeAttribute2nd.STAMINA_ATTRIBUTE_2ND}, {(uint)parsed.i_prof._creatureProfileTable._stamina})" + Environment.NewLine;
+                                        ////attribute2ndsLine += $"     , ({parsed.i_objid}, {(uint)STypeAttribute2nd.MANA_ATTRIBUTE_2ND}, {(uint)parsed.i_prof._creatureProfileTable._mana})" + Environment.NewLine;
 
                                         attribute2ndsLine += $"     , ({parsed.i_objid}, {(uint)STypeAttribute2nd.MAX_HEALTH_ATTRIBUTE_2ND}, {(uint)parsed.i_prof._creatureProfileTable._max_health})" + Environment.NewLine;
                                         attribute2ndsLine += $"     , ({parsed.i_objid}, {(uint)STypeAttribute2nd.MAX_STAMINA_ATTRIBUTE_2ND}, {(uint)parsed.i_prof._creatureProfileTable._max_stamina})" + Environment.NewLine;
                                         attribute2ndsLine += $"     , ({parsed.i_objid}, {(uint)STypeAttribute2nd.MAX_MANA_ATTRIBUTE_2ND}, {(uint)parsed.i_prof._creatureProfileTable._max_mana})" + Environment.NewLine;
+
+
+                                        ////attributesLine += $"     , ({parsed.i_objid}, {(uint)1}, {(uint)parsed.i_prof._creatureProfileTable._strength})" + Environment.NewLine;
+                                        ////attributesLine += $"     , ({parsed.i_objid}, {(uint)2}, {(uint)parsed.i_prof._creatureProfileTable._endurance})" + Environment.NewLine;
+                                        ////attributesLine += $"     , ({parsed.i_objid}, {(uint)4}, {(uint)parsed.i_prof._creatureProfileTable._coordination})" + Environment.NewLine;
+                                        ////attributesLine += $"     , ({parsed.i_objid}, {(uint)8}, {(uint)parsed.i_prof._creatureProfileTable._quickness})" + Environment.NewLine;
+                                        ////attributesLine += $"     , ({parsed.i_objid}, {(uint)16}, {(uint)parsed.i_prof._creatureProfileTable._focus})" + Environment.NewLine;
+                                        ////attributesLine += $"     , ({parsed.i_objid}, {(uint)32}, {(uint)parsed.i_prof._creatureProfileTable._self})" + Environment.NewLine;
+
+                                        //////attribute2ndsLine += $"     , ({parsed.i_objid}, {(uint)64}, {(uint)parsed.i_prof._creatureProfileTable._health})" + Environment.NewLine;
+                                        //////attribute2ndsLine += $"     , ({parsed.i_objid}, {(uint)128}, {(uint)parsed.i_prof._creatureProfileTable._stamina})" + Environment.NewLine;
+                                        //////attribute2ndsLine += $"     , ({parsed.i_objid}, {(uint)256}, {(uint)parsed.i_prof._creatureProfileTable._mana})" + Environment.NewLine;
+
+                                        ////attribute2ndsLine += $"     , ({parsed.i_objid}, {(uint)64}, {(uint)parsed.i_prof._creatureProfileTable._max_health})" + Environment.NewLine;
+                                        ////attribute2ndsLine += $"     , ({parsed.i_objid}, {(uint)128}, {(uint)parsed.i_prof._creatureProfileTable._max_stamina})" + Environment.NewLine;
+                                        ////attribute2ndsLine += $"     , ({parsed.i_objid}, {(uint)256}, {(uint)parsed.i_prof._creatureProfileTable._max_mana})" + Environment.NewLine;
                                     }
                                 }
 
@@ -1284,7 +1303,7 @@ namespace aclogview
                                 {
                                     if (parsed.i_prof.success_flag == 0)
                                     {
-                                        attribute2ndsLine += $"     , ({parsed.i_objid}, {(uint)STypeAttribute2nd.HEALTH_ATTRIBUTE_2ND}, {(uint)parsed.i_prof._creatureProfileTable._health})" + Environment.NewLine;
+                                        ////attribute2ndsLine += $"     , ({parsed.i_objid}, {(uint)STypeAttribute2nd.HEALTH_ATTRIBUTE_2ND}, {(uint)parsed.i_prof._creatureProfileTable._health})" + Environment.NewLine;
                                         attribute2ndsLine += $"     , ({parsed.i_objid}, {(uint)STypeAttribute2nd.MAX_HEALTH_ATTRIBUTE_2ND}, {(uint)parsed.i_prof._creatureProfileTable._max_health})" + Environment.NewLine;
                                     }
                                     else
@@ -1297,9 +1316,9 @@ namespace aclogview
                                         attributesLine += $"     , ({parsed.i_objid}, {(uint)STypeAttribute.SELF_ATTRIBUTE}, {(uint)parsed.i_prof._creatureProfileTable._self})" + Environment.NewLine;
 
 
-                                        attribute2ndsLine += $"     , ({parsed.i_objid}, {(uint)STypeAttribute2nd.HEALTH_ATTRIBUTE_2ND}, {(uint)parsed.i_prof._creatureProfileTable._health})" + Environment.NewLine;
-                                        attribute2ndsLine += $"     , ({parsed.i_objid}, {(uint)STypeAttribute2nd.STAMINA_ATTRIBUTE_2ND}, {(uint)parsed.i_prof._creatureProfileTable._stamina})" + Environment.NewLine;
-                                        attribute2ndsLine += $"     , ({parsed.i_objid}, {(uint)STypeAttribute2nd.MANA_ATTRIBUTE_2ND}, {(uint)parsed.i_prof._creatureProfileTable._mana})" + Environment.NewLine;
+                                        ////attribute2ndsLine += $"     , ({parsed.i_objid}, {(uint)STypeAttribute2nd.HEALTH_ATTRIBUTE_2ND}, {(uint)parsed.i_prof._creatureProfileTable._health})" + Environment.NewLine;
+                                        ////attribute2ndsLine += $"     , ({parsed.i_objid}, {(uint)STypeAttribute2nd.STAMINA_ATTRIBUTE_2ND}, {(uint)parsed.i_prof._creatureProfileTable._stamina})" + Environment.NewLine;
+                                        ////attribute2ndsLine += $"     , ({parsed.i_objid}, {(uint)STypeAttribute2nd.MANA_ATTRIBUTE_2ND}, {(uint)parsed.i_prof._creatureProfileTable._mana})" + Environment.NewLine;
 
                                         attribute2ndsLine += $"     , ({parsed.i_objid}, {(uint)STypeAttribute2nd.MAX_HEALTH_ATTRIBUTE_2ND}, {(uint)parsed.i_prof._creatureProfileTable._max_health})" + Environment.NewLine;
                                         attribute2ndsLine += $"     , ({parsed.i_objid}, {(uint)STypeAttribute2nd.MAX_STAMINA_ATTRIBUTE_2ND}, {(uint)parsed.i_prof._creatureProfileTable._max_stamina})" + Environment.NewLine;
