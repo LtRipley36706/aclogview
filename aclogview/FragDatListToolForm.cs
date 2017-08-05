@@ -507,11 +507,9 @@ namespace aclogview
                 Dictionary<uint, uint> weeniesWeenieType = new Dictionary<uint, uint>();
 
                 List<uint> bookObjectIds = new List<uint>();
-                //Dictionary<string, List<CM_Writing.PageData>> bookObjects = new Dictionary<string, List<CM_Writing.PageData>>();
-                //Dictionary<string, Dictionary<uint, Dictionary<uint, List<CM_Writing.PageData>>>> bookObjects = new Dictionary<string, Dictionary<uint, Dictionary<uint, List<CM_Writing.PageData>>>>();
-                Dictionary<string, Dictionary<uint, CM_Writing.PageData>> bookObjects = new Dictionary<string, Dictionary<uint, CM_Writing.PageData>>();
+                Dictionary<string, Dictionary<uint, CM_Writing.PageDataList>> bookObjects = new Dictionary<string, Dictionary<uint, CM_Writing.PageDataList>>();
+                List<uint> pageObjectIds = new List<uint>();
                 Dictionary<string, Dictionary<uint, Dictionary<uint, CM_Writing.PageData>>> pageObjects = new Dictionary<string, Dictionary<uint, Dictionary<uint, CM_Writing.PageData>>>();
-                //Dictionary<uint, List<CM_Writing.PageData>> pageObjects = new Dictionary<uint, List<CM_Writing.PageData>>();
 
                 while (true)
                 {
@@ -630,14 +628,6 @@ namespace aclogview
 
                                 CreateStaticObjectsList(parsed, objectIds, staticObjects, weenieIds, weenies, processedWeeniePositions, appraisalObjectsCatagoryMap, appraisalObjectToWeenieId, weeniesWeenieType, staticObjectsWeenieType);                                      
                             }
-
-                            //if (messageCode == (uint)PacketOpcode.BOOK_PAGE_DATA_RESPONSE_EVENT) // Create Object
-                            //{
-                            //    var parsed = CM_Writing.PageData.read(fragDataReader);
-
-                            //    // CreateStaticObjectsList(parsed, objectIds, staticObjects, weenieIds, weenies, processedWeeniePositions, appraisalObjectsCatagoryMap, appraisalObjectToWeenieId, weeniesWeenieType, staticObjectsWeenieType);
-                            //    CreateBookObjectsList();
-                            //}
                         }
                         catch (EndOfStreamException) // This can happen when a frag is incomplete and we try to parse it
                         {
@@ -683,11 +673,18 @@ namespace aclogview
                                     CreateAppraisalObjectsList(parsed, objectIds, staticObjects, weenieIds, weenies, appraisalObjects, appraisalObjectIds, appraisalObjectsCatagoryMap, appraisalObjectToWeenieId);
                                 }
 
-                                if (opCode == (uint)PacketOpcode.BOOK_PAGE_DATA_RESPONSE_EVENT) // Create Object
+                                if (opCode == (uint)PacketOpcode.BOOK_DATA_RESPONSE_EVENT)
+                                {
+                                    var parsed = CM_Writing.PageDataList.read(fragDataReader);
+
+                                    CreateBookObjectsList(parsed, objectIds, staticObjects, weenieIds, weenies, appraisalObjects, appraisalObjectIds, appraisalObjectsCatagoryMap, appraisalObjectToWeenieId, bookObjectIds, bookObjects);
+                                }
+
+                                if (opCode == (uint)PacketOpcode.BOOK_PAGE_DATA_RESPONSE_EVENT)
                                 {
                                     var parsed = CM_Writing.PageData.read(fragDataReader);
 
-                                    CreatePageObjectsList(parsed, objectIds, staticObjects, weenieIds, weenies, appraisalObjects, appraisalObjectIds, appraisalObjectsCatagoryMap, appraisalObjectToWeenieId, bookObjectIds, pageObjects);
+                                    CreatePageObjectsList(parsed, objectIds, staticObjects, weenieIds, weenies, appraisalObjects, appraisalObjectIds, appraisalObjectsCatagoryMap, appraisalObjectToWeenieId, pageObjectIds, pageObjects);
                                 }
                             }
                         }
@@ -701,17 +698,21 @@ namespace aclogview
 
                 WriteWeenieData(weenies, txtOutputFolder.Text, weeniesWeenieType);
 
-                WriteWeenieAppraisalObjectData(appraisalObjects, appraisalObjectIds, appraisalObjectToWeenieId, txtOutputFolder.Text);
+                WriteWeenieAppraisalObjectData(appraisalObjects, txtOutputFolder.Text);
 
-                WriteWeeniePageObjectData(pageObjects, bookObjectIds, appraisalObjectToWeenieId, txtOutputFolder.Text);
+                WriteWeenieBookObjectData(bookObjects, txtOutputFolder.Text);
+
+                WriteWeeniePageObjectData(pageObjects, txtOutputFolder.Text);
 
                 WriteStaticObjectData(staticObjects, objectIds, txtOutputFolder.Text, staticObjectsWeenieType);
 
-                WriteAppraisalObjectData(appraisalObjects, appraisalObjectIds, appraisalObjectToWeenieId, txtOutputFolder.Text);
+                WriteAppraisalObjectData(appraisalObjects, txtOutputFolder.Text);
 
                 //// WriteGeneratorObjectData(staticObjects, objectIds, txtOutputFolder.Text);
 
-                WritePageObjectData(pageObjects, bookObjectIds, appraisalObjectToWeenieId, txtOutputFolder.Text);
+                WriteBookObjectData(bookObjects, txtOutputFolder.Text);
+
+                WritePageObjectData(pageObjects, txtOutputFolder.Text);
 
                 MessageBox.Show($"Export completed at {DateTime.Now.ToString()} and took {(DateTime.Now - start).TotalMinutes} minutes.");
             }
@@ -754,6 +755,377 @@ namespace aclogview
                 }
 
                 File.Delete(Path.Combine(txtOutputFolder.Text, kvp.Key + ".csv.temp"));
+            }
+        }
+
+        private void CreateBookObjectsList(CM_Writing.PageDataList parsed, List<uint> objectIds, Dictionary<string, List<CM_Physics.CreateObject>> staticObjects,
+            List<uint> weenieIds, Dictionary<string, List<CM_Physics.CreateObject>> weenies, Dictionary<string, List<CM_Examine.SetAppraiseInfo>> appraisalObjects,
+            List<uint> appraisalObjectIds, Dictionary<uint, string> appraisalObjectsCatagoryMap, Dictionary<uint, uint> appraisalObjectToWeenieId,
+            //                           fileToPutItIn             bookid             pagedata
+            List<uint> bookObjectIds, Dictionary<string, Dictionary<uint, CM_Writing.PageDataList>> bookObjects)
+        {
+            try
+            {
+                uint weenieId = 0;
+                bool foundInObjectIds = false;
+                bool foundInWeenieIds = false;
+                foundInObjectIds = objectIds.Contains(parsed.i_bookID);
+                appraisalObjectToWeenieId.TryGetValue(parsed.i_bookID, out weenieId);
+                foundInWeenieIds = weenieIds.Contains(weenieId);
+
+                if (!foundInObjectIds && !(weenieId > 0))
+                    return;
+
+                bool addIt = true;
+                //bool addWeenie = false;
+                string fileToPutItIn = "BookData";
+
+
+                appraisalObjectsCatagoryMap.TryGetValue(parsed.i_bookID, out fileToPutItIn);
+
+                if (fileToPutItIn == null)
+                    fileToPutItIn = "0-BookData";
+
+                if (!foundInObjectIds && weenieId > 0)
+                {
+                    if (!foundInWeenieIds)
+                        return;
+
+                    parsed.i_bookID = weenieId;
+                }
+
+                // de-dupe based on position and wcid
+                if (addIt) //&& !PositionRecorded(parsed, processedWeeniePositions[parsed.wdesc._wcid], parsed.physicsdesc.pos, margin))
+                {
+
+                    //if (parsed.bookID > 65535)
+                    //    return;
+
+                    if (!bookObjects.ContainsKey(fileToPutItIn))
+                    {
+                        bookObjects.Add(fileToPutItIn, new Dictionary<uint, CM_Writing.PageDataList>());
+                    }
+
+                    //if (!bookObjects[fileToPutItIn].ContainsKey(parsed.i_bookID))
+                    //{
+                    //    //bookObjects[fileToPutItIn].Add(parsed.bookID, new Dictionary<uint, CM_Writing.PageData>());
+                    //    bookObjects[fileToPutItIn].Add(parsed.i_bookID, new CM_Writing.PageDataList());
+                    //}
+
+                    //if (bookObjectIds.Contains(parsed.bookID))
+                    //{
+                    //    if (bookObjects[fileToPutItIn][parsed.bookID].ContainsKey(parsed.page))
+                    //        return;
+                    //}
+
+                    if (bookObjectIds.Contains(parsed.i_bookID))
+                    {
+                        //if (bookObjects[fileToPutItIn][parsed.bookID].ContainsKey(parsed.page))
+                        return;
+                    }
+
+                    //bookObjects[fileToPutItIn][parsed.bookID].Add(parsed.page, parsed);
+                    bookObjects[fileToPutItIn].Add(parsed.i_bookID, parsed);
+                    bookObjectIds.Add(parsed.i_bookID);
+
+                    if (bookObjectIds.Contains(weenieId) && weenieId > 0)
+                    {
+                        if (!bookObjects[fileToPutItIn].Keys.Contains(parsed.i_bookID))
+                        {
+                            CM_Writing.PageDataList parsedClone;
+
+                            parsedClone = new CM_Writing.PageDataList();
+                            parsedClone.i_bookID = weenieId;
+
+                            parsedClone.authorId = parsed.authorId;
+                            parsedClone.authorName = parsed.authorName;
+                            parsedClone.inscription = parsed.inscription;
+                            parsedClone.i_maxNumPages = parsed.i_maxNumPages;
+                            parsedClone.numPages = parsed.numPages;
+                            parsedClone.pageData = parsed.pageData;
+
+                            bookObjects[fileToPutItIn].Add(parsedClone.i_bookID, parsedClone);
+                            bookObjectIds.Add(parsedClone.i_bookID);
+                        }
+                    }
+
+                    if (!bookObjectIds.Contains(weenieId) && weenieId > 0) //&& !pageObjects[fileToPutItIn][weenieId].Keys.Contains(parsed.page))
+                    {
+                        CM_Writing.PageDataList parsedClone;
+
+                        parsedClone = new CM_Writing.PageDataList();
+                        parsedClone.i_bookID = weenieId;
+
+                        parsedClone.authorId = parsed.authorId;
+                        parsedClone.authorName = parsed.authorName;
+                        parsedClone.inscription = parsed.inscription;
+                        parsedClone.i_maxNumPages = parsed.i_maxNumPages;
+                        parsedClone.numPages = parsed.numPages;
+                        parsedClone.pageData = parsed.pageData;
+
+                        if (!bookObjects.ContainsKey(fileToPutItIn))
+                        {
+                            bookObjects.Add(fileToPutItIn, new Dictionary<uint, CM_Writing.PageDataList>());
+                        }
+
+                        //if (!bookObjects[fileToPutItIn].ContainsKey(parsedClone.i_bookID))
+                        //{
+                        //    bookObjects[fileToPutItIn].Add(parsedClone.i_bookID, new CM_Writing.PageDataList());
+                        //}
+
+                        bookObjects[fileToPutItIn].Add(parsedClone.i_bookID, parsedClone);
+                        bookObjectIds.Add(parsedClone.i_bookID);
+                    }
+                    totalHits++;
+                }
+            }
+            catch (Exception ex)
+            {
+                totalExceptions++;
+            }
+        }
+
+        private void WriteBookObjectData(Dictionary<string, Dictionary<uint, CM_Writing.PageDataList>> bookObjects, string outputFolder)
+        {
+            string staticFolder = Path.Combine(outputFolder, "7-bookdata");
+
+            //string sqlCommand = "INSERT";
+            string sqlCommand = "REPLACE";
+
+            if (!Directory.Exists(staticFolder))
+                Directory.CreateDirectory(staticFolder);
+
+            Dictionary<string, int> fileCount = new Dictionary<string, int>();
+
+            foreach (string key in bookObjects.Keys)
+            {
+                foreach (var book in bookObjects[key].Values)
+                {
+
+                    if (book.i_bookID < 65535)
+                        continue;
+
+                    try
+                    {
+                        if (!fileCount.ContainsKey(key))
+                            fileCount.Add(key, 0);
+
+                        string fullFile = Path.Combine(staticFolder, $"{key}_{fileCount[key]}.sql");
+
+                        if (File.Exists(fullFile))
+                        {
+                            FileInfo fi = new FileInfo(fullFile);
+
+                            // go to the next file if it's bigger than a MB
+                            if (fi.Length > ((1048576) * 40))
+                            {
+                                fileCount[key]++;
+                                fullFile = Path.Combine(staticFolder, $"{key}_{fileCount[key]}.sql");
+
+                                if (File.Exists(fullFile))
+                                    File.Delete(fullFile);
+                            }
+                        }
+
+                        //foreach (var page in bookObjects[key].Values)
+                        //{
+                        using (FileStream fs = new FileStream(fullFile, FileMode.Append))
+                        {
+                            using (StreamWriter writer = new StreamWriter(fs))
+                            {
+                                string intsLine = "", bigintsLine = "", floatsLine = "", boolsLine = "", strsLine = "", didsLine = "", iidsLine = "";
+
+                                intsLine += $"     , ({book.i_bookID}, {(uint)STypeInt.APPRAISAL_PAGES_INT}, {(uint)book.numPages})" + Environment.NewLine;
+                                intsLine += $"     , ({book.i_bookID}, {(uint)STypeInt.APPRAISAL_MAX_PAGES_INT}, {(uint)book.i_maxNumPages})" + Environment.NewLine;
+
+                                intsLine += $"     , ({book.i_bookID}, {(uint)STypeInt.AVAILABLE_CHARACTER_INT}, {(uint)book.maxNumCharsPerPage})" + Environment.NewLine;
+
+                                iidsLine += $"     , ({book.i_bookID}, {(uint)STypeIID.SCRIBE_IID}, {(uint)book.authorId})" + Environment.NewLine;
+                                if (book.authorName.m_buffer != null)
+                                    strsLine += $"     , ({book.i_bookID}, {(uint)STypeString.SCRIBE_NAME_STRING}, '{book.authorName.m_buffer.Replace("'", "''")}')" + Environment.NewLine;
+                                if (book.inscription.m_buffer != null)
+                                    strsLine += $"     , ({book.i_bookID}, {(uint)STypeString.INSCRIPTION_STRING}, '{book.inscription.m_buffer.Replace("'", "''")}')" + Environment.NewLine;
+
+                                if (strsLine != "")
+                                {
+                                    strsLine = $"{sqlCommand} INTO `ace_object_properties_string` (`aceObjectId`, `strPropertyId`, `propertyValue`)" + Environment.NewLine
+                                        + "VALUES " + strsLine.TrimStart("     ,".ToCharArray());
+                                    strsLine = strsLine.TrimEnd(Environment.NewLine.ToCharArray()) + ";" + Environment.NewLine;
+                                    writer.WriteLine(strsLine);
+                                }
+                                if (didsLine != "")
+                                {
+                                    didsLine = $"{sqlCommand} INTO `ace_object_properties_did` (`aceObjectId`, `didPropertyId`, `propertyValue`)" + Environment.NewLine
+                                        + "VALUES " + didsLine.TrimStart("     ,".ToCharArray());
+                                    didsLine = didsLine.TrimEnd(Environment.NewLine.ToCharArray()) + ";" + Environment.NewLine;
+                                    writer.WriteLine(didsLine);
+                                }
+                                if (iidsLine != "")
+                                {
+                                    iidsLine = $"{sqlCommand} INTO `ace_object_properties_iid` (`aceObjectId`, `iidPropertyId`, `propertyValue`)" + Environment.NewLine
+                                        + "VALUES " + iidsLine.TrimStart("     ,".ToCharArray());
+                                    iidsLine = iidsLine.TrimEnd(Environment.NewLine.ToCharArray()) + ";" + Environment.NewLine;
+                                    writer.WriteLine(iidsLine);
+                                }
+                                if (intsLine != "")
+                                {
+                                    intsLine = $"{sqlCommand} INTO `ace_object_properties_int` (`aceObjectId`, `intPropertyId`, `propertyValue`)" + Environment.NewLine
+                                        + "VALUES " + intsLine.TrimStart("     ,".ToCharArray());
+                                    intsLine = intsLine.TrimEnd(Environment.NewLine.ToCharArray()) + ";" + Environment.NewLine;
+                                    writer.WriteLine(intsLine);
+                                }
+                                if (bigintsLine != "")
+                                {
+                                    bigintsLine = $"{sqlCommand} INTO `ace_object_properties_bigint` (`aceObjectId`, `bigIntPropertyId`, `propertyValue`)" + Environment.NewLine
+                                        + "VALUES " + bigintsLine.TrimStart("     ,".ToCharArray());
+                                    bigintsLine = bigintsLine.TrimEnd(Environment.NewLine.ToCharArray()) + ";" + Environment.NewLine;
+                                    writer.WriteLine(bigintsLine);
+                                }
+                                if (floatsLine != "")
+                                {
+                                    floatsLine = $"{sqlCommand} INTO `ace_object_properties_double` (`aceObjectId`, `dblPropertyId`, `propertyValue`)" + Environment.NewLine
+                                        + "VALUES " + floatsLine.TrimStart("     ,".ToCharArray());
+                                    floatsLine = floatsLine.TrimEnd(Environment.NewLine.ToCharArray()) + ";" + Environment.NewLine;
+                                    writer.WriteLine(floatsLine);
+                                }
+                                if (boolsLine != "")
+                                {
+                                    boolsLine = $"{sqlCommand} INTO `ace_object_properties_bool` (`aceObjectId`, `boolPropertyId`, `propertyValue`)" + Environment.NewLine
+                                        + "VALUES " + boolsLine.TrimStart("     ,".ToCharArray());
+                                    boolsLine = boolsLine.TrimEnd(Environment.NewLine.ToCharArray()) + ";" + Environment.NewLine;
+                                    writer.WriteLine(boolsLine);
+                                }
+                            }
+                            //}
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        System.Diagnostics.Debug.WriteLine("Unable to export object " + book + ". Exception:" + Environment.NewLine + ex.ToString());
+                    }
+                }
+            }
+        }
+
+        private void WriteWeenieBookObjectData(Dictionary<string, Dictionary<uint, CM_Writing.PageDataList>> bookObjects, string outputFolder)
+        {
+            string staticFolder = Path.Combine(outputFolder, "3-weeniebookdata");
+
+            //string sqlCommand = "INSERT";
+            string sqlCommand = "REPLACE";
+
+            if (!Directory.Exists(staticFolder))
+                Directory.CreateDirectory(staticFolder);
+
+            Dictionary<string, int> fileCount = new Dictionary<string, int>();
+
+            foreach (string key in bookObjects.Keys)
+            {
+                foreach (var book in bookObjects[key].Values)
+                {
+
+                    if (book.i_bookID < 65535)
+                        continue;
+
+                    try
+                    {
+                        if (!fileCount.ContainsKey(key))
+                            fileCount.Add(key, 0);
+
+                        string fullFile = Path.Combine(staticFolder, $"{key}_{fileCount[key]}.sql");
+
+                        if (File.Exists(fullFile))
+                        {
+                            FileInfo fi = new FileInfo(fullFile);
+
+                            // go to the next file if it's bigger than a MB
+                            if (fi.Length > ((1048576) * 40))
+                            {
+                                fileCount[key]++;
+                                fullFile = Path.Combine(staticFolder, $"{key}_{fileCount[key]}.sql");
+
+                                if (File.Exists(fullFile))
+                                    File.Delete(fullFile);
+                            }
+                        }
+
+                        //foreach (var page in bookObjects[key].Values)
+                        //{
+                        using (FileStream fs = new FileStream(fullFile, FileMode.Append))
+                        {
+                            using (StreamWriter writer = new StreamWriter(fs))
+                            {
+                                string intsLine = "", bigintsLine = "", floatsLine = "", boolsLine = "", strsLine = "", didsLine = "", iidsLine = "";
+
+                                intsLine += $"     , ({book.i_bookID}, {(uint)STypeInt.APPRAISAL_PAGES_INT}, {(uint)book.numPages})" + Environment.NewLine;
+                                intsLine += $"     , ({book.i_bookID}, {(uint)STypeInt.APPRAISAL_MAX_PAGES_INT}, {(uint)book.i_maxNumPages})" + Environment.NewLine;
+
+                                intsLine += $"     , ({book.i_bookID}, {(uint)STypeInt.AVAILABLE_CHARACTER_INT}, {(uint)book.maxNumCharsPerPage})" + Environment.NewLine;
+
+                                iidsLine += $"     , ({book.i_bookID}, {(uint)STypeIID.SCRIBE_IID}, {(uint)book.authorId})" + Environment.NewLine;
+                                if (book.authorName.m_buffer != null)
+                                    strsLine += $"     , ({book.i_bookID}, {(uint)STypeString.SCRIBE_NAME_STRING}, '{book.authorName.m_buffer.Replace("'", "''")}')" + Environment.NewLine;
+                                if (book.inscription.m_buffer != null)
+                                    strsLine += $"     , ({book.i_bookID}, {(uint)STypeString.INSCRIPTION_STRING}, '{book.inscription.m_buffer.Replace("'", "''")}')" + Environment.NewLine;
+
+                                if (strsLine != "")
+                                {
+                                    strsLine = $"{sqlCommand} INTO `ace_object_properties_string` (`aceObjectId`, `strPropertyId`, `propertyValue`)" + Environment.NewLine
+                                        + "VALUES " + strsLine.TrimStart("     ,".ToCharArray());
+                                    strsLine = strsLine.TrimEnd(Environment.NewLine.ToCharArray()) + ";" + Environment.NewLine;
+                                    writer.WriteLine(strsLine);
+                                }
+                                if (didsLine != "")
+                                {
+                                    didsLine = $"{sqlCommand} INTO `ace_object_properties_did` (`aceObjectId`, `didPropertyId`, `propertyValue`)" + Environment.NewLine
+                                        + "VALUES " + didsLine.TrimStart("     ,".ToCharArray());
+                                    didsLine = didsLine.TrimEnd(Environment.NewLine.ToCharArray()) + ";" + Environment.NewLine;
+                                    writer.WriteLine(didsLine);
+                                }
+                                if (iidsLine != "")
+                                {
+                                    iidsLine = $"{sqlCommand} INTO `ace_object_properties_iid` (`aceObjectId`, `iidPropertyId`, `propertyValue`)" + Environment.NewLine
+                                        + "VALUES " + iidsLine.TrimStart("     ,".ToCharArray());
+                                    iidsLine = iidsLine.TrimEnd(Environment.NewLine.ToCharArray()) + ";" + Environment.NewLine;
+                                    writer.WriteLine(iidsLine);
+                                }
+                                if (intsLine != "")
+                                {
+                                    intsLine = $"{sqlCommand} INTO `ace_object_properties_int` (`aceObjectId`, `intPropertyId`, `propertyValue`)" + Environment.NewLine
+                                        + "VALUES " + intsLine.TrimStart("     ,".ToCharArray());
+                                    intsLine = intsLine.TrimEnd(Environment.NewLine.ToCharArray()) + ";" + Environment.NewLine;
+                                    writer.WriteLine(intsLine);
+                                }
+                                if (bigintsLine != "")
+                                {
+                                    bigintsLine = $"{sqlCommand} INTO `ace_object_properties_bigint` (`aceObjectId`, `bigIntPropertyId`, `propertyValue`)" + Environment.NewLine
+                                        + "VALUES " + bigintsLine.TrimStart("     ,".ToCharArray());
+                                    bigintsLine = bigintsLine.TrimEnd(Environment.NewLine.ToCharArray()) + ";" + Environment.NewLine;
+                                    writer.WriteLine(bigintsLine);
+                                }
+                                if (floatsLine != "")
+                                {
+                                    floatsLine = $"{sqlCommand} INTO `ace_object_properties_double` (`aceObjectId`, `dblPropertyId`, `propertyValue`)" + Environment.NewLine
+                                        + "VALUES " + floatsLine.TrimStart("     ,".ToCharArray());
+                                    floatsLine = floatsLine.TrimEnd(Environment.NewLine.ToCharArray()) + ";" + Environment.NewLine;
+                                    writer.WriteLine(floatsLine);
+                                }
+                                if (boolsLine != "")
+                                {
+                                    boolsLine = $"{sqlCommand} INTO `ace_object_properties_bool` (`aceObjectId`, `boolPropertyId`, `propertyValue`)" + Environment.NewLine
+                                        + "VALUES " + boolsLine.TrimStart("     ,".ToCharArray());
+                                    boolsLine = boolsLine.TrimEnd(Environment.NewLine.ToCharArray()) + ";" + Environment.NewLine;
+                                    writer.WriteLine(boolsLine);
+                                }
+                            }
+                            //}
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        System.Diagnostics.Debug.WriteLine("Unable to export object " + book + ". Exception:" + Environment.NewLine + ex.ToString());
+                    }
+                }
             }
         }
 
@@ -882,9 +1254,9 @@ namespace aclogview
             }
         }
 
-        private void WritePageObjectData(Dictionary<string, Dictionary<uint, Dictionary<uint, CM_Writing.PageData>>> pageObjects, List<uint> bookObjectIds, Dictionary<uint, uint> appraisalObjectToWeenieId, string outputFolder)
+        private void WritePageObjectData(Dictionary<string, Dictionary<uint, Dictionary<uint, CM_Writing.PageData>>> pageObjects, string outputFolder)
         {
-            string staticFolder = Path.Combine(outputFolder, "6-pagedata");
+            string staticFolder = Path.Combine(outputFolder, "8-pagedata");
 
             //string sqlCommand = "INSERT";
             string sqlCommand = "REPLACE";
@@ -932,11 +1304,11 @@ namespace aclogview
                                 {
                                     string pagesLine = "";
 
-                                    pagesLine += $"     , ({page.bookID}, {page.page}, '{page.authorName.m_buffer?.Replace("'", "''")}', '{page.authorAccount.m_buffer?.Replace("'", "''")}', {page.authorID}, '{page.pageText.m_buffer?.Replace("'", "''")}')" + Environment.NewLine;
+                                    pagesLine += $"     , ({page.bookID}, {page.page}, '{page.authorName.m_buffer?.Replace("'", "''")}', '{page.authorAccount.m_buffer?.Replace("'", "''")}', {page.authorID}, {page.ignoreAuthor}, '{page.pageText.m_buffer?.Replace("'", "''")}')" + Environment.NewLine;
 
                                     if (pagesLine != "")
                                     {
-                                        pagesLine = $"{sqlCommand} INTO `ace_object_properties_book` (`aceObjectId`, `page`, `authorName`, `authorAccount`, `authorId`, `pageText`)" + Environment.NewLine
+                                        pagesLine = $"{sqlCommand} INTO `ace_object_properties_book` (`aceObjectId`, `page`, `authorName`, `authorAccount`, `authorId`, `ignoreAuthor`, `pageText`)" + Environment.NewLine
                                             + "VALUES " + pagesLine.TrimStart("     ,".ToCharArray());
                                         pagesLine = pagesLine.TrimEnd(Environment.NewLine.ToCharArray()) + ";" + Environment.NewLine;
                                         writer.WriteLine(pagesLine);
@@ -953,9 +1325,9 @@ namespace aclogview
             }
         }
 
-        private void WriteWeeniePageObjectData(Dictionary<string, Dictionary<uint, Dictionary<uint, CM_Writing.PageData>>> pageObjects, List<uint> bookObjectIds, Dictionary<uint, uint> appraisalObjectToWeenieId, string outputFolder)
+        private void WriteWeeniePageObjectData(Dictionary<string, Dictionary<uint, Dictionary<uint, CM_Writing.PageData>>> pageObjects, string outputFolder)
         {
-            string staticFolder = Path.Combine(outputFolder, "3-weeniepagedata");
+            string staticFolder = Path.Combine(outputFolder, "4-weeniepagedata");
 
             //string sqlCommand = "INSERT";
             string sqlCommand = "REPLACE";
@@ -1003,11 +1375,11 @@ namespace aclogview
                                 {
                                     string pagesLine = "";
 
-                                    pagesLine += $"     , ({page.bookID}, {page.page}, '{page.authorName.m_buffer?.Replace("'", "''")}', '{page.authorAccount.m_buffer?.Replace("'", "''")}', {page.authorID}, '{page.pageText.m_buffer?.Replace("'", "''")}')" + Environment.NewLine;
+                                    pagesLine += $"     , ({page.bookID}, {page.page}, '{page.authorName.m_buffer?.Replace("'", "''")}', '{page.authorAccount.m_buffer?.Replace("'", "''")}', {page.authorID}, {page.ignoreAuthor}, '{page.pageText.m_buffer?.Replace("'", "''")}')" + Environment.NewLine;
 
                                     if (pagesLine != "")
                                     {
-                                        pagesLine = $"{sqlCommand} INTO `ace_object_properties_book` (`aceObjectId`, `page`, `authorName`, `authorAccount`, `authorId`, `pageText`)" + Environment.NewLine
+                                        pagesLine = $"{sqlCommand} INTO `ace_object_properties_book` (`aceObjectId`, `page`, `authorName`, `authorAccount`, `authorId`, `ignoreAuthor`, `pageText`)" + Environment.NewLine
                                             + "VALUES " + pagesLine.TrimStart("     ,".ToCharArray());
                                         pagesLine = pagesLine.TrimEnd(Environment.NewLine.ToCharArray()) + ";" + Environment.NewLine;
                                         writer.WriteLine(pagesLine);
@@ -1243,9 +1615,9 @@ namespace aclogview
             }
         }
 
-        private void WriteAppraisalObjectData(Dictionary<string, List<CM_Examine.SetAppraiseInfo>> appraisalObjects, List<uint> appraisalObjectIds, Dictionary<uint, uint> appraisalObjectToWeenieId, string outputFolder)
+        private void WriteAppraisalObjectData(Dictionary<string, List<CM_Examine.SetAppraiseInfo>> appraisalObjects, string outputFolder)
         {
-            string staticFolder = Path.Combine(outputFolder, "5-apprasialobjects");
+            string staticFolder = Path.Combine(outputFolder, "6-apprasialobjects");
 
             //string sqlCommand = "INSERT";
             string sqlCommand = "REPLACE";
@@ -1520,7 +1892,7 @@ namespace aclogview
             }
         }
 
-        private void WriteWeenieAppraisalObjectData(Dictionary<string, List<CM_Examine.SetAppraiseInfo>> appraisalObjects, List<uint> appraisalObjectIds, Dictionary<uint, uint> appraisalObjectToWeenieId, string outputFolder)
+        private void WriteWeenieAppraisalObjectData(Dictionary<string, List<CM_Examine.SetAppraiseInfo>> appraisalObjects, string outputFolder)
         {
             string staticFolder = Path.Combine(outputFolder, "2-weenieapprasialobjects");
 
@@ -3305,7 +3677,7 @@ namespace aclogview
 
         private void WriteStaticObjectData(Dictionary<string, List<CM_Physics.CreateObject>> staticObjects, List<uint> objectIds, string outputFolder, Dictionary<uint, uint> staticObjectsWeenieType)
         {
-            string staticFolder = Path.Combine(outputFolder, "4-objects");
+            string staticFolder = Path.Combine(outputFolder, "5-objects");
 
             string sqlCommand = "INSERT";
             //string sqlCommand = "REPLACE";
