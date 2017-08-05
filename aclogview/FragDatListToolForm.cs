@@ -163,7 +163,8 @@ namespace aclogview
         private readonly FragDatListFile allFragDatFile = new FragDatListFile();
         private readonly FragDatListFile createObjectFragDatFile = new FragDatListFile();
         private readonly FragDatListFile appraisalInfoFragDatFile = new FragDatListFile();
-        private readonly FragDatListFile createObjectAppraisalInfoFragDatFile = new FragDatListFile();
+        private readonly FragDatListFile bookFragDatFile = new FragDatListFile();
+        private readonly FragDatListFile aceWorldFragDatFile = new FragDatListFile();
 
         private void DoBuild()
         {
@@ -173,7 +174,8 @@ namespace aclogview
             allFragDatFile.CreateFile(Path.Combine(txtOutputFolder.Text, "All.frags"), chkCompressOutput.Checked ? FragDatListFile.CompressionType.DeflateStream : FragDatListFile.CompressionType.None);
             createObjectFragDatFile.CreateFile(Path.Combine(txtOutputFolder.Text, "CreateObject.frags"), chkCompressOutput.Checked ? FragDatListFile.CompressionType.DeflateStream : FragDatListFile.CompressionType.None);
             appraisalInfoFragDatFile.CreateFile(Path.Combine(txtOutputFolder.Text, "AppraisalInfo.frags"), chkCompressOutput.Checked ? FragDatListFile.CompressionType.DeflateStream : FragDatListFile.CompressionType.None);
-            createObjectAppraisalInfoFragDatFile.CreateFile(Path.Combine(txtOutputFolder.Text, "CreateObjectPlusAppraisalInfo.frags"), chkCompressOutput.Checked ? FragDatListFile.CompressionType.DeflateStream : FragDatListFile.CompressionType.None);
+            bookFragDatFile.CreateFile(Path.Combine(txtOutputFolder.Text, "Book.frags"), chkCompressOutput.Checked ? FragDatListFile.CompressionType.DeflateStream : FragDatListFile.CompressionType.None);
+            aceWorldFragDatFile.CreateFile(Path.Combine(txtOutputFolder.Text, "ACE-World.frags"), chkCompressOutput.Checked ? FragDatListFile.CompressionType.DeflateStream : FragDatListFile.CompressionType.None);
 
             // Do not parallel this search
             foreach (var currentFile in filesToProcess)
@@ -197,7 +199,8 @@ namespace aclogview
             allFragDatFile.CloseFile();
             createObjectFragDatFile.CloseFile();
             appraisalInfoFragDatFile.CloseFile();
-            createObjectAppraisalInfoFragDatFile.CloseFile();
+            bookFragDatFile.CloseFile();
+            aceWorldFragDatFile.CloseFile();
         }
 
         private void ProcessFileForBuild(string fileName)
@@ -211,7 +214,8 @@ namespace aclogview
             var allFrags = new List<FragDatListFile.FragDatInfo>();
             var createObjectFrags = new List<FragDatListFile.FragDatInfo>();
             var appraisalInfoFrags = new List<FragDatListFile.FragDatInfo>();
-            var createObjectPlusAppraisalInfoFrags = new List<FragDatListFile.FragDatInfo>();
+            var bookFrags = new List<FragDatListFile.FragDatInfo>();
+            var aceWorldFrags = new List<FragDatListFile.FragDatInfo>();
 
             foreach (var record in records)
             {
@@ -250,7 +254,7 @@ namespace aclogview
                         createObjectFrags.Add(new FragDatListFile.FragDatInfo(packetDirection, record.index, record.data));
 
                         //createObjectPlusAppraisalInfoFrags.Add(new FragDatListFile.FragDatInfo(packetDirection, record.index, frag.dat_));
-                        createObjectPlusAppraisalInfoFrags.Add(new FragDatListFile.FragDatInfo(packetDirection, record.index, record.data));
+                        aceWorldFrags.Add(new FragDatListFile.FragDatInfo(packetDirection, record.index, record.data));
                     }
 
                     if (messageCode == (uint)PacketOpcode.APPRAISAL_INFO_EVENT) // APPRAISAL_INFO_EVENT
@@ -261,7 +265,43 @@ namespace aclogview
                         appraisalInfoFrags.Add(new FragDatListFile.FragDatInfo(packetDirection, record.index, record.data));
 
                         //createObjectPlusAppraisalInfoFrags.Add(new FragDatListFile.FragDatInfo(packetDirection, record.index, frag.dat_));
-                        createObjectPlusAppraisalInfoFrags.Add(new FragDatListFile.FragDatInfo(packetDirection, record.index, record.data));
+                        aceWorldFrags.Add(new FragDatListFile.FragDatInfo(packetDirection, record.index, record.data));
+                    }
+
+                    if (messageCode == (uint)PacketOpcode.BOOK_DATA_RESPONSE_EVENT)
+                    {
+                        Interlocked.Increment(ref totalHits);
+
+                        bookFrags.Add(new FragDatListFile.FragDatInfo(packetDirection, record.index, record.data));
+
+                        aceWorldFrags.Add(new FragDatListFile.FragDatInfo(packetDirection, record.index, record.data));
+                    }
+
+                    if (messageCode == (uint)PacketOpcode.BOOK_PAGE_DATA_RESPONSE_EVENT)
+                    {
+                        Interlocked.Increment(ref totalHits);
+
+                        bookFrags.Add(new FragDatListFile.FragDatInfo(packetDirection, record.index, record.data));
+
+                        aceWorldFrags.Add(new FragDatListFile.FragDatInfo(packetDirection, record.index, record.data));
+                    }
+
+                    if (messageCode == (uint)PacketOpcode.Evt_Writing__BookData_ID)
+                    {
+                        Interlocked.Increment(ref totalHits);
+
+                        bookFrags.Add(new FragDatListFile.FragDatInfo(packetDirection, record.index, record.data));
+
+                        aceWorldFrags.Add(new FragDatListFile.FragDatInfo(packetDirection, record.index, record.data));
+                    }
+
+                    if (messageCode == (uint)PacketOpcode.Evt_Writing__BookPageData_ID)
+                    {
+                        Interlocked.Increment(ref totalHits);
+
+                        bookFrags.Add(new FragDatListFile.FragDatInfo(packetDirection, record.index, record.data));
+
+                        aceWorldFrags.Add(new FragDatListFile.FragDatInfo(packetDirection, record.index, record.data));
                     }
 
                     if (messageCode == (uint)PacketOpcode.WEENIE_ORDERED_EVENT || messageCode == (uint)PacketOpcode.ORDERED_EVENT) // WEENIE_ORDERED_EVENT or ORDERED_EVENT 
@@ -291,7 +331,43 @@ namespace aclogview
                             appraisalInfoFrags.Add(new FragDatListFile.FragDatInfo(packetDirection, record.index, record.data));
 
                             //createObjectPlusAppraisalInfoFrags.Add(new FragDatListFile.FragDatInfo(packetDirection, record.index, frag.dat_));
-                            createObjectPlusAppraisalInfoFrags.Add(new FragDatListFile.FragDatInfo(packetDirection, record.index, record.data));
+                            aceWorldFrags.Add(new FragDatListFile.FragDatInfo(packetDirection, record.index, record.data));
+                        }
+
+                        if (opCode == (uint)PacketOpcode.BOOK_DATA_RESPONSE_EVENT)
+                        {
+                            Interlocked.Increment(ref totalHits);
+
+                            bookFrags.Add(new FragDatListFile.FragDatInfo(packetDirection, record.index, record.data));
+
+                            aceWorldFrags.Add(new FragDatListFile.FragDatInfo(packetDirection, record.index, record.data));
+                        }
+
+                        if (opCode == (uint)PacketOpcode.BOOK_PAGE_DATA_RESPONSE_EVENT)
+                        {
+                            Interlocked.Increment(ref totalHits);
+
+                            bookFrags.Add(new FragDatListFile.FragDatInfo(packetDirection, record.index, record.data));
+
+                            aceWorldFrags.Add(new FragDatListFile.FragDatInfo(packetDirection, record.index, record.data));
+                        }
+
+                        if (opCode == (uint)PacketOpcode.Evt_Writing__BookData_ID)
+                        {
+                            Interlocked.Increment(ref totalHits);
+
+                            bookFrags.Add(new FragDatListFile.FragDatInfo(packetDirection, record.index, record.data));
+
+                            aceWorldFrags.Add(new FragDatListFile.FragDatInfo(packetDirection, record.index, record.data));
+                        }
+
+                        if (opCode == (uint)PacketOpcode.Evt_Writing__BookPageData_ID)
+                        {
+                            Interlocked.Increment(ref totalHits);
+
+                            bookFrags.Add(new FragDatListFile.FragDatInfo(packetDirection, record.index, record.data));
+
+                            aceWorldFrags.Add(new FragDatListFile.FragDatInfo(packetDirection, record.index, record.data));
                         }
                     }
 
@@ -312,7 +388,8 @@ namespace aclogview
             allFragDatFile.Write(new KeyValuePair<string, IList<FragDatListFile.FragDatInfo>>(outputFileName, allFrags));
             createObjectFragDatFile.Write(new KeyValuePair<string, IList<FragDatListFile.FragDatInfo>>(outputFileName, createObjectFrags));
             appraisalInfoFragDatFile.Write(new KeyValuePair<string, IList<FragDatListFile.FragDatInfo>>(outputFileName, appraisalInfoFrags));
-            createObjectAppraisalInfoFragDatFile.Write(new KeyValuePair<string, IList<FragDatListFile.FragDatInfo>>(outputFileName, createObjectPlusAppraisalInfoFrags));
+            bookFragDatFile.Write(new KeyValuePair<string, IList<FragDatListFile.FragDatInfo>>(outputFileName, bookFrags));
+            aceWorldFragDatFile.Write(new KeyValuePair<string, IList<FragDatListFile.FragDatInfo>>(outputFileName, aceWorldFrags));
 
             Interlocked.Increment(ref filesProcessed);
         }
@@ -428,6 +505,13 @@ namespace aclogview
 
                 Dictionary<uint, uint> staticObjectsWeenieType = new Dictionary<uint, uint>();
                 Dictionary<uint, uint> weeniesWeenieType = new Dictionary<uint, uint>();
+
+                List<uint> bookObjectIds = new List<uint>();
+                //Dictionary<string, List<CM_Writing.PageData>> bookObjects = new Dictionary<string, List<CM_Writing.PageData>>();
+                //Dictionary<string, Dictionary<uint, Dictionary<uint, List<CM_Writing.PageData>>>> bookObjects = new Dictionary<string, Dictionary<uint, Dictionary<uint, List<CM_Writing.PageData>>>>();
+                Dictionary<string, Dictionary<uint, CM_Writing.PageData>> bookObjects = new Dictionary<string, Dictionary<uint, CM_Writing.PageData>>();
+                Dictionary<string, Dictionary<uint, Dictionary<uint, CM_Writing.PageData>>> pageObjects = new Dictionary<string, Dictionary<uint, Dictionary<uint, CM_Writing.PageData>>>();
+                //Dictionary<uint, List<CM_Writing.PageData>> pageObjects = new Dictionary<uint, List<CM_Writing.PageData>>();
 
                 while (true)
                 {
@@ -546,6 +630,14 @@ namespace aclogview
 
                                 CreateStaticObjectsList(parsed, objectIds, staticObjects, weenieIds, weenies, processedWeeniePositions, appraisalObjectsCatagoryMap, appraisalObjectToWeenieId, weeniesWeenieType, staticObjectsWeenieType);                                      
                             }
+
+                            //if (messageCode == (uint)PacketOpcode.BOOK_PAGE_DATA_RESPONSE_EVENT) // Create Object
+                            //{
+                            //    var parsed = CM_Writing.PageData.read(fragDataReader);
+
+                            //    // CreateStaticObjectsList(parsed, objectIds, staticObjects, weenieIds, weenies, processedWeeniePositions, appraisalObjectsCatagoryMap, appraisalObjectToWeenieId, weeniesWeenieType, staticObjectsWeenieType);
+                            //    CreateBookObjectsList();
+                            //}
                         }
                         catch (EndOfStreamException) // This can happen when a frag is incomplete and we try to parse it
                         {
@@ -590,6 +682,13 @@ namespace aclogview
 
                                     CreateAppraisalObjectsList(parsed, objectIds, staticObjects, weenieIds, weenies, appraisalObjects, appraisalObjectIds, appraisalObjectsCatagoryMap, appraisalObjectToWeenieId);
                                 }
+
+                                if (opCode == (uint)PacketOpcode.BOOK_PAGE_DATA_RESPONSE_EVENT) // Create Object
+                                {
+                                    var parsed = CM_Writing.PageData.read(fragDataReader);
+
+                                    CreatePageObjectsList(parsed, objectIds, staticObjects, weenieIds, weenies, appraisalObjects, appraisalObjectIds, appraisalObjectsCatagoryMap, appraisalObjectToWeenieId, bookObjectIds, pageObjects);
+                                }
                             }
                         }
                         catch (EndOfStreamException) // This can happen when a frag is incomplete and we try to parse it
@@ -604,11 +703,15 @@ namespace aclogview
 
                 WriteWeenieAppraisalObjectData(appraisalObjects, appraisalObjectIds, appraisalObjectToWeenieId, txtOutputFolder.Text);
 
+                WriteWeeniePageObjectData(pageObjects, bookObjectIds, appraisalObjectToWeenieId, txtOutputFolder.Text);
+
                 WriteStaticObjectData(staticObjects, objectIds, txtOutputFolder.Text, staticObjectsWeenieType);
 
                 WriteAppraisalObjectData(appraisalObjects, appraisalObjectIds, appraisalObjectToWeenieId, txtOutputFolder.Text);
 
                 //// WriteGeneratorObjectData(staticObjects, objectIds, txtOutputFolder.Text);
+
+                WritePageObjectData(pageObjects, bookObjectIds, appraisalObjectToWeenieId, txtOutputFolder.Text);
 
                 MessageBox.Show($"Export completed at {DateTime.Now.ToString()} and took {(DateTime.Now - start).TotalMinutes} minutes.");
             }
@@ -651,6 +754,273 @@ namespace aclogview
                 }
 
                 File.Delete(Path.Combine(txtOutputFolder.Text, kvp.Key + ".csv.temp"));
+            }
+        }
+
+        private void CreatePageObjectsList(CM_Writing.PageData parsed, List<uint> objectIds, Dictionary<string, List<CM_Physics.CreateObject>> staticObjects, 
+            List<uint> weenieIds, Dictionary<string, List<CM_Physics.CreateObject>> weenies, Dictionary<string, List<CM_Examine.SetAppraiseInfo>> appraisalObjects, 
+            List<uint> appraisalObjectIds, Dictionary<uint, string> appraisalObjectsCatagoryMap, Dictionary<uint, uint> appraisalObjectToWeenieId,
+            //                                   fileToPutItIn      bookid           pageid         pagedata
+            List<uint> bookObjectIds, Dictionary<string, Dictionary<uint, Dictionary<uint, CM_Writing.PageData>>> pageObjects)
+        {
+            try
+            {
+                uint weenieId = 0;
+                bool foundInObjectIds = false;
+                bool foundInWeenieIds = false;
+                foundInObjectIds = objectIds.Contains(parsed.bookID);
+                appraisalObjectToWeenieId.TryGetValue(parsed.bookID, out weenieId);
+                foundInWeenieIds = weenieIds.Contains(weenieId);
+
+                if (!foundInObjectIds && !(weenieId > 0))
+                    return;
+
+                bool addIt = true;
+                //bool addWeenie = false;
+                string fileToPutItIn = "PageData";
+
+
+                appraisalObjectsCatagoryMap.TryGetValue(parsed.bookID, out fileToPutItIn);
+
+                if (fileToPutItIn == null)
+                    fileToPutItIn = "0-PageData";
+
+                if (!foundInObjectIds && weenieId > 0)
+                {
+                    if (!foundInWeenieIds)
+                        return;
+
+                    parsed.bookID = weenieId;
+                }
+
+                // de-dupe based on position and wcid
+                if (addIt) //&& !PositionRecorded(parsed, processedWeeniePositions[parsed.wdesc._wcid], parsed.physicsdesc.pos, margin))
+                {
+
+                    //if (parsed.bookID > 65535)
+                    //    return;
+
+                    if (!pageObjects.ContainsKey(fileToPutItIn))
+                    {
+                        pageObjects.Add(fileToPutItIn, new Dictionary<uint, Dictionary<uint, CM_Writing.PageData>>());
+                    }
+
+                    if (!pageObjects[fileToPutItIn].ContainsKey(parsed.bookID))
+                    {
+                        pageObjects[fileToPutItIn].Add(parsed.bookID, new Dictionary<uint, CM_Writing.PageData>());
+                    }
+
+                    if (bookObjectIds.Contains(parsed.bookID))
+                    {
+                        if (pageObjects[fileToPutItIn][parsed.bookID].ContainsKey(parsed.page))
+                            return;
+                    }
+
+                    pageObjects[fileToPutItIn][parsed.bookID].Add(parsed.page, parsed);
+                    //bookObjects[fileToPutItIn][parsed.bookID][parsed.page].Add(parsed);
+                    //bookObjects[fileToPutItIn].Add(parsed.bookID, );
+                    bookObjectIds.Add(parsed.bookID);
+
+                    if (bookObjectIds.Contains(weenieId) && weenieId > 0)
+                    {
+                        if (!pageObjects[fileToPutItIn][weenieId].Keys.Contains(parsed.page))
+                        {
+                            CM_Writing.PageData parsedClone;
+
+                            parsedClone = new CM_Writing.PageData();
+                            parsedClone.bookID = weenieId;
+
+                            parsedClone.authorAccount = parsed.authorAccount;
+                            parsedClone.authorID = parsed.authorID;
+                            parsedClone.authorName = parsed.authorName;
+                            parsedClone.flags = parsed.flags;
+                            parsedClone.ignoreAuthor = parsed.ignoreAuthor;
+                            parsedClone.page = parsed.page;
+                            parsedClone.pageText = parsed.pageText;
+                            parsedClone.textIncluded = parsed.textIncluded;
+
+                            pageObjects[fileToPutItIn][parsedClone.bookID].Add(parsedClone.page, parsedClone);
+                            bookObjectIds.Add(parsedClone.bookID);
+                        }
+                    }
+
+                    if (!bookObjectIds.Contains(weenieId) && weenieId > 0) //&& !pageObjects[fileToPutItIn][weenieId].Keys.Contains(parsed.page))
+                    {
+                        CM_Writing.PageData parsedClone;
+
+                        parsedClone = new CM_Writing.PageData();
+                        parsedClone.bookID = weenieId;
+
+                        parsedClone.authorAccount = parsed.authorAccount;
+                        parsedClone.authorID = parsed.authorID;
+                        parsedClone.authorName = parsed.authorName;
+                        parsedClone.flags = parsed.flags;
+                        parsedClone.ignoreAuthor = parsed.ignoreAuthor;
+                        parsedClone.page = parsed.page;
+                        parsedClone.pageText = parsed.pageText;
+                        parsedClone.textIncluded = parsed.textIncluded;
+
+                        if (!pageObjects.ContainsKey(fileToPutItIn))
+                        {
+                            pageObjects.Add(fileToPutItIn, new Dictionary<uint, Dictionary<uint, CM_Writing.PageData>>());
+                        }
+
+                        if (!pageObjects[fileToPutItIn].ContainsKey(parsedClone.bookID))
+                        {
+                            pageObjects[fileToPutItIn].Add(parsedClone.bookID, new Dictionary<uint, CM_Writing.PageData>());
+                        }
+
+                        pageObjects[fileToPutItIn][parsedClone.bookID].Add(parsedClone.page, parsedClone);
+                        bookObjectIds.Add(parsedClone.bookID);
+                    }
+                    totalHits++;
+                }
+            }
+            catch (Exception ex)
+            {
+                totalExceptions++;
+            }
+        }
+
+        private void WritePageObjectData(Dictionary<string, Dictionary<uint, Dictionary<uint, CM_Writing.PageData>>> pageObjects, List<uint> bookObjectIds, Dictionary<uint, uint> appraisalObjectToWeenieId, string outputFolder)
+        {
+            string staticFolder = Path.Combine(outputFolder, "6-pagedata");
+
+            //string sqlCommand = "INSERT";
+            string sqlCommand = "REPLACE";
+
+            if (!Directory.Exists(staticFolder))
+                Directory.CreateDirectory(staticFolder);
+
+            Dictionary<string, int> fileCount = new Dictionary<string, int>();
+
+            foreach (string key in pageObjects.Keys)
+            {
+                foreach (var book in pageObjects[key].Keys)
+                {
+
+                    if (book < 65535)
+                        continue;
+
+                    try
+                    {
+                        if (!fileCount.ContainsKey(key))
+                            fileCount.Add(key, 0);
+
+                        string fullFile = Path.Combine(staticFolder, $"{key}_{fileCount[key]}.sql");
+
+                        if (File.Exists(fullFile))
+                        {
+                            FileInfo fi = new FileInfo(fullFile);
+
+                            // go to the next file if it's bigger than a MB
+                            if (fi.Length > ((1048576) * 40))
+                            {
+                                fileCount[key]++;
+                                fullFile = Path.Combine(staticFolder, $"{key}_{fileCount[key]}.sql");
+
+                                if (File.Exists(fullFile))
+                                    File.Delete(fullFile);
+                            }
+                        }
+
+                        foreach (var page in pageObjects[key][book].Values)
+                        {
+                            using (FileStream fs = new FileStream(fullFile, FileMode.Append))
+                            {
+                                using (StreamWriter writer = new StreamWriter(fs))
+                                {
+                                    string pagesLine = "";
+
+                                    pagesLine += $"     , ({page.bookID}, {page.page}, '{page.authorName.m_buffer?.Replace("'", "''")}', '{page.authorAccount.m_buffer?.Replace("'", "''")}', {page.authorID}, '{page.pageText.m_buffer?.Replace("'", "''")}')" + Environment.NewLine;
+
+                                    if (pagesLine != "")
+                                    {
+                                        pagesLine = $"{sqlCommand} INTO `ace_object_properties_book` (`aceObjectId`, `page`, `authorName`, `authorAccount`, `authorId`, `pageText`)" + Environment.NewLine
+                                            + "VALUES " + pagesLine.TrimStart("     ,".ToCharArray());
+                                        pagesLine = pagesLine.TrimEnd(Environment.NewLine.ToCharArray()) + ";" + Environment.NewLine;
+                                        writer.WriteLine(pagesLine);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        System.Diagnostics.Debug.WriteLine("Unable to export object " + book + ". Exception:" + Environment.NewLine + ex.ToString());
+                    }
+                }
+            }
+        }
+
+        private void WriteWeeniePageObjectData(Dictionary<string, Dictionary<uint, Dictionary<uint, CM_Writing.PageData>>> pageObjects, List<uint> bookObjectIds, Dictionary<uint, uint> appraisalObjectToWeenieId, string outputFolder)
+        {
+            string staticFolder = Path.Combine(outputFolder, "3-weeniepagedata");
+
+            //string sqlCommand = "INSERT";
+            string sqlCommand = "REPLACE";
+
+            if (!Directory.Exists(staticFolder))
+                Directory.CreateDirectory(staticFolder);
+
+            Dictionary<string, int> fileCount = new Dictionary<string, int>();
+
+            foreach (string key in pageObjects.Keys)
+            {
+                foreach (var book in pageObjects[key].Keys)
+                {
+
+                    if (book > 65535)
+                        continue;
+
+                    try
+                    {
+                        if (!fileCount.ContainsKey(key))
+                            fileCount.Add(key, 0);
+
+                        string fullFile = Path.Combine(staticFolder, $"{key}_{fileCount[key]}.sql");
+
+                        if (File.Exists(fullFile))
+                        {
+                            FileInfo fi = new FileInfo(fullFile);
+
+                            // go to the next file if it's bigger than a MB
+                            if (fi.Length > ((1048576) * 40))
+                            {
+                                fileCount[key]++;
+                                fullFile = Path.Combine(staticFolder, $"{key}_{fileCount[key]}.sql");
+
+                                if (File.Exists(fullFile))
+                                    File.Delete(fullFile);
+                            }
+                        }
+
+                        foreach (var page in pageObjects[key][book].Values)
+                        {
+                            using (FileStream fs = new FileStream(fullFile, FileMode.Append))
+                            {
+                                using (StreamWriter writer = new StreamWriter(fs))
+                                {
+                                    string pagesLine = "";
+
+                                    pagesLine += $"     , ({page.bookID}, {page.page}, '{page.authorName.m_buffer?.Replace("'", "''")}', '{page.authorAccount.m_buffer?.Replace("'", "''")}', {page.authorID}, '{page.pageText.m_buffer?.Replace("'", "''")}')" + Environment.NewLine;
+
+                                    if (pagesLine != "")
+                                    {
+                                        pagesLine = $"{sqlCommand} INTO `ace_object_properties_book` (`aceObjectId`, `page`, `authorName`, `authorAccount`, `authorId`, `pageText`)" + Environment.NewLine
+                                            + "VALUES " + pagesLine.TrimStart("     ,".ToCharArray());
+                                        pagesLine = pagesLine.TrimEnd(Environment.NewLine.ToCharArray()) + ";" + Environment.NewLine;
+                                        writer.WriteLine(pagesLine);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        System.Diagnostics.Debug.WriteLine("Unable to export object " + book + ". Exception:" + Environment.NewLine + ex.ToString());
+                    }
+                }
             }
         }
 
@@ -875,7 +1245,7 @@ namespace aclogview
 
         private void WriteAppraisalObjectData(Dictionary<string, List<CM_Examine.SetAppraiseInfo>> appraisalObjects, List<uint> appraisalObjectIds, Dictionary<uint, uint> appraisalObjectToWeenieId, string outputFolder)
         {
-            string staticFolder = Path.Combine(outputFolder, "4-apprasialobjects");
+            string staticFolder = Path.Combine(outputFolder, "5-apprasialobjects");
 
             //string sqlCommand = "INSERT";
             string sqlCommand = "REPLACE";
@@ -2650,6 +3020,9 @@ namespace aclogview
                         weenies[fileToPutItIn].Add(parsed);
                         weenieIds.Add(parsed.wdesc._wcid);
 
+                        //if (parsed.wdesc._wcid == 9519)
+                        //    System.Diagnostics.Debug.WriteLine("bp here");
+
                         if (!appraisalObjectsCatagoryMap.ContainsKey(parsed.object_id))
                             appraisalObjectsCatagoryMap.Add(parsed.object_id, fileToPutItIn);
                         if (!appraisalObjectToWeenieId.ContainsKey(parsed.object_id))
@@ -2664,6 +3037,9 @@ namespace aclogview
 
                     staticObjects[fileToPutItIn].Add(parsed);
                     objectIds.Add(parsed.object_id);
+
+                    if (!appraisalObjectToWeenieId.ContainsKey(parsed.object_id))
+                        appraisalObjectToWeenieId.Add(parsed.object_id, parsed.wdesc._wcid);
 
                     if (!appraisalObjectsCatagoryMap.ContainsKey(parsed.object_id))
                         appraisalObjectsCatagoryMap.Add(parsed.object_id, fileToPutItIn);
@@ -2929,7 +3305,7 @@ namespace aclogview
 
         private void WriteStaticObjectData(Dictionary<string, List<CM_Physics.CreateObject>> staticObjects, List<uint> objectIds, string outputFolder, Dictionary<uint, uint> staticObjectsWeenieType)
         {
-            string staticFolder = Path.Combine(outputFolder, "3-objects");
+            string staticFolder = Path.Combine(outputFolder, "4-objects");
 
             string sqlCommand = "INSERT";
             //string sqlCommand = "REPLACE";
@@ -3506,7 +3882,7 @@ namespace aclogview
                                 weenieName = weenieName.Substring(0, weenieName.Length - 6).Replace("_", "-").ToLower();
                             }
                             else
-                                weenieName = "ace" + parsed.wdesc._wcid.ToString() + "-" + parsed.wdesc._name.m_buffer.Replace("'", "").Replace(" ", "").Replace(".", "").Replace("(", "").Replace(")", "").Replace("+", "").Replace(":", "").Replace("_", "").Replace("-", "").ToLower();
+                                weenieName = "ace" + parsed.wdesc._wcid.ToString() + "-" + parsed.wdesc._name.m_buffer.Replace("'", "").Replace(" ", "").Replace(".", "").Replace("(", "").Replace(")", "").Replace("+", "").Replace(":", "").Replace("_", "").Replace("-", "").Replace(",", "").ToLower();
 
                             string line = $"{sqlCommand} INTO ace_weenie_class (`weenieClassId`, `weenieClassDescription`)" + Environment.NewLine +
                                    $"VALUES ({parsed.wdesc._wcid}, '{weenieName}');" + Environment.NewLine;
