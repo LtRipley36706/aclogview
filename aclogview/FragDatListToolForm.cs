@@ -995,6 +995,26 @@ namespace aclogview
                                     boolsLine = boolsLine.TrimEnd(Environment.NewLine.ToCharArray()) + ";" + Environment.NewLine;
                                     writer.WriteLine(boolsLine);
                                 }
+
+                                int pageNum = 0;
+                                foreach (var page in book.pageData)
+                                {
+                                    if (page.textIncluded == 1)
+                                    {
+                                        string pagesLine = "";
+
+                                        pagesLine += $"     , ({book.i_bookID}, {pageNum}, '{page.authorName.m_buffer?.Replace("'", "''")}', '{page.authorAccount.m_buffer?.Replace("'", "''")}', {page.authorID}, {page.ignoreAuthor}, '{page.pageText.m_buffer?.Replace("'", "''")}')" + Environment.NewLine;
+
+                                        if (pagesLine != "")
+                                        {
+                                            pagesLine = $"{sqlCommand} INTO `ace_object_properties_book` (`aceObjectId`, `page`, `authorName`, `authorAccount`, `authorId`, `ignoreAuthor`, `pageText`)" + Environment.NewLine
+                                                + "VALUES " + pagesLine.TrimStart("     ,".ToCharArray());
+                                            pagesLine = pagesLine.TrimEnd(Environment.NewLine.ToCharArray()) + ";" + Environment.NewLine;
+                                            writer.WriteLine(pagesLine);
+                                        }
+                                    }
+                                    pageNum++;
+                                }
                             }
                             //}
                         }
@@ -1024,7 +1044,7 @@ namespace aclogview
                 foreach (var book in bookObjects[key].Values)
                 {
 
-                    if (book.i_bookID < 65535)
+                    if (book.i_bookID > 65535)
                         continue;
 
                     try
@@ -1062,7 +1082,8 @@ namespace aclogview
 
                                 intsLine += $"     , ({book.i_bookID}, {(uint)STypeInt.AVAILABLE_CHARACTER_INT}, {(uint)book.maxNumCharsPerPage})" + Environment.NewLine;
 
-                                iidsLine += $"     , ({book.i_bookID}, {(uint)STypeIID.SCRIBE_IID}, {(uint)book.authorId})" + Environment.NewLine;
+                                //if (book.authorId > 0)
+                                //    iidsLine += $"     , ({book.i_bookID}, {(uint)STypeIID.SCRIBE_IID}, {(uint)book.authorId})" + Environment.NewLine;
                                 if (book.authorName.m_buffer != null)
                                     strsLine += $"     , ({book.i_bookID}, {(uint)STypeString.SCRIBE_NAME_STRING}, '{book.authorName.m_buffer.Replace("'", "''")}')" + Environment.NewLine;
                                 if (book.inscription.m_buffer != null)
@@ -1116,6 +1137,26 @@ namespace aclogview
                                         + "VALUES " + boolsLine.TrimStart("     ,".ToCharArray());
                                     boolsLine = boolsLine.TrimEnd(Environment.NewLine.ToCharArray()) + ";" + Environment.NewLine;
                                     writer.WriteLine(boolsLine);
+                                }
+
+                                int pageNum = 0;
+                                foreach (var page in book.pageData)
+                                {
+                                    if (page.textIncluded == 1)
+                                    {
+                                        string pagesLine = "";
+
+                                        pagesLine += $"     , ({book.i_bookID}, {pageNum}, '{page.authorName.m_buffer?.Replace("'", "''")}', '{page.authorAccount.m_buffer?.Replace("'", "''")}', {page.authorID}, {page.ignoreAuthor}, '{page.pageText.m_buffer?.Replace("'", "''")}')" + Environment.NewLine;
+
+                                        if (pagesLine != "")
+                                        {
+                                            pagesLine = $"{sqlCommand} INTO `ace_object_properties_book` (`aceObjectId`, `page`, `authorName`, `authorAccount`, `authorId`, `ignoreAuthor`, `pageText`)" + Environment.NewLine
+                                                + "VALUES " + pagesLine.TrimStart("     ,".ToCharArray());
+                                            pagesLine = pagesLine.TrimEnd(Environment.NewLine.ToCharArray()) + ";" + Environment.NewLine;
+                                            writer.WriteLine(pagesLine);
+                                        }
+                                    }
+                                    pageNum++;
                                 }
                             }
                             //}
@@ -2498,13 +2539,13 @@ namespace aclogview
                         )
                     {
                         fileToPutItIn = "MiscBuildingSigns";
-                        weenieType = WeenieType.Book_WeenieType;
+                        weenieType = WeenieType.Generic_WeenieType;
                         addIt = true;
                     }
                     else if (parsed.wdesc._name.m_buffer.Contains("Residential Halls"))
                     {
                         fileToPutItIn = "MiscResidentialHallSigns";
-                        weenieType = WeenieType.Book_WeenieType;
+                        weenieType = WeenieType.Generic_WeenieType;
                         addIt = true;
                     }
                     else if (parsed.wdesc._name.m_buffer.Contains("Deed"))
@@ -2526,20 +2567,20 @@ namespace aclogview
                         )
                     {
                         fileToPutItIn = "MiscResidentialHallSigns";
-                        weenieType = WeenieType.Book_WeenieType;
+                        weenieType = WeenieType.Generic_WeenieType;
                         addIt = true;
                     }
                     else if (parsed.wdesc._name.m_buffer.Contains("Festival Stone"))
                     {
                         fileToPutItIn = "MiscFestivalStones";
-                        weenieType = WeenieType.Book_WeenieType;
+                        weenieType = WeenieType.Generic_WeenieType;
                         addIt = true;
                     }
                     else if (parsed.physicsdesc.setup_id == 33557463
                         )
                     {
                         fileToPutItIn = "MiscSettlementMarkers";
-                        weenieType = WeenieType.Book_WeenieType;
+                        weenieType = WeenieType.Generic_WeenieType;
                         parsed.physicsdesc.bitfield = 32769; // error correct
                         addIt = true;
                     }
