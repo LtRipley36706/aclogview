@@ -2269,7 +2269,7 @@ namespace aclogview
                     else if (parsed.wdesc._name.m_buffer.Contains("Scroll"))
                     {
                         weeniefileToPutItIn = "BooksScrolls";
-                        weenieType = WeenieType.Scroll_WeenieType;
+                        weenieType = WeenieType.Book_WeenieType;
                         addWeenie = true;
                     }
                     else if (parsed.wdesc._name.m_buffer.Contains("Pack"))
