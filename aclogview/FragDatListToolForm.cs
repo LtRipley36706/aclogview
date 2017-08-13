@@ -2584,6 +2584,22 @@ namespace aclogview
                         parsed.physicsdesc.bitfield = 32769; // error correct
                         addIt = true;
                     }
+                    else if (parsed.wdesc._name.m_buffer.Contains("Button"))
+                    {
+                        fileToPutItIn = "MiscButtons";
+                        weenieType = WeenieType.Switch_WeenieType;
+                        addIt = true;
+                    }
+                    else if (parsed.wdesc._name.m_buffer.Contains("Lever")
+                        || parsed.wdesc._name.m_buffer.Contains("Candle") && !parsed.wdesc._name.m_buffer.Contains("Floating") && !parsed.wdesc._name.m_buffer.Contains("Bronze")
+                        || parsed.wdesc._name.m_buffer.Contains("Torch") && parsed.wdesc._wcid != 293
+                        || parsed.wdesc._name.m_buffer.Contains("Plant") && !parsed.wdesc._name.m_buffer.Contains("Fertilized")
+                        )
+                    {
+                        fileToPutItIn = "MiscLevers";
+                        weenieType = WeenieType.Switch_WeenieType;
+                        addIt = true;
+                    }
                     else if (parsed.object_id < 0x80000000)
                     {
                         fileToPutItIn = "MiscStaticsObjects";
@@ -3233,12 +3249,26 @@ namespace aclogview
                     //    weenieType = WeenieType.Cow_WeenieType;
                     //    addWeenie = true;
                     //}
+                    else if (parsed.wdesc._wcid >= 14342 && parsed.wdesc._wcid <= 14347
+                        || parsed.wdesc._wcid >= 14404 && parsed.wdesc._wcid <= 14409
+                        )
+                    {
+                        weeniefileToPutItIn = "CreaturesChessPieces";
+                        weenieType = WeenieType.GamePiece_WeenieType;
+                        addWeenie = true;
+                    }
                     else
                     {
                         weeniefileToPutItIn = "CreaturesUnsorted";
                         weenieType = WeenieType.Creature_WeenieType;
                         addWeenie = true;
                     }
+                }
+                else if (parsed.wdesc._type == ITEM_TYPE.TYPE_GAMEBOARD)
+                {
+                    fileToPutItIn = "GameBoards";
+                    weenieType = WeenieType.Game_WeenieType;
+                    addIt = true;
                 }
                 else if (parsed.object_id < 0x80000000)
                 {
