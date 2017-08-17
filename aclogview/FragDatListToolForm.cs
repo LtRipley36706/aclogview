@@ -497,6 +497,13 @@ namespace aclogview
                 Dictionary<string, List<CM_Physics.CreateObject>> staticObjects = new Dictionary<string, List<CM_Physics.CreateObject>>();
                 Dictionary<uint, List<Position>> processedWeeniePositions = new Dictionary<uint, List<Position>>();
 
+                Dictionary<uint, List<uint>> wieldedObjectsParentMap = new Dictionary<uint, List<uint>>();
+                Dictionary<uint, List<CM_Physics.CreateObject>> wieldedObjects = new Dictionary<uint, List<CM_Physics.CreateObject>>();
+
+                Dictionary<uint, List<uint>> inventoryParents = new Dictionary<uint, List<uint>>();
+                //Dictionary<uint, List<CM_Physics.CreateObject>> inventoryObjects = new Dictionary<uint, List<CM_Physics.CreateObject>>();
+                Dictionary<uint, CM_Physics.CreateObject> inventoryObjects = new Dictionary<uint, CM_Physics.CreateObject>();
+
                 List<uint> appraisalObjectIds = new List<uint>();
                 Dictionary<string, List<CM_Examine.SetAppraiseInfo>> appraisalObjects = new Dictionary<string, List<CM_Examine.SetAppraiseInfo>>();
                 //Dictionary<uint, uint> assessmentInfoStatus = new Dictionary<uint, uint>();
@@ -521,12 +528,94 @@ namespace aclogview
                     if (!fragDatListFile.TryReadNext(out kvp))
                         break;
 
+                    //foreach (var frag in kvp.Value)
+                    //{
+                    //    fragmentsProcessed++;
+
+                    //    //if (fragmentsProcessed > 600000)
+                    //    //    break;
+
+                    //    try
+                    //    {
+                    //        // ********************************************************************
+                    //        // ********************** CUSTOM PROCESSING CODE ********************** 
+                    //        // ********************************************************************
+                    //        if (frag.Data.Length <= 4)
+                    //            continue;
+
+                    //        BinaryReader fragDataReader = new BinaryReader(new MemoryStream(frag.Data));
+
+                    //        var messageCode = fragDataReader.ReadUInt32();
+
+                    //        if (messageCode == (uint)PacketOpcode.Evt_Physics__CreateObject_ID) // Create Object
+                    //        {
+                    //            var parsed = CM_Physics.CreateObject.read(fragDataReader);
+
+                    //            CreateStaticObjectsList(parsed, objectIds, staticObjects, weenieIds, weenies, processedWeeniePositions, appraisalObjectsCatagoryMap, appraisalObjectToWeenieId, weeniesWeenieType, staticObjectsWeenieType);
+
+                    //            //totalHits++;
+
+                    //            //if (!itemTypesToParse.Contains(parsed.wdesc._type))
+                    //            //    continue;
+
+                    //            //totalHits++;
+
+                    //            //// This bit of trickery uses the existing tree view parser code to create readable output, which we can then convert to csv
+                    //            //treeView.Nodes.Clear();
+                    //            //parsed.contributeToTreeView(treeView);
+                    //            //if (treeView.Nodes.Count == 1)
+                    //            //{
+                    //            //    var lineItems = new string[256];
+                    //            //    int lineItemCount = 0;
+
+                    //            //    ProcessNode(treeView.Nodes[0], itemTypeKeys[parsed.wdesc._type], null, lineItems, ref lineItemCount);
+
+                    //            //    var sb = new StringBuilder();
+
+                    //            //    for (int i = 0; i < lineItemCount; i++)
+                    //            //    {
+                    //            //        if (i > 0)
+                    //            //            sb.Append(',');
+
+                    //            //        var output = lineItems[i];
+
+                    //            //        // Format the value for CSV output, if needed.
+                    //            //        // We only do this for certain columns. This is very time consuming
+                    //            //        if (output != null && itemTypeKeys[parsed.wdesc._type][i].EndsWith("name"))
+                    //            //        {
+                    //            //            if (output.Contains(",") || output.Contains("\"") || output.Contains("\r") || output.Contains("\n"))
+                    //            //            {
+                    //            //                var sb2 = new StringBuilder();
+                    //            //                sb2.Append("\"");
+                    //            //                foreach (char nextChar in output)
+                    //            //                {
+                    //            //                    sb2.Append(nextChar);
+                    //            //                    if (nextChar == '"')
+                    //            //                        sb2.Append("\"");
+                    //            //                }
+                    //            //                sb2.Append("\"");
+                    //            //                output = sb2.ToString();
+                    //            //            }
+
+                    //            //        }
+
+                    //            //        if (output != null)
+                    //            //            sb.Append(output);
+                    //            //    }
+
+                    //            //    itemTypeStreamWriters[parsed.wdesc._type].WriteLine(sb.ToString());
+                    //            //}
+                    //        }
+                    //    }
+                    //    catch (EndOfStreamException) // This can happen when a frag is incomplete and we try to parse it
+                    //    {
+                    //        totalExceptions++;
+                    //    }
+                    //}
+
                     foreach (var frag in kvp.Value)
                     {
                         fragmentsProcessed++;
-
-                        //if (fragmentsProcessed > 600000)
-                        //    break;
 
                         try
                         {
@@ -544,112 +633,16 @@ namespace aclogview
                             {
                                 var parsed = CM_Physics.CreateObject.read(fragDataReader);
 
-                                CreateStaticObjectsList(parsed, objectIds, staticObjects, weenieIds, weenies, processedWeeniePositions, appraisalObjectsCatagoryMap, appraisalObjectToWeenieId, weeniesWeenieType, staticObjectsWeenieType);
-
-                                //totalHits++;
-
-                                //if (!itemTypesToParse.Contains(parsed.wdesc._type))
-                                //    continue;
-
-                                //totalHits++;
-
-                                //// This bit of trickery uses the existing tree view parser code to create readable output, which we can then convert to csv
-                                //treeView.Nodes.Clear();
-                                //parsed.contributeToTreeView(treeView);
-                                //if (treeView.Nodes.Count == 1)
-                                //{
-                                //    var lineItems = new string[256];
-                                //    int lineItemCount = 0;
-
-                                //    ProcessNode(treeView.Nodes[0], itemTypeKeys[parsed.wdesc._type], null, lineItems, ref lineItemCount);
-
-                                //    var sb = new StringBuilder();
-
-                                //    for (int i = 0; i < lineItemCount; i++)
-                                //    {
-                                //        if (i > 0)
-                                //            sb.Append(',');
-
-                                //        var output = lineItems[i];
-
-                                //        // Format the value for CSV output, if needed.
-                                //        // We only do this for certain columns. This is very time consuming
-                                //        if (output != null && itemTypeKeys[parsed.wdesc._type][i].EndsWith("name"))
-                                //        {
-                                //            if (output.Contains(",") || output.Contains("\"") || output.Contains("\r") || output.Contains("\n"))
-                                //            {
-                                //                var sb2 = new StringBuilder();
-                                //                sb2.Append("\"");
-                                //                foreach (char nextChar in output)
-                                //                {
-                                //                    sb2.Append(nextChar);
-                                //                    if (nextChar == '"')
-                                //                        sb2.Append("\"");
-                                //                }
-                                //                sb2.Append("\"");
-                                //                output = sb2.ToString();
-                                //            }
-
-                                //        }
-
-                                //        if (output != null)
-                                //            sb.Append(output);
-                                //    }
-
-                                //    itemTypeStreamWriters[parsed.wdesc._type].WriteLine(sb.ToString());
-                                //}
+                                CreateStaticObjectsList(parsed, 
+                                    objectIds, staticObjects, 
+                                    weenieIds, weenies, 
+                                    processedWeeniePositions, 
+                                    appraisalObjectsCatagoryMap, appraisalObjectToWeenieId, 
+                                    weeniesWeenieType, staticObjectsWeenieType, 
+                                    wieldedObjectsParentMap, wieldedObjects,
+                                    inventoryParents, inventoryObjects
+                                    );                                      
                             }
-                        }
-                        catch (EndOfStreamException) // This can happen when a frag is incomplete and we try to parse it
-                        {
-                            totalExceptions++;
-                        }
-                    }
-
-                    foreach (var frag in kvp.Value)
-                    {
-                        fragmentsProcessed++;
-
-                        try
-                        {
-                            // ********************************************************************
-                            // ********************** CUSTOM PROCESSING CODE ********************** 
-                            // ********************************************************************
-                            if (frag.Data.Length <= 4)
-                                continue;
-
-                            BinaryReader fragDataReader = new BinaryReader(new MemoryStream(frag.Data));
-
-                            var messageCode = fragDataReader.ReadUInt32();
-
-                            if (messageCode == (uint)PacketOpcode.Evt_Physics__CreateObject_ID) // Create Object
-                            {
-                                var parsed = CM_Physics.CreateObject.read(fragDataReader);
-
-                                CreateStaticObjectsList(parsed, objectIds, staticObjects, weenieIds, weenies, processedWeeniePositions, appraisalObjectsCatagoryMap, appraisalObjectToWeenieId, weeniesWeenieType, staticObjectsWeenieType);                                      
-                            }
-                        }
-                        catch (EndOfStreamException) // This can happen when a frag is incomplete and we try to parse it
-                        {
-                            totalExceptions++;
-                        }
-                    }
-
-                    foreach (var frag in kvp.Value)
-                    {
-                        fragmentsProcessed++;
-
-                        try
-                        {
-                            // ********************************************************************
-                            // ********************** CUSTOM PROCESSING CODE ********************** 
-                            // ********************************************************************
-                            if (frag.Data.Length <= 4)
-                                continue;
-
-                            BinaryReader fragDataReader = new BinaryReader(new MemoryStream(frag.Data));
-
-                            var messageCode = fragDataReader.ReadUInt32();
 
                             if (messageCode == (uint)PacketOpcode.WEENIE_ORDERED_EVENT || messageCode == (uint)PacketOpcode.ORDERED_EVENT) // WEENIE_ORDERED_EVENT or ORDERED_EVENT 
                             {
@@ -693,6 +686,65 @@ namespace aclogview
                             totalExceptions++;
                         }
                     }
+
+                    //foreach (var frag in kvp.Value)
+                    //{
+                    //    fragmentsProcessed++;
+
+                    //    try
+                    //    {
+                    //        // ********************************************************************
+                    //        // ********************** CUSTOM PROCESSING CODE ********************** 
+                    //        // ********************************************************************
+                    //        if (frag.Data.Length <= 4)
+                    //            continue;
+
+                    //        BinaryReader fragDataReader = new BinaryReader(new MemoryStream(frag.Data));
+
+                    //        var messageCode = fragDataReader.ReadUInt32();
+
+                    //        if (messageCode == (uint)PacketOpcode.WEENIE_ORDERED_EVENT || messageCode == (uint)PacketOpcode.ORDERED_EVENT) // WEENIE_ORDERED_EVENT or ORDERED_EVENT 
+                    //        {
+                    //            uint opCode = 0;
+
+                    //            if (messageCode == (uint)PacketOpcode.WEENIE_ORDERED_EVENT)
+                    //            {
+                    //                WOrderHdr orderHeader = WOrderHdr.read(fragDataReader);
+                    //                opCode = fragDataReader.ReadUInt32();
+                    //            }
+                    //            if (messageCode == (uint)PacketOpcode.ORDERED_EVENT)
+                    //            {
+                    //                OrderHdr orderHeader = OrderHdr.read(fragDataReader);
+                    //                opCode = fragDataReader.ReadUInt32();
+                    //            }
+
+                    //            if (opCode == (uint)PacketOpcode.APPRAISAL_INFO_EVENT)
+                    //            {
+                    //                var parsed = CM_Examine.SetAppraiseInfo.read(fragDataReader);
+
+                    //                CreateAppraisalObjectsList(parsed, objectIds, staticObjects, weenieIds, weenies, appraisalObjects, appraisalObjectIds, appraisalObjectsCatagoryMap, appraisalObjectToWeenieId);
+                    //            }
+
+                    //            if (opCode == (uint)PacketOpcode.BOOK_DATA_RESPONSE_EVENT)
+                    //            {
+                    //                var parsed = CM_Writing.PageDataList.read(fragDataReader);
+
+                    //                CreateBookObjectsList(parsed, objectIds, staticObjects, weenieIds, weenies, appraisalObjects, appraisalObjectIds, appraisalObjectsCatagoryMap, appraisalObjectToWeenieId, bookObjectIds, bookObjects);
+                    //            }
+
+                    //            if (opCode == (uint)PacketOpcode.BOOK_PAGE_DATA_RESPONSE_EVENT)
+                    //            {
+                    //                var parsed = CM_Writing.PageData.read(fragDataReader);
+
+                    //                CreatePageObjectsList(parsed, objectIds, staticObjects, weenieIds, weenies, appraisalObjects, appraisalObjectIds, appraisalObjectsCatagoryMap, appraisalObjectToWeenieId, pageObjectIds, pageObjects);
+                    //            }
+                    //        }
+                    //    }
+                    //    catch (EndOfStreamException) // This can happen when a frag is incomplete and we try to parse it
+                    //    {
+                    //        totalExceptions++;
+                    //    }
+                    //}
 
                 }
 
@@ -2191,7 +2243,11 @@ namespace aclogview
             }
         }
 
-        private void CreateStaticObjectsList(CM_Physics.CreateObject parsed, List<uint> objectIds, Dictionary<string, List<CM_Physics.CreateObject>> staticObjects, List<uint> weenieIds, Dictionary<string, List<CM_Physics.CreateObject>> weenies, Dictionary<uint, List<Position>> processedWeeniePositions, Dictionary<uint, string> appraisalObjectsCatagoryMap, Dictionary<uint, uint> appraisalObjectToWeenieId, Dictionary<uint, uint> weeniesWeenieType, Dictionary<uint, uint> staticObjectsWeenieType)
+        private void CreateStaticObjectsList(CM_Physics.CreateObject parsed, List<uint> objectIds, Dictionary<string, List<CM_Physics.CreateObject>> staticObjects, 
+            List<uint> weenieIds, Dictionary<string, List<CM_Physics.CreateObject>> weenies, Dictionary<uint, List<Position>> processedWeeniePositions, 
+            Dictionary<uint, string> appraisalObjectsCatagoryMap, Dictionary<uint, uint> appraisalObjectToWeenieId, Dictionary<uint, uint> weeniesWeenieType, 
+            Dictionary<uint, uint> staticObjectsWeenieType, Dictionary<uint, List<uint>> wieldedObjectsParentMap, Dictionary<uint, List<CM_Physics.CreateObject>> wieldedObjects,
+            Dictionary<uint, List<uint>> inventoryParents, Dictionary<uint, CM_Physics.CreateObject> inventoryObjects)
         {
             try
             {
@@ -3152,7 +3208,7 @@ namespace aclogview
                         weenieType = WeenieType.Creature_WeenieType;
                         addIt = true;
                     }
-                    else if (parsed.wdesc._name.m_buffer.Contains("Statue")
+                    else if (parsed.wdesc._name.m_buffer.Contains("Statue") && !parsed.wdesc._name.m_buffer.Contains("Bronze")
                         || parsed.wdesc._name.m_buffer.Contains("Shrine")
                         // || parsed.wdesc._name.m_buffer.Contains("Altar")
                         || parsed.wdesc._name.m_buffer.Contains("Warden of")
@@ -3435,21 +3491,239 @@ namespace aclogview
                 if (!processedWeeniePositions.ContainsKey(parsed.wdesc._wcid))
                     processedWeeniePositions.Add(parsed.wdesc._wcid, new List<Position>());
 
-                if (objectIds.Contains(parsed.wdesc._wielderID))
+                ////if (objectIds.Contains(parsed.wdesc._wielderID))
+                ////{
+                ////    fileToPutItIn = weeniefileToPutItIn + "-wielded";
+                ////    addIt = true;
+                ////}
+                ////else if (objectIds.Contains(parsed.wdesc._containerID))
+                ////{
+                ////    fileToPutItIn = weeniefileToPutItIn + "-contained";
+                ////    addIt = true;
+                ////}
+                ////else if (objectIds.Contains(parsed.physicsdesc.parent_id))
+                ////{
+                ////    fileToPutItIn = weeniefileToPutItIn + "-children";
+                ////    addIt = true;
+                ////}
+
+                //foreach (var child in parsed.physicsdesc.children)
+                //{
+                //    if (!wieldedObjectsParentMap.ContainsKey(parsed.physicsdesc.parent_id))
+                //    {
+                //        wieldedObjectsParentMap.Add(parsed.physicsdesc.parent_id, new List<uint>());
+                //    }
+
+                //    wieldedObjectsParentMap[parsed.physicsdesc.parent_id].Add(child.id);                  
+                //}
+
+                //if (parsed.physicsdesc.parent_id > 0)
+                //{
+                //    if (!wieldedObjectsParentMap.ContainsKey(parsed.physicsdesc.parent_id))
+                //    {
+                //        wieldedObjectsParentMap.Add(parsed.physicsdesc.parent_id, new List<uint>());
+                //    }
+
+                //    if (!wieldedObjectsParentMap[parsed.physicsdesc.parent_id].Contains(parsed.object_id))
+                //    {
+                //        wieldedObjectsParentMap[parsed.physicsdesc.parent_id].Add(parsed.object_id);
+
+                //        if (!wieldedObjects.ContainsKey(parsed.physicsdesc.parent_id))
+                //            wieldedObjects.Add(parsed.physicsdesc.parent_id, new List<CreateObject>());
+
+                //        wieldedObjects[parsed.physicsdesc.parent_id].Add(parsed);
+                //    }
+                //}
+
+                //bool addedChild = false;
+                ////if (addIt)
+                ////{
+                ////    foreach (var child in parsed.physicsdesc.children)
+                ////    {
+                ////        if (!wieldedObjectsParentMap.ContainsKey(parsed.wdesc._wcid))
+                ////        {
+                ////            wieldedObjectsParentMap.Add(parsed.wdesc._wcid, new List<uint>());
+                ////        }
+
+                ////        wieldedObjectsParentMap[parsed.wdesc._wcid].Add(child.id);
+                ////    }
+                ////}
+                ////else
+                ////{
+                ////    if (parsed.wdesc._name.m_buffer == "Giant Monouga Axe")
+                ////        System.Diagnostics.Debug.WriteLine("Found Axe");
+
+                ////    if (parsed.physicsdesc.parent_id > 0)
+                ////    {
+                ////        foreach (var parent in wieldedObjectsParentMap.Keys)
+                ////        {
+                ////            foreach (var child in wieldedObjectsParentMap[parent])
+                ////            {
+                ////                if (child == parsed.object_id)
+                ////                {
+                ////                    if (!wieldedObjects.ContainsKey(parent))
+                ////                        wieldedObjects.Add(parent, new List<CreateObject>());
+
+                ////                    wieldedObjects[parent].Add(parsed);
+
+                ////                    fileToPutItIn = weeniefileToPutItIn + "-wielded";
+                ////                    //// fileToPutItIn = weeniefileToPutItIn;
+                ////                    addIt = true;
+
+                ////                    //addedChild = true;
+                ////                }
+                ////            }
+                ////        }
+
+                ////        //if (!addedChild)
+                ////        //{
+                ////        //    if (!wieldedObjectsParentMap.ContainsKey(parsed.physicsdesc.parent_id))
+                ////        //    {
+                ////        //        wieldedObjectsParentMap.Add(parsed.physicsdesc.parent_id, new List<uint>());
+                ////        //    }
+
+                ////        //    if (!wieldedObjectsParentMap[parsed.physicsdesc.parent_id].Contains(parsed.object_id))
+                ////        //    {
+                ////        //        wieldedObjectsParentMap[parsed.physicsdesc.parent_id].Add(parsed.object_id);
+
+                ////        //        if (!wieldedObjects.ContainsKey(parsed.physicsdesc.parent_id))
+                ////        //            wieldedObjects.Add(parsed.physicsdesc.parent_id, new List<CreateObject>());
+
+                ////        //        wieldedObjects[parsed.physicsdesc.parent_id].Add(parsed);
+                ////        //    }
+                ////        //}
+                ////    }
+                ////}
+                //if (parsed.physicsdesc.parent_id > 0)
+                //{
+                //    //if (!wieldedObjectsParentMap.ContainsKey(parsed.physicsdesc.parent_id))
+                //    //{
+                //    //    wieldedObjectsParentMap.Add(parsed.physicsdesc.parent_id, new List<uint>());
+                //    //}
+
+                //    //if (!wieldedObjectsParentMap[parsed.physicsdesc.parent_id].Contains(parsed.object_id))
+                //    //{
+                //    //    wieldedObjectsParentMap[parsed.physicsdesc.parent_id].Add(parsed.object_id);
+
+                //    //    if (!wieldedObjects.ContainsKey(parsed.physicsdesc.parent_id))
+                //    //        wieldedObjects.Add(parsed.physicsdesc.parent_id, new List<CreateObject>());
+
+                //    //    wieldedObjects[parsed.physicsdesc.parent_id].Add(parsed);
+                //    //}
+                //    foreach (var children in wieldedObjectsParentMap.Values)
+                //    {
+                //        if (children.Contains(parsed.object_id))
+                //        {
+
+                //        }
+                //    }
+                //}
+
+                //if (wieldedObjectsParentMap.ContainsKey(parsed.physicsdesc.parent_id))
+                //{
+                //    //foreach (var child in wieldedObjects[parsed.physicsdesc.parent_id])
+                //    //{
+                //    //    if (addWeenie)
+                //    //    {
+                //    //        if (!objectIds.Contains(child.object_id))
+                //    //        {
+                //    //            fileToPutItIn = weeniefileToPutItIn + "-wielded";
+                //    //            addIt = true;
+                //    //        }
+                //    //    }
+                //    //}
+                //    if (objectIds.Contains(parsed.physicsdesc.parent_id))
+                //    {
+                //        // fileToPutItIn = weeniefileToPutItIn + "-wielded";
+                //        fileToPutItIn = weeniefileToPutItIn;
+                //        addIt = true;
+                //    }
+                //}
+
+                if (addIt)
                 {
-                    fileToPutItIn = weeniefileToPutItIn + "-wielded";
-                    addIt = true;
+                    if (parsed.physicsdesc.children.Count > 0)
+                    {
+                        if (!wieldedObjectsParentMap.ContainsKey(parsed.object_id))
+                        {
+                            wieldedObjectsParentMap.Add(parsed.object_id, new List<uint>());
+                        }
+
+                        foreach (var child in parsed.physicsdesc.children)
+                        {
+                            wieldedObjectsParentMap[parsed.object_id].Add(child.id);
+                        }
+                    }
                 }
-                else if (objectIds.Contains(parsed.wdesc._containerID))
+
+                if (parsed.physicsdesc.parent_id > 0)
                 {
-                    fileToPutItIn = weeniefileToPutItIn + "-contained";
-                    addIt = true;
+                    if (!inventoryParents.ContainsKey(parsed.physicsdesc.parent_id))
+                    {
+                        inventoryParents.Add(parsed.physicsdesc.parent_id, new List<uint>());
+                    }
+
+                    if (!inventoryParents[parsed.physicsdesc.parent_id].Contains(parsed.object_id))
+                    {
+                        uint weenieDedupe = 0;
+                        bool weenieFound = false;
+                        foreach (var child in inventoryParents[parsed.physicsdesc.parent_id])
+                        {
+                            appraisalObjectToWeenieId.TryGetValue(child, out weenieDedupe);
+                         
+                            if ((weenieDedupe > 0) && weenieDedupe == parsed.wdesc._wcid)
+                                weenieFound = true;
+                        }
+
+                        if (!weenieFound)
+                        {
+                            inventoryParents[parsed.physicsdesc.parent_id].Add(parsed.object_id);
+
+                            //if (!inventoryObjects.ContainsKey(parsed.object_id))
+                            //    inventoryObjects.Add(parsed.object_id, parsed);
+
+                            // inventoryObjects[parsed.object_id].Add(parsed);
+
+                            if (!wieldedObjects.ContainsKey(parsed.physicsdesc.parent_id))
+                                wieldedObjects.Add(parsed.physicsdesc.parent_id, new List<CreateObject>());
+
+                            wieldedObjects[parsed.physicsdesc.parent_id].Add(parsed);
+                        }
+
+                        if (objectIds.Contains(parsed.physicsdesc.parent_id))
+                        {
+                            //fileToPutItIn = weeniefileToPutItIn + "-wielded";
+                            //fileToPutItIn = weeniefileToPutItIn;
+                            //addIt = true;
+                            if (wieldedObjectsParentMap.ContainsKey(parsed.physicsdesc.parent_id))
+                            {
+                                foreach (var child in wieldedObjectsParentMap[parsed.physicsdesc.parent_id])
+                                {
+                                    if (child == parsed.object_id)
+                                    {
+                                        fileToPutItIn = weeniefileToPutItIn;
+                                        addIt = true;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }               
                 }
-                else if (objectIds.Contains(parsed.physicsdesc.parent_id))
-                {
-                    fileToPutItIn = weeniefileToPutItIn + "-children";
-                    addIt = true;
-                }
+
+                //if (addIt)
+                //{
+                //    foreach (var child in parsed.physicsdesc.children)
+                //    {
+                //        if (!inventoryParents.ContainsKey(parsed.physicsdesc.parent_id))
+                //        {
+                //            inventoryParents.Add(parsed.physicsdesc.parent_id, new List<uint>());
+                //        }
+
+                //        inventoryParents[parsed.physicsdesc.parent_id].Add(child.id);
+                //    }
+                //}
+
 
                 // de-dupe based on position and wcid
                 if (addIt && !PositionRecorded(parsed, processedWeeniePositions[parsed.wdesc._wcid], parsed.physicsdesc.pos, margin))
@@ -3462,9 +3736,6 @@ namespace aclogview
 
                         weenies[fileToPutItIn].Add(parsed);
                         weenieIds.Add(parsed.wdesc._wcid);
-
-                        //if (parsed.wdesc._wcid == 9519)
-                        //    System.Diagnostics.Debug.WriteLine("bp here");
 
                         if (!appraisalObjectsCatagoryMap.ContainsKey(parsed.object_id))
                             appraisalObjectsCatagoryMap.Add(parsed.object_id, fileToPutItIn);
@@ -3493,6 +3764,137 @@ namespace aclogview
                     processedWeeniePositions[parsed.wdesc._wcid].Add(parsed.physicsdesc.pos);
 
                     totalHits++;
+
+                    if (inventoryParents.ContainsKey(parsed.object_id))
+                    {
+                        foreach (var child in wieldedObjects[parsed.object_id])
+                        {
+                            if (wieldedObjectsParentMap.ContainsKey(parsed.object_id))
+                            {
+                                if (wieldedObjectsParentMap[parsed.object_id].Contains(child.object_id))
+                                {
+                                    //string newfileToPutItIn = fileToPutItIn + "-wielded";
+                                    string newfileToPutItIn = fileToPutItIn;
+                                    if (!staticObjects.ContainsKey(newfileToPutItIn))
+                                        staticObjects.Add(newfileToPutItIn, new List<CM_Physics.CreateObject>());
+
+                                    staticObjects[newfileToPutItIn].Add(child);
+                                    objectIds.Add(child.object_id);
+
+                                    if (!appraisalObjectToWeenieId.ContainsKey(child.object_id))
+                                        appraisalObjectToWeenieId.Add(child.object_id, child.wdesc._wcid);
+
+                                    if (!appraisalObjectsCatagoryMap.ContainsKey(child.object_id))
+                                        appraisalObjectsCatagoryMap.Add(child.object_id, newfileToPutItIn);
+
+                                    if (!staticObjectsWeenieType.ContainsKey(child.object_id))
+                                        staticObjectsWeenieType.Add(child.object_id, (uint)weenieType);
+
+                                    processedWeeniePositions[child.wdesc._wcid].Add(child.physicsdesc.pos);
+
+                                    totalHits++;
+                                }
+                            }
+                        }
+                    }
+
+                    //if (wieldedObjectsParentMap.ContainsKey(parsed.object_id))
+                    //{
+                    //    foreach (var child in wieldedObjects[parsed.object_id])
+                    //    {
+                    //        if (!objectIds.Contains(child.object_id))
+                    //        {
+                    //            string newfileToPutItIn = fileToPutItIn + "-wieldedobjects";
+                    //            if (!staticObjects.ContainsKey(newfileToPutItIn))
+                    //                staticObjects.Add(newfileToPutItIn, new List<CM_Physics.CreateObject>());
+
+                    //            staticObjects[newfileToPutItIn].Add(child);
+                    //            objectIds.Add(child.object_id);
+
+                    //            if (!appraisalObjectToWeenieId.ContainsKey(child.object_id))
+                    //                appraisalObjectToWeenieId.Add(child.object_id, child.wdesc._wcid);
+
+                    //            if (!appraisalObjectsCatagoryMap.ContainsKey(child.object_id))
+                    //                appraisalObjectsCatagoryMap.Add(child.object_id, newfileToPutItIn);
+
+                    //            if (!staticObjectsWeenieType.ContainsKey(child.object_id))
+                    //                staticObjectsWeenieType.Add(child.object_id, (uint)weenieType);
+
+                    //            processedWeeniePositions[child.wdesc._wcid].Add(child.physicsdesc.pos);
+
+                    //            totalHits++;
+                    //        }
+                    //    }
+                    //}
+
+                    //if (!addedChild)
+                    //{
+                    //    if (wieldedObjectsParentMap.ContainsKey(parsed.wdesc._wcid))
+                    //    {
+                    //        if (wieldedObjects.ContainsKey(parsed.wdesc._wcid))
+                    //        {
+                    //            foreach (var child in wieldedObjects[parsed.wdesc._wcid])
+                    //            {
+                    //                if (!objectIds.Contains(child.object_id))
+                    //                {
+                    //                    string newfileToPutItIn = fileToPutItIn + "-wieldedobjects";
+                    //                    if (!staticObjects.ContainsKey(newfileToPutItIn))
+                    //                        staticObjects.Add(newfileToPutItIn, new List<CM_Physics.CreateObject>());
+
+                    //                    staticObjects[newfileToPutItIn].Add(child);
+                    //                    objectIds.Add(child.object_id);
+
+                    //                    if (!appraisalObjectToWeenieId.ContainsKey(child.object_id))
+                    //                        appraisalObjectToWeenieId.Add(child.object_id, child.wdesc._wcid);
+
+                    //                    if (!appraisalObjectsCatagoryMap.ContainsKey(child.object_id))
+                    //                        appraisalObjectsCatagoryMap.Add(child.object_id, newfileToPutItIn);
+
+                    //                    if (!staticObjectsWeenieType.ContainsKey(child.object_id))
+                    //                        staticObjectsWeenieType.Add(child.object_id, (uint)weenieType);
+
+                    //                    processedWeeniePositions[child.wdesc._wcid].Add(child.physicsdesc.pos);
+
+                    //                    totalHits++;
+                    //                }
+                    //            }
+                    //        }
+                    //    }
+                    //}
+                    //else
+                    //{
+                    //    if (wieldedObjectsParentMap.ContainsKey(parsed.physicsdesc.parent_id))
+                    //    {
+                    //        if (wieldedObjects.ContainsKey(parsed.physicsdesc.parent_id))
+                    //        {
+                    //            foreach (var child in wieldedObjects[parsed.physicsdesc.parent_id])
+                    //            {
+                    //                if (!objectIds.Contains(child.object_id))
+                    //                {
+                    //                    string newfileToPutItIn = fileToPutItIn + "-wieldedobjectsXXX";
+                    //                    if (!staticObjects.ContainsKey(newfileToPutItIn))
+                    //                        staticObjects.Add(newfileToPutItIn, new List<CM_Physics.CreateObject>());
+
+                    //                    staticObjects[newfileToPutItIn].Add(child);
+                    //                    objectIds.Add(child.object_id);
+
+                    //                    if (!appraisalObjectToWeenieId.ContainsKey(child.object_id))
+                    //                        appraisalObjectToWeenieId.Add(child.object_id, child.wdesc._wcid);
+
+                    //                    if (!appraisalObjectsCatagoryMap.ContainsKey(child.object_id))
+                    //                        appraisalObjectsCatagoryMap.Add(child.object_id, newfileToPutItIn);
+
+                    //                    if (!staticObjectsWeenieType.ContainsKey(child.object_id))
+                    //                        staticObjectsWeenieType.Add(child.object_id, (uint)weenieType);
+
+                    //                    processedWeeniePositions[child.wdesc._wcid].Add(child.physicsdesc.pos);
+
+                    //                    totalHits++;
+                    //                }
+                    //            }
+                    //        }
+                    //    }
+                    //}
                 }
                 else if (addWeenie)
                 {
