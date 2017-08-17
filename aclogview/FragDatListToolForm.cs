@@ -501,12 +501,10 @@ namespace aclogview
                 Dictionary<uint, List<CM_Physics.CreateObject>> wieldedObjects = new Dictionary<uint, List<CM_Physics.CreateObject>>();
 
                 Dictionary<uint, List<uint>> inventoryParents = new Dictionary<uint, List<uint>>();
-                //Dictionary<uint, List<CM_Physics.CreateObject>> inventoryObjects = new Dictionary<uint, List<CM_Physics.CreateObject>>();
                 Dictionary<uint, CM_Physics.CreateObject> inventoryObjects = new Dictionary<uint, CM_Physics.CreateObject>();
 
                 List<uint> appraisalObjectIds = new List<uint>();
                 Dictionary<string, List<CM_Examine.SetAppraiseInfo>> appraisalObjects = new Dictionary<string, List<CM_Examine.SetAppraiseInfo>>();
-                //Dictionary<uint, uint> assessmentInfoStatus = new Dictionary<uint, uint>();
                 Dictionary<uint, string> appraisalObjectsCatagoryMap = new Dictionary<uint, string>();
                 Dictionary<uint, uint> appraisalObjectToWeenieId = new Dictionary<uint, uint>();
 
@@ -527,92 +525,7 @@ namespace aclogview
 
                     if (!fragDatListFile.TryReadNext(out kvp))
                         break;
-
-                    //foreach (var frag in kvp.Value)
-                    //{
-                    //    fragmentsProcessed++;
-
-                    //    //if (fragmentsProcessed > 600000)
-                    //    //    break;
-
-                    //    try
-                    //    {
-                    //        // ********************************************************************
-                    //        // ********************** CUSTOM PROCESSING CODE ********************** 
-                    //        // ********************************************************************
-                    //        if (frag.Data.Length <= 4)
-                    //            continue;
-
-                    //        BinaryReader fragDataReader = new BinaryReader(new MemoryStream(frag.Data));
-
-                    //        var messageCode = fragDataReader.ReadUInt32();
-
-                    //        if (messageCode == (uint)PacketOpcode.Evt_Physics__CreateObject_ID) // Create Object
-                    //        {
-                    //            var parsed = CM_Physics.CreateObject.read(fragDataReader);
-
-                    //            CreateStaticObjectsList(parsed, objectIds, staticObjects, weenieIds, weenies, processedWeeniePositions, appraisalObjectsCatagoryMap, appraisalObjectToWeenieId, weeniesWeenieType, staticObjectsWeenieType);
-
-                    //            //totalHits++;
-
-                    //            //if (!itemTypesToParse.Contains(parsed.wdesc._type))
-                    //            //    continue;
-
-                    //            //totalHits++;
-
-                    //            //// This bit of trickery uses the existing tree view parser code to create readable output, which we can then convert to csv
-                    //            //treeView.Nodes.Clear();
-                    //            //parsed.contributeToTreeView(treeView);
-                    //            //if (treeView.Nodes.Count == 1)
-                    //            //{
-                    //            //    var lineItems = new string[256];
-                    //            //    int lineItemCount = 0;
-
-                    //            //    ProcessNode(treeView.Nodes[0], itemTypeKeys[parsed.wdesc._type], null, lineItems, ref lineItemCount);
-
-                    //            //    var sb = new StringBuilder();
-
-                    //            //    for (int i = 0; i < lineItemCount; i++)
-                    //            //    {
-                    //            //        if (i > 0)
-                    //            //            sb.Append(',');
-
-                    //            //        var output = lineItems[i];
-
-                    //            //        // Format the value for CSV output, if needed.
-                    //            //        // We only do this for certain columns. This is very time consuming
-                    //            //        if (output != null && itemTypeKeys[parsed.wdesc._type][i].EndsWith("name"))
-                    //            //        {
-                    //            //            if (output.Contains(",") || output.Contains("\"") || output.Contains("\r") || output.Contains("\n"))
-                    //            //            {
-                    //            //                var sb2 = new StringBuilder();
-                    //            //                sb2.Append("\"");
-                    //            //                foreach (char nextChar in output)
-                    //            //                {
-                    //            //                    sb2.Append(nextChar);
-                    //            //                    if (nextChar == '"')
-                    //            //                        sb2.Append("\"");
-                    //            //                }
-                    //            //                sb2.Append("\"");
-                    //            //                output = sb2.ToString();
-                    //            //            }
-
-                    //            //        }
-
-                    //            //        if (output != null)
-                    //            //            sb.Append(output);
-                    //            //    }
-
-                    //            //    itemTypeStreamWriters[parsed.wdesc._type].WriteLine(sb.ToString());
-                    //            //}
-                    //        }
-                    //    }
-                    //    catch (EndOfStreamException) // This can happen when a frag is incomplete and we try to parse it
-                    //    {
-                    //        totalExceptions++;
-                    //    }
-                    //}
-
+                    
                     foreach (var frag in kvp.Value)
                     {
                         fragmentsProcessed++;
@@ -663,21 +576,32 @@ namespace aclogview
                                 {
                                     var parsed = CM_Examine.SetAppraiseInfo.read(fragDataReader);
 
-                                    CreateAppraisalObjectsList(parsed, objectIds, staticObjects, weenieIds, weenies, appraisalObjects, appraisalObjectIds, appraisalObjectsCatagoryMap, appraisalObjectToWeenieId);
+                                    CreateAppraisalObjectsList(parsed, 
+                                        objectIds, staticObjects, 
+                                        weenieIds, weenies, 
+                                        appraisalObjects, appraisalObjectIds, appraisalObjectsCatagoryMap, appraisalObjectToWeenieId);
                                 }
 
                                 if (opCode == (uint)PacketOpcode.BOOK_DATA_RESPONSE_EVENT)
                                 {
                                     var parsed = CM_Writing.PageDataList.read(fragDataReader);
 
-                                    CreateBookObjectsList(parsed, objectIds, staticObjects, weenieIds, weenies, appraisalObjects, appraisalObjectIds, appraisalObjectsCatagoryMap, appraisalObjectToWeenieId, bookObjectIds, bookObjects);
+                                    CreateBookObjectsList(parsed, 
+                                        objectIds, staticObjects, 
+                                        weenieIds, weenies, 
+                                        appraisalObjects, appraisalObjectIds, appraisalObjectsCatagoryMap, appraisalObjectToWeenieId, 
+                                        bookObjectIds, bookObjects);
                                 }
 
                                 if (opCode == (uint)PacketOpcode.BOOK_PAGE_DATA_RESPONSE_EVENT)
                                 {
                                     var parsed = CM_Writing.PageData.read(fragDataReader);
 
-                                    CreatePageObjectsList(parsed, objectIds, staticObjects, weenieIds, weenies, appraisalObjects, appraisalObjectIds, appraisalObjectsCatagoryMap, appraisalObjectToWeenieId, pageObjectIds, pageObjects);
+                                    CreatePageObjectsList(parsed, 
+                                        objectIds, staticObjects, 
+                                        weenieIds, weenies, 
+                                        appraisalObjects, appraisalObjectIds, appraisalObjectsCatagoryMap, appraisalObjectToWeenieId, 
+                                        pageObjectIds, pageObjects);
                                 }
                             }
                         }
@@ -686,66 +610,6 @@ namespace aclogview
                             totalExceptions++;
                         }
                     }
-
-                    //foreach (var frag in kvp.Value)
-                    //{
-                    //    fragmentsProcessed++;
-
-                    //    try
-                    //    {
-                    //        // ********************************************************************
-                    //        // ********************** CUSTOM PROCESSING CODE ********************** 
-                    //        // ********************************************************************
-                    //        if (frag.Data.Length <= 4)
-                    //            continue;
-
-                    //        BinaryReader fragDataReader = new BinaryReader(new MemoryStream(frag.Data));
-
-                    //        var messageCode = fragDataReader.ReadUInt32();
-
-                    //        if (messageCode == (uint)PacketOpcode.WEENIE_ORDERED_EVENT || messageCode == (uint)PacketOpcode.ORDERED_EVENT) // WEENIE_ORDERED_EVENT or ORDERED_EVENT 
-                    //        {
-                    //            uint opCode = 0;
-
-                    //            if (messageCode == (uint)PacketOpcode.WEENIE_ORDERED_EVENT)
-                    //            {
-                    //                WOrderHdr orderHeader = WOrderHdr.read(fragDataReader);
-                    //                opCode = fragDataReader.ReadUInt32();
-                    //            }
-                    //            if (messageCode == (uint)PacketOpcode.ORDERED_EVENT)
-                    //            {
-                    //                OrderHdr orderHeader = OrderHdr.read(fragDataReader);
-                    //                opCode = fragDataReader.ReadUInt32();
-                    //            }
-
-                    //            if (opCode == (uint)PacketOpcode.APPRAISAL_INFO_EVENT)
-                    //            {
-                    //                var parsed = CM_Examine.SetAppraiseInfo.read(fragDataReader);
-
-                    //                CreateAppraisalObjectsList(parsed, objectIds, staticObjects, weenieIds, weenies, appraisalObjects, appraisalObjectIds, appraisalObjectsCatagoryMap, appraisalObjectToWeenieId);
-                    //            }
-
-                    //            if (opCode == (uint)PacketOpcode.BOOK_DATA_RESPONSE_EVENT)
-                    //            {
-                    //                var parsed = CM_Writing.PageDataList.read(fragDataReader);
-
-                    //                CreateBookObjectsList(parsed, objectIds, staticObjects, weenieIds, weenies, appraisalObjects, appraisalObjectIds, appraisalObjectsCatagoryMap, appraisalObjectToWeenieId, bookObjectIds, bookObjects);
-                    //            }
-
-                    //            if (opCode == (uint)PacketOpcode.BOOK_PAGE_DATA_RESPONSE_EVENT)
-                    //            {
-                    //                var parsed = CM_Writing.PageData.read(fragDataReader);
-
-                    //                CreatePageObjectsList(parsed, objectIds, staticObjects, weenieIds, weenies, appraisalObjects, appraisalObjectIds, appraisalObjectsCatagoryMap, appraisalObjectToWeenieId, pageObjectIds, pageObjects);
-                    //            }
-                    //        }
-                    //    }
-                    //    catch (EndOfStreamException) // This can happen when a frag is incomplete and we try to parse it
-                    //    {
-                    //        totalExceptions++;
-                    //    }
-                    //}
-
                 }
 
                 WriteWeenieData(weenies, txtOutputFolder.Text, weeniesWeenieType);
@@ -849,34 +713,16 @@ namespace aclogview
                 // de-dupe based on position and wcid
                 if (addIt) //&& !PositionRecorded(parsed, processedWeeniePositions[parsed.wdesc._wcid], parsed.physicsdesc.pos, margin))
                 {
-
-                    //if (parsed.bookID > 65535)
-                    //    return;
-
                     if (!bookObjects.ContainsKey(fileToPutItIn))
                     {
                         bookObjects.Add(fileToPutItIn, new Dictionary<uint, CM_Writing.PageDataList>());
                     }
-
-                    //if (!bookObjects[fileToPutItIn].ContainsKey(parsed.i_bookID))
-                    //{
-                    //    //bookObjects[fileToPutItIn].Add(parsed.bookID, new Dictionary<uint, CM_Writing.PageData>());
-                    //    bookObjects[fileToPutItIn].Add(parsed.i_bookID, new CM_Writing.PageDataList());
-                    //}
-
-                    //if (bookObjectIds.Contains(parsed.bookID))
-                    //{
-                    //    if (bookObjects[fileToPutItIn][parsed.bookID].ContainsKey(parsed.page))
-                    //        return;
-                    //}
-
+                    
                     if (bookObjectIds.Contains(parsed.i_bookID))
                     {
-                        //if (bookObjects[fileToPutItIn][parsed.bookID].ContainsKey(parsed.page))
                         return;
                     }
 
-                    //bookObjects[fileToPutItIn][parsed.bookID].Add(parsed.page, parsed);
                     bookObjects[fileToPutItIn].Add(parsed.i_bookID, parsed);
                     bookObjectIds.Add(parsed.i_bookID);
 
@@ -901,7 +747,7 @@ namespace aclogview
                         }
                     }
 
-                    if (!bookObjectIds.Contains(weenieId) && weenieId > 0) //&& !pageObjects[fileToPutItIn][weenieId].Keys.Contains(parsed.page))
+                    if (!bookObjectIds.Contains(weenieId) && weenieId > 0)
                     {
                         CM_Writing.PageDataList parsedClone;
 
@@ -919,11 +765,6 @@ namespace aclogview
                         {
                             bookObjects.Add(fileToPutItIn, new Dictionary<uint, CM_Writing.PageDataList>());
                         }
-
-                        //if (!bookObjects[fileToPutItIn].ContainsKey(parsedClone.i_bookID))
-                        //{
-                        //    bookObjects[fileToPutItIn].Add(parsedClone.i_bookID, new CM_Writing.PageDataList());
-                        //}
 
                         bookObjects[fileToPutItIn].Add(parsedClone.i_bookID, parsedClone);
                         bookObjectIds.Add(parsedClone.i_bookID);
@@ -979,8 +820,6 @@ namespace aclogview
                             }
                         }
 
-                        //foreach (var page in bookObjects[key].Values)
-                        //{
                         using (FileStream fs = new FileStream(fullFile, FileMode.Append))
                         {
                             using (StreamWriter writer = new StreamWriter(fs))
@@ -1261,10 +1100,6 @@ namespace aclogview
                 // de-dupe based on position and wcid
                 if (addIt) //&& !PositionRecorded(parsed, processedWeeniePositions[parsed.wdesc._wcid], parsed.physicsdesc.pos, margin))
                 {
-
-                    //if (parsed.bookID > 65535)
-                    //    return;
-
                     if (!pageObjects.ContainsKey(fileToPutItIn))
                     {
                         pageObjects.Add(fileToPutItIn, new Dictionary<uint, Dictionary<uint, CM_Writing.PageData>>());
@@ -1282,8 +1117,6 @@ namespace aclogview
                     }
 
                     pageObjects[fileToPutItIn][parsed.bookID].Add(parsed.page, parsed);
-                    //bookObjects[fileToPutItIn][parsed.bookID][parsed.page].Add(parsed);
-                    //bookObjects[fileToPutItIn].Add(parsed.bookID, );
                     bookObjectIds.Add(parsed.bookID);
 
                     if (bookObjectIds.Contains(weenieId) && weenieId > 0)
@@ -1309,7 +1142,7 @@ namespace aclogview
                         }
                     }
 
-                    if (!bookObjectIds.Contains(weenieId) && weenieId > 0) //&& !pageObjects[fileToPutItIn][weenieId].Keys.Contains(parsed.page))
+                    if (!bookObjectIds.Contains(weenieId) && weenieId > 0)
                     {
                         CM_Writing.PageData parsedClone;
 
@@ -1493,10 +1326,6 @@ namespace aclogview
         {
             try
             {
-                //uint success = 0;
-                // don't need undefined crap or players
-                //if (!objectIds.Contains(parsed.i_objid) || (assessmentInfoIds.Contains(parsed.i_objid) && assessmentInfoStatus.TryGetValue(parsed.i_objid, out success)))
-                //if (!objectIds.Contains(parsed.i_objid) || assessmentInfoIds.Contains(parsed.i_objid))
                 uint weenieId = 0;
                 bool foundInObjectIds = false;
                 bool foundInWeenieIds = false;
@@ -1504,15 +1333,8 @@ namespace aclogview
                 appraisalObjectToWeenieId.TryGetValue(parsed.i_objid, out weenieId);
                 foundInWeenieIds = weenieIds.Contains(weenieId);
 
-                //if (!objectIds.Contains(parsed.i_objid) || weenieId > 0 )
-                //if (!foundInObjectIds || weenieId > 0)
-                //    return;
-
                 if (!foundInObjectIds && !(weenieId > 0))
                     return;
-
-                //if (parsed.wdesc._wcid == 1 || objectIds.Contains(parsed.object_id))
-                //    return;
 
                 bool addIt = true;
                 //bool addWeenie = false;
@@ -1534,25 +1356,13 @@ namespace aclogview
                 }
 
                 // de-dupe based on position and wcid
-                //if (addIt && !PositionRecorded(parsed, processedWeeniePositions[parsed.wdesc._wcid], parsed.physicsdesc.pos, margin))
                 if (addIt) //&& !PositionRecorded(parsed, processedWeeniePositions[parsed.wdesc._wcid], parsed.physicsdesc.pos, margin))
                 {
-                    //if (!weenieIds.Contains(parsed.wdesc._wcid))
-                    //{
-                    //    if (!weenies.ContainsKey(fileToPutItIn))
-                    //        weenies.Add(fileToPutItIn, new List<CM_Physics.CreateObject>());
-
-                    //    weenies[fileToPutItIn].Add(parsed);
-                    //    weenieIds.Add(parsed.wdesc._wcid);
-                    //}
-
                     if (!appraisalObjects.ContainsKey(fileToPutItIn))
                         appraisalObjects.Add(fileToPutItIn, new List<CM_Examine.SetAppraiseInfo>());
 
                     if (appraisalObjectIds.Contains(parsed.i_objid))
                     {
-                        //int i = appraisalObjects[fileToPutItIn].FindIndex(appraisalObjects.Values);
-                        //var keyToRemove = appraisalObjects.FirstOrDefault(x => x.Value..FindIndex(parsed.i_objid)).Key;
                         int i = 0;
                         for (int ListIndex = 0; ListIndex < appraisalObjects[fileToPutItIn].Count; ListIndex++)
                         {
@@ -1563,10 +1373,7 @@ namespace aclogview
                             }
                         }
                         if (appraisalObjects[fileToPutItIn][i].i_prof.success_flag == 0)
-                        //if (appraisalObjects[fileToPutItIn][appraisalObjectIds.IndexOf(parsed.i_objid)].i_prof.success_flag == 0)
                         {
-                            //assessmentInfo[fileToPutItIn].Remove(parsed);
-                            //appraisalObjects[fileToPutItIn].RemoveAt(appraisalObjectIds.IndexOf(parsed.i_objid));
                             appraisalObjects[fileToPutItIn].RemoveAt(i);
                             appraisalObjectIds.Remove(parsed.i_objid);
                         }
@@ -1581,7 +1388,6 @@ namespace aclogview
                     {
                         CM_Examine.SetAppraiseInfo parsedClone;
 
-                        //parsedClone = parsed;
                         parsedClone = new CM_Examine.SetAppraiseInfo();
                         parsedClone.i_objid = weenieId;
                         parsedClone.i_prof = parsed.i_prof;
@@ -1590,33 +1396,11 @@ namespace aclogview
                         appraisalObjects[fileToPutItIn].Add(parsedClone);
                         appraisalObjectIds.Add(parsedClone.i_objid);
                     }
-                    //assessmentInfoStatus.Add(parsed.i_objid, parsed.i_prof.success_flag);
-
-                    //processedWeeniePositions[parsed.wdesc._wcid].Add(parsed.physicsdesc.pos);
-                    //if (parsed.i_objid == 3688325436)
-                    //{
-                    //    System.Diagnostics.Debug.WriteLine("Found Axe");
-                    //}
-
                     totalHits++;
                 }
-                //else if (addWeenie)
-                //{
-                //    if (!weenieIds.Contains(parsed.wdesc._wcid))
-                //    {
-                //        if (!weenies.ContainsKey(weeniefileToPutItIn))
-                //            weenies.Add(weeniefileToPutItIn, new List<CM_Physics.CreateObject>());
-
-                //        weenies[weeniefileToPutItIn].Add(parsed);
-                //        weenieIds.Add(parsed.wdesc._wcid);
-
-                //        totalHits++;
-                //    }
-                //}
             }
             catch (Exception ex)
             {
-                // MessageBox.Show(ex.ToString());
                 totalExceptions++;
             }
         }
@@ -3491,155 +3275,6 @@ namespace aclogview
                 if (!processedWeeniePositions.ContainsKey(parsed.wdesc._wcid))
                     processedWeeniePositions.Add(parsed.wdesc._wcid, new List<Position>());
 
-                ////if (objectIds.Contains(parsed.wdesc._wielderID))
-                ////{
-                ////    fileToPutItIn = weeniefileToPutItIn + "-wielded";
-                ////    addIt = true;
-                ////}
-                ////else if (objectIds.Contains(parsed.wdesc._containerID))
-                ////{
-                ////    fileToPutItIn = weeniefileToPutItIn + "-contained";
-                ////    addIt = true;
-                ////}
-                ////else if (objectIds.Contains(parsed.physicsdesc.parent_id))
-                ////{
-                ////    fileToPutItIn = weeniefileToPutItIn + "-children";
-                ////    addIt = true;
-                ////}
-
-                //foreach (var child in parsed.physicsdesc.children)
-                //{
-                //    if (!wieldedObjectsParentMap.ContainsKey(parsed.physicsdesc.parent_id))
-                //    {
-                //        wieldedObjectsParentMap.Add(parsed.physicsdesc.parent_id, new List<uint>());
-                //    }
-
-                //    wieldedObjectsParentMap[parsed.physicsdesc.parent_id].Add(child.id);                  
-                //}
-
-                //if (parsed.physicsdesc.parent_id > 0)
-                //{
-                //    if (!wieldedObjectsParentMap.ContainsKey(parsed.physicsdesc.parent_id))
-                //    {
-                //        wieldedObjectsParentMap.Add(parsed.physicsdesc.parent_id, new List<uint>());
-                //    }
-
-                //    if (!wieldedObjectsParentMap[parsed.physicsdesc.parent_id].Contains(parsed.object_id))
-                //    {
-                //        wieldedObjectsParentMap[parsed.physicsdesc.parent_id].Add(parsed.object_id);
-
-                //        if (!wieldedObjects.ContainsKey(parsed.physicsdesc.parent_id))
-                //            wieldedObjects.Add(parsed.physicsdesc.parent_id, new List<CreateObject>());
-
-                //        wieldedObjects[parsed.physicsdesc.parent_id].Add(parsed);
-                //    }
-                //}
-
-                //bool addedChild = false;
-                ////if (addIt)
-                ////{
-                ////    foreach (var child in parsed.physicsdesc.children)
-                ////    {
-                ////        if (!wieldedObjectsParentMap.ContainsKey(parsed.wdesc._wcid))
-                ////        {
-                ////            wieldedObjectsParentMap.Add(parsed.wdesc._wcid, new List<uint>());
-                ////        }
-
-                ////        wieldedObjectsParentMap[parsed.wdesc._wcid].Add(child.id);
-                ////    }
-                ////}
-                ////else
-                ////{
-                ////    if (parsed.wdesc._name.m_buffer == "Giant Monouga Axe")
-                ////        System.Diagnostics.Debug.WriteLine("Found Axe");
-
-                ////    if (parsed.physicsdesc.parent_id > 0)
-                ////    {
-                ////        foreach (var parent in wieldedObjectsParentMap.Keys)
-                ////        {
-                ////            foreach (var child in wieldedObjectsParentMap[parent])
-                ////            {
-                ////                if (child == parsed.object_id)
-                ////                {
-                ////                    if (!wieldedObjects.ContainsKey(parent))
-                ////                        wieldedObjects.Add(parent, new List<CreateObject>());
-
-                ////                    wieldedObjects[parent].Add(parsed);
-
-                ////                    fileToPutItIn = weeniefileToPutItIn + "-wielded";
-                ////                    //// fileToPutItIn = weeniefileToPutItIn;
-                ////                    addIt = true;
-
-                ////                    //addedChild = true;
-                ////                }
-                ////            }
-                ////        }
-
-                ////        //if (!addedChild)
-                ////        //{
-                ////        //    if (!wieldedObjectsParentMap.ContainsKey(parsed.physicsdesc.parent_id))
-                ////        //    {
-                ////        //        wieldedObjectsParentMap.Add(parsed.physicsdesc.parent_id, new List<uint>());
-                ////        //    }
-
-                ////        //    if (!wieldedObjectsParentMap[parsed.physicsdesc.parent_id].Contains(parsed.object_id))
-                ////        //    {
-                ////        //        wieldedObjectsParentMap[parsed.physicsdesc.parent_id].Add(parsed.object_id);
-
-                ////        //        if (!wieldedObjects.ContainsKey(parsed.physicsdesc.parent_id))
-                ////        //            wieldedObjects.Add(parsed.physicsdesc.parent_id, new List<CreateObject>());
-
-                ////        //        wieldedObjects[parsed.physicsdesc.parent_id].Add(parsed);
-                ////        //    }
-                ////        //}
-                ////    }
-                ////}
-                //if (parsed.physicsdesc.parent_id > 0)
-                //{
-                //    //if (!wieldedObjectsParentMap.ContainsKey(parsed.physicsdesc.parent_id))
-                //    //{
-                //    //    wieldedObjectsParentMap.Add(parsed.physicsdesc.parent_id, new List<uint>());
-                //    //}
-
-                //    //if (!wieldedObjectsParentMap[parsed.physicsdesc.parent_id].Contains(parsed.object_id))
-                //    //{
-                //    //    wieldedObjectsParentMap[parsed.physicsdesc.parent_id].Add(parsed.object_id);
-
-                //    //    if (!wieldedObjects.ContainsKey(parsed.physicsdesc.parent_id))
-                //    //        wieldedObjects.Add(parsed.physicsdesc.parent_id, new List<CreateObject>());
-
-                //    //    wieldedObjects[parsed.physicsdesc.parent_id].Add(parsed);
-                //    //}
-                //    foreach (var children in wieldedObjectsParentMap.Values)
-                //    {
-                //        if (children.Contains(parsed.object_id))
-                //        {
-
-                //        }
-                //    }
-                //}
-
-                //if (wieldedObjectsParentMap.ContainsKey(parsed.physicsdesc.parent_id))
-                //{
-                //    //foreach (var child in wieldedObjects[parsed.physicsdesc.parent_id])
-                //    //{
-                //    //    if (addWeenie)
-                //    //    {
-                //    //        if (!objectIds.Contains(child.object_id))
-                //    //        {
-                //    //            fileToPutItIn = weeniefileToPutItIn + "-wielded";
-                //    //            addIt = true;
-                //    //        }
-                //    //    }
-                //    //}
-                //    if (objectIds.Contains(parsed.physicsdesc.parent_id))
-                //    {
-                //        // fileToPutItIn = weeniefileToPutItIn + "-wielded";
-                //        fileToPutItIn = weeniefileToPutItIn;
-                //        addIt = true;
-                //    }
-                //}
-
                 if (addIt)
                 {
                     if (parsed.physicsdesc.children.Count > 0)
@@ -3679,11 +3314,6 @@ namespace aclogview
                         {
                             inventoryParents[parsed.physicsdesc.parent_id].Add(parsed.object_id);
 
-                            //if (!inventoryObjects.ContainsKey(parsed.object_id))
-                            //    inventoryObjects.Add(parsed.object_id, parsed);
-
-                            // inventoryObjects[parsed.object_id].Add(parsed);
-
                             if (!wieldedObjects.ContainsKey(parsed.physicsdesc.parent_id))
                                 wieldedObjects.Add(parsed.physicsdesc.parent_id, new List<CreateObject>());
 
@@ -3692,9 +3322,6 @@ namespace aclogview
 
                         if (objectIds.Contains(parsed.physicsdesc.parent_id))
                         {
-                            //fileToPutItIn = weeniefileToPutItIn + "-wielded";
-                            //fileToPutItIn = weeniefileToPutItIn;
-                            //addIt = true;
                             if (wieldedObjectsParentMap.ContainsKey(parsed.physicsdesc.parent_id))
                             {
                                 foreach (var child in wieldedObjectsParentMap[parsed.physicsdesc.parent_id])
@@ -3710,20 +3337,6 @@ namespace aclogview
                         }
                     }               
                 }
-
-                //if (addIt)
-                //{
-                //    foreach (var child in parsed.physicsdesc.children)
-                //    {
-                //        if (!inventoryParents.ContainsKey(parsed.physicsdesc.parent_id))
-                //        {
-                //            inventoryParents.Add(parsed.physicsdesc.parent_id, new List<uint>());
-                //        }
-
-                //        inventoryParents[parsed.physicsdesc.parent_id].Add(child.id);
-                //    }
-                //}
-
 
                 // de-dupe based on position and wcid
                 if (addIt && !PositionRecorded(parsed, processedWeeniePositions[parsed.wdesc._wcid], parsed.physicsdesc.pos, margin))
@@ -3773,7 +3386,6 @@ namespace aclogview
                             {
                                 if (wieldedObjectsParentMap[parsed.object_id].Contains(child.object_id))
                                 {
-                                    //string newfileToPutItIn = fileToPutItIn + "-wielded";
                                     string newfileToPutItIn = fileToPutItIn;
                                     if (!staticObjects.ContainsKey(newfileToPutItIn))
                                         staticObjects.Add(newfileToPutItIn, new List<CM_Physics.CreateObject>());
@@ -3797,104 +3409,6 @@ namespace aclogview
                             }
                         }
                     }
-
-                    //if (wieldedObjectsParentMap.ContainsKey(parsed.object_id))
-                    //{
-                    //    foreach (var child in wieldedObjects[parsed.object_id])
-                    //    {
-                    //        if (!objectIds.Contains(child.object_id))
-                    //        {
-                    //            string newfileToPutItIn = fileToPutItIn + "-wieldedobjects";
-                    //            if (!staticObjects.ContainsKey(newfileToPutItIn))
-                    //                staticObjects.Add(newfileToPutItIn, new List<CM_Physics.CreateObject>());
-
-                    //            staticObjects[newfileToPutItIn].Add(child);
-                    //            objectIds.Add(child.object_id);
-
-                    //            if (!appraisalObjectToWeenieId.ContainsKey(child.object_id))
-                    //                appraisalObjectToWeenieId.Add(child.object_id, child.wdesc._wcid);
-
-                    //            if (!appraisalObjectsCatagoryMap.ContainsKey(child.object_id))
-                    //                appraisalObjectsCatagoryMap.Add(child.object_id, newfileToPutItIn);
-
-                    //            if (!staticObjectsWeenieType.ContainsKey(child.object_id))
-                    //                staticObjectsWeenieType.Add(child.object_id, (uint)weenieType);
-
-                    //            processedWeeniePositions[child.wdesc._wcid].Add(child.physicsdesc.pos);
-
-                    //            totalHits++;
-                    //        }
-                    //    }
-                    //}
-
-                    //if (!addedChild)
-                    //{
-                    //    if (wieldedObjectsParentMap.ContainsKey(parsed.wdesc._wcid))
-                    //    {
-                    //        if (wieldedObjects.ContainsKey(parsed.wdesc._wcid))
-                    //        {
-                    //            foreach (var child in wieldedObjects[parsed.wdesc._wcid])
-                    //            {
-                    //                if (!objectIds.Contains(child.object_id))
-                    //                {
-                    //                    string newfileToPutItIn = fileToPutItIn + "-wieldedobjects";
-                    //                    if (!staticObjects.ContainsKey(newfileToPutItIn))
-                    //                        staticObjects.Add(newfileToPutItIn, new List<CM_Physics.CreateObject>());
-
-                    //                    staticObjects[newfileToPutItIn].Add(child);
-                    //                    objectIds.Add(child.object_id);
-
-                    //                    if (!appraisalObjectToWeenieId.ContainsKey(child.object_id))
-                    //                        appraisalObjectToWeenieId.Add(child.object_id, child.wdesc._wcid);
-
-                    //                    if (!appraisalObjectsCatagoryMap.ContainsKey(child.object_id))
-                    //                        appraisalObjectsCatagoryMap.Add(child.object_id, newfileToPutItIn);
-
-                    //                    if (!staticObjectsWeenieType.ContainsKey(child.object_id))
-                    //                        staticObjectsWeenieType.Add(child.object_id, (uint)weenieType);
-
-                    //                    processedWeeniePositions[child.wdesc._wcid].Add(child.physicsdesc.pos);
-
-                    //                    totalHits++;
-                    //                }
-                    //            }
-                    //        }
-                    //    }
-                    //}
-                    //else
-                    //{
-                    //    if (wieldedObjectsParentMap.ContainsKey(parsed.physicsdesc.parent_id))
-                    //    {
-                    //        if (wieldedObjects.ContainsKey(parsed.physicsdesc.parent_id))
-                    //        {
-                    //            foreach (var child in wieldedObjects[parsed.physicsdesc.parent_id])
-                    //            {
-                    //                if (!objectIds.Contains(child.object_id))
-                    //                {
-                    //                    string newfileToPutItIn = fileToPutItIn + "-wieldedobjectsXXX";
-                    //                    if (!staticObjects.ContainsKey(newfileToPutItIn))
-                    //                        staticObjects.Add(newfileToPutItIn, new List<CM_Physics.CreateObject>());
-
-                    //                    staticObjects[newfileToPutItIn].Add(child);
-                    //                    objectIds.Add(child.object_id);
-
-                    //                    if (!appraisalObjectToWeenieId.ContainsKey(child.object_id))
-                    //                        appraisalObjectToWeenieId.Add(child.object_id, child.wdesc._wcid);
-
-                    //                    if (!appraisalObjectsCatagoryMap.ContainsKey(child.object_id))
-                    //                        appraisalObjectsCatagoryMap.Add(child.object_id, newfileToPutItIn);
-
-                    //                    if (!staticObjectsWeenieType.ContainsKey(child.object_id))
-                    //                        staticObjectsWeenieType.Add(child.object_id, (uint)weenieType);
-
-                    //                    processedWeeniePositions[child.wdesc._wcid].Add(child.physicsdesc.pos);
-
-                    //                    totalHits++;
-                    //                }
-                    //            }
-                    //        }
-                    //    }
-                    //}
                 }
                 else if (addWeenie)
                 {
@@ -4247,17 +3761,6 @@ namespace aclogview
                             {
                                 string intsLine = "", bigintsLine = "", floatsLine = "", boolsLine = "", strsLine = "", didsLine = "", iidsLine = "";
 
-                                //string line = $"{sqlCommand} INTO `ace_object` (`" +
-                                //"aceObjectId`, `aceObjectDescriptionFlags`, " +
-                                //"`weenieClassId`, `weenieHeaderFlags`, " +
-                                //"`iconId`, `iconOverlayId`, `iconUnderlayId`, " +
-                                //"`modelTableId`, `soundTableId`, " +
-                                //"`motionTableId`, `currentMotionState`, `animationFrameId`, " +
-                                //"`physicsTableId`, `physicsDescriptionFlag`, " +
-                                //"`spellId`, " +
-                                //"`playScript`, `defaultScript`" +
-                                //")" + Environment.NewLine + "VALUES (" +
-
                                 string line = $"{sqlCommand} INTO `ace_object` (`" +
                                 "aceObjectId`, `aceObjectDescriptionFlags`, " +
                                 "`weenieClassId`, `weenieHeaderFlags`, " +
@@ -4265,69 +3768,35 @@ namespace aclogview
                                 "`physicsDescriptionFlag`" +
                                 ")" + Environment.NewLine + "VALUES (" +
 
-                                //$"{parsed.object_id}, {parsed.wdesc.header}, " +
-                                //$"{parsed.wdesc._wcid}, {parsed.wdesc._bitfield}, "; //+
                                 $"{parsed.object_id}, {parsed.wdesc._bitfield}, " +
                                 $"{parsed.wdesc._wcid}, {parsed.wdesc.header}, "; //+
-                                //$"{parsed.wdesc._iconID}, ";
                                 didsLine += $"     , ({parsed.object_id}, {(uint)STypeDID.ICON_DID}, {(uint)parsed.wdesc._iconID})" + Environment.NewLine;
                                 if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_IconOverlay) != 0)
-                                    //    line += $"{parsed.wdesc._iconOverlayID}, ";
                                     didsLine += $"     , ({parsed.object_id}, {(uint)STypeDID.ICON_OVERLAY_DID}, {(uint)parsed.wdesc._iconOverlayID})" + Environment.NewLine;
-                                //else
-                                //    line += $"NULL, ";
                                 if ((parsed.wdesc.header2 & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader2.PWD2_Packed_IconUnderlay) != 0)
-                                    //    line += $"{parsed.wdesc._iconUnderlayID}, ";
                                     didsLine += $"     , ({parsed.object_id}, {(uint)STypeDID.ICON_UNDERLAY_DID}, {(uint)parsed.wdesc._iconUnderlayID})" + Environment.NewLine;
-                                //else
-                                //    line += $"NULL, ";
 
                                 if ((parsed.physicsdesc.bitfield & (uint)PhysicsDesc.PhysicsDescInfo.CSetup) != 0)
-                                    //    line += $"{parsed.physicsdesc.setup_id}, ";
                                     didsLine += $"     , ({parsed.object_id}, {(uint)STypeDID.SETUP_DID}, {(uint)parsed.physicsdesc.setup_id})" + Environment.NewLine;
-                                //else
-                                //    line += $"NULL, ";
                                 if ((parsed.physicsdesc.bitfield & (uint)PhysicsDesc.PhysicsDescInfo.STABLE) != 0)
-                                    //    line += $"{parsed.physicsdesc.stable_id}, ";
                                     didsLine += $"     , ({parsed.object_id}, {(uint)STypeDID.SOUND_TABLE_DID}, {(uint)parsed.physicsdesc.stable_id})" + Environment.NewLine;
-                                //else
-                                //    line += $"NULL, ";
                                 if ((parsed.physicsdesc.bitfield & (uint)PhysicsDesc.PhysicsDescInfo.MTABLE) != 0)
-                                    //    line += $"{parsed.physicsdesc.mtable_id}, ";
                                     didsLine += $"     , ({parsed.object_id}, {(uint)STypeDID.MOTION_TABLE_DID}, {(uint)parsed.physicsdesc.mtable_id})" + Environment.NewLine;
-                                //else
-                                //    line += $"NULL, ";
                                 if ((parsed.physicsdesc.bitfield & (uint)PhysicsDesc.PhysicsDescInfo.MOVEMENT) != 0)
                                     line += $"'{ConvertMovementBufferToString(parsed.physicsdesc.movement_buffer)}', ";
                                 else
                                     line += $"NULL, ";
                                 if ((parsed.physicsdesc.bitfield & (uint)PhysicsDesc.PhysicsDescInfo.ANIMFRAME_ID) != 0)
-                                    //    line += $"{parsed.physicsdesc.animframe_id}, ";
                                     intsLine += $"     , ({parsed.object_id}, {(uint)STypeInt.PLACEMENT_POSITION_INT}, {(uint)parsed.physicsdesc.animframe_id})" + Environment.NewLine;
-                                //else
-                                //    line += $"NULL, ";
                                 if ((parsed.physicsdesc.bitfield & (uint)PhysicsDesc.PhysicsDescInfo.PETABLE) != 0)
-                                    //    line += $"{parsed.physicsdesc.phstable_id}, ";
                                     didsLine += $"     , ({parsed.object_id}, {(uint)STypeDID.PHYSICS_EFFECT_TABLE_DID}, {(uint)parsed.physicsdesc.phstable_id})" + Environment.NewLine;
-                                //else
-                                //    line += $"NULL, ";
-                                //line += $"{parsed.physicsdesc.bitfield}, ";
                                 line += $"{parsed.physicsdesc.bitfield}";
                                 if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_SpellID) != 0)
-                                    //    line += $"{parsed.wdesc._spellID}, ";
                                     didsLine += $"     , ({parsed.object_id}, {(uint)STypeDID.SPELL_DID}, {(uint)parsed.wdesc._spellID})" + Environment.NewLine;
-                                //else
-                                //    line += $"NULL, ";
                                 if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_PScript) != 0)
-                                    //    line += $"{parsed.wdesc._pscript}, ";
                                     didsLine += $"     , ({parsed.object_id}, {(uint)STypeDID.PHYSICS_SCRIPT_DID}, {(uint)parsed.wdesc._pscript})" + Environment.NewLine;
-                                //else
-                                //    line += $"NULL, ";
                                 if ((parsed.physicsdesc.bitfield & (uint)PhysicsDesc.PhysicsDescInfo.DEFAULT_SCRIPT) != 0)
-                                    //    line += $"{(uint)parsed.physicsdesc.default_script}";
                                     didsLine += $"     , ({parsed.object_id}, {(uint)STypeDID.USE_USER_ANIMATION_DID}, {(uint)parsed.physicsdesc.default_script})" + Environment.NewLine;
-                                //else
-                                //    line += $"NULL";
 
                                 line += ");" + Environment.NewLine;
 
@@ -4735,72 +4204,6 @@ namespace aclogview
 
                             string intsLine = "", bigintsLine = "", floatsLine = "", boolsLine = "", strsLine = "", didsLine = "", iidsLine = "";
 
-                            //line = $"{sqlCommand} INTO `ace_object` (`" +
-                            //"aceObjectId`, `aceObjectDescriptionFlags`, " +
-                            //"`weenieClassId`, `weenieHeaderFlags`, " +
-                            //"`iconId`, `iconOverlayId`, `iconUnderlayId`, " +
-                            //"`modelTableId`, `soundTableId`, " +
-                            //"`motionTableId`, `currentMotionState`, `animationFrameId`, " +
-                            //"`physicsTableId`, `physicsDescriptionFlag`, " +
-                            //"`spellId`, " +
-                            //"`playScript`, `defaultScript`" +
-                            //")" + Environment.NewLine + "VALUES (" +
-
-                            //$"{parsed.wdesc._wcid}, {parsed.wdesc.header}, " +
-                            //$"{parsed.wdesc._wcid}, {parsed.wdesc._bitfield}, " +
-                            //$"{parsed.wdesc._iconID}, ";
-                            //if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_IconOverlay) != 0)
-                            //    line += $"{parsed.wdesc._iconOverlayID}, ";
-                            //else
-                            //    line += $"NULL, ";
-                            //if ((parsed.wdesc.header2 & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader2.PWD2_Packed_IconUnderlay) != 0)
-                            //    line += $"{parsed.wdesc._iconUnderlayID}, ";
-                            //else
-                            //    line += $"NULL, ";
-
-                            //if ((parsed.physicsdesc.bitfield & (uint)PhysicsDesc.PhysicsDescInfo.CSetup) != 0)
-                            //    line += $"{parsed.physicsdesc.setup_id}, ";
-                            //else
-                            //    line += $"NULL, ";
-                            //if ((parsed.physicsdesc.bitfield & (uint)PhysicsDesc.PhysicsDescInfo.STABLE) != 0)
-                            //    line += $"{parsed.physicsdesc.stable_id}, ";
-                            //else
-                            //    line += $"NULL, ";
-                            //if ((parsed.physicsdesc.bitfield & (uint)PhysicsDesc.PhysicsDescInfo.MTABLE) != 0)
-                            //    line += $"{parsed.physicsdesc.mtable_id}, ";
-                            //else
-                            //    line += $"NULL, ";
-                            //if ((parsed.physicsdesc.bitfield & (uint)PhysicsDesc.PhysicsDescInfo.MOVEMENT) != 0)
-                            //    line += $"'{ConvertMovementBufferToString(parsed.physicsdesc.movement_buffer)}', ";
-                            //else
-                            //    line += $"NULL, ";
-                            //if ((parsed.physicsdesc.bitfield & (uint)PhysicsDesc.PhysicsDescInfo.ANIMFRAME_ID) != 0)
-                            //    line += $"{parsed.physicsdesc.animframe_id}, ";
-                            //else
-                            //    line += $"NULL, ";
-                            //if ((parsed.physicsdesc.bitfield & (uint)PhysicsDesc.PhysicsDescInfo.PETABLE) != 0)
-                            //    line += $"{parsed.physicsdesc.phstable_id}, ";
-                            //else
-                            //    line += $"NULL, ";
-                            //line += $"{parsed.physicsdesc.bitfield}, ";
-                            //if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_SpellID) != 0)
-                            //    line += $"{parsed.wdesc._spellID}, ";
-                            //else
-                            //    line += $"NULL, ";
-                            //if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_PScript) != 0)
-                            //    line += $"{parsed.wdesc._pscript}, ";
-                            //else
-                            //    line += $"NULL, ";
-                            //if ((parsed.physicsdesc.bitfield & (uint)PhysicsDesc.PhysicsDescInfo.DEFAULT_SCRIPT) != 0)
-                            //    line += $"{(uint)parsed.physicsdesc.default_script}";
-                            //else
-                            //    line += $"NULL";
-
-                            //line += ");" + Environment.NewLine;
-
-                            //// creates the weenieClass record
-                            //writer.WriteLine(line);
-
                             line = $"{sqlCommand} INTO `ace_object` (`" +
                                 "aceObjectId`, `aceObjectDescriptionFlags`, " +
                                 "`weenieClassId`, `weenieHeaderFlags`, " +
@@ -4808,75 +4211,39 @@ namespace aclogview
                                 "`physicsDescriptionFlag`" +
                                 ")" + Environment.NewLine + "VALUES (" +
 
-                            //$"{parsed.wdesc._wcid}, {parsed.wdesc.header}, " +
-                            //$"{parsed.wdesc._wcid}, {parsed.wdesc._bitfield}, "; //+
                             $"{parsed.wdesc._wcid}, {parsed.wdesc._bitfield}, " +
                             $"{parsed.wdesc._wcid}, {parsed.wdesc.header}, "; //+
-                            //$"{parsed.wdesc._iconID}, ";
                             didsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeDID.ICON_DID}, {(uint)parsed.wdesc._iconID})" + Environment.NewLine;
                             if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_IconOverlay) != 0)
-                                //    line += $"{parsed.wdesc._iconOverlayID}, ";
                                 didsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeDID.ICON_OVERLAY_DID}, {(uint)parsed.wdesc._iconOverlayID})" + Environment.NewLine;
-                            //else
-                            //    line += $"NULL, ";
                             if ((parsed.wdesc.header2 & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader2.PWD2_Packed_IconUnderlay) != 0)
-                                //    line += $"{parsed.wdesc._iconUnderlayID}, ";
                                 didsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeDID.ICON_UNDERLAY_DID}, {(uint)parsed.wdesc._iconUnderlayID})" + Environment.NewLine;
-                            //else
-                            //    line += $"NULL, ";
 
                             if ((parsed.physicsdesc.bitfield & (uint)PhysicsDesc.PhysicsDescInfo.CSetup) != 0)
-                                //    line += $"{parsed.physicsdesc.setup_id}, ";
                                 didsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeDID.SETUP_DID}, {(uint)parsed.physicsdesc.setup_id})" + Environment.NewLine;
-                            //else
-                            //    line += $"NULL, ";
                             if ((parsed.physicsdesc.bitfield & (uint)PhysicsDesc.PhysicsDescInfo.STABLE) != 0)
-                                //    line += $"{parsed.physicsdesc.stable_id}, ";
                                 didsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeDID.SOUND_TABLE_DID}, {(uint)parsed.physicsdesc.stable_id})" + Environment.NewLine;
-                            //else
-                            //    line += $"NULL, ";
                             if ((parsed.physicsdesc.bitfield & (uint)PhysicsDesc.PhysicsDescInfo.MTABLE) != 0)
-                                //    line += $"{parsed.physicsdesc.mtable_id}, ";
                                 didsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeDID.MOTION_TABLE_DID}, {(uint)parsed.physicsdesc.mtable_id})" + Environment.NewLine;
-                            //else
-                            //    line += $"NULL, ";
                             if ((parsed.physicsdesc.bitfield & (uint)PhysicsDesc.PhysicsDescInfo.MOVEMENT) != 0)
                                 line += $"'{ConvertMovementBufferToString(parsed.physicsdesc.movement_buffer)}', ";
                             else
                                 line += $"NULL, ";
                             if ((parsed.physicsdesc.bitfield & (uint)PhysicsDesc.PhysicsDescInfo.ANIMFRAME_ID) != 0)
-                                //    line += $"{parsed.physicsdesc.animframe_id}, ";
                                 intsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeInt.PLACEMENT_POSITION_INT}, {(uint)parsed.physicsdesc.animframe_id})" + Environment.NewLine;
-                            //else
-                            //    line += $"NULL, ";
                             if ((parsed.physicsdesc.bitfield & (uint)PhysicsDesc.PhysicsDescInfo.PETABLE) != 0)
-                                //    line += $"{parsed.physicsdesc.phstable_id}, ";
                                 didsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeDID.PHYSICS_EFFECT_TABLE_DID}, {(uint)parsed.physicsdesc.phstable_id})" + Environment.NewLine;
-                            //else
-                            //    line += $"NULL, ";
-                            //line += $"{parsed.physicsdesc.bitfield}, ";
                             line += $"{parsed.physicsdesc.bitfield}";
                             if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_SpellID) != 0)
-                                //    line += $"{parsed.wdesc._spellID}, ";
                                 didsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeDID.SPELL_DID}, {(uint)parsed.wdesc._spellID})" + Environment.NewLine;
-                            //else
-                            //    line += $"NULL, ";
                             if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_PScript) != 0)
-                                //    line += $"{parsed.wdesc._pscript}, ";
                                 didsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeDID.PHYSICS_SCRIPT_DID}, {(uint)parsed.wdesc._pscript})" + Environment.NewLine;
-                            //else
-                            //    line += $"NULL, ";
                             if ((parsed.physicsdesc.bitfield & (uint)PhysicsDesc.PhysicsDescInfo.DEFAULT_SCRIPT) != 0)
-                                //    line += $"{(uint)parsed.physicsdesc.default_script}";
                                 didsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeDID.USE_USER_ANIMATION_DID}, {(uint)parsed.physicsdesc.default_script})" + Environment.NewLine;
-                            //else
-                            //    line += $"NULL";
 
                             line += ");" + Environment.NewLine;
 
                             writer.WriteLine(line);
-
-                            //string intsLine = "", bigintsLine = "", floatsLine = "", boolsLine = "", strsLine = "";
 
                             strsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeString.NAME_STRING}, '{parsed.wdesc._name.m_buffer.Replace("'", "''")}')" + Environment.NewLine;
                             intsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeInt.ITEM_TYPE_INT}, {(uint)parsed.wdesc._type})" + Environment.NewLine;
@@ -5054,8 +4421,8 @@ namespace aclogview
                                 boolsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeBool.IGNORE_HOUSE_BARRIERS_BOOL}, {true})" + Environment.NewLine;
                             if (((uint)parsed.wdesc._bitfield & (uint)PublicWeenieDesc.BitfieldIndex.BF_INSCRIBABLE) != 0)
                                 boolsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeBool.INSCRIBABLE_BOOL}, {true})" + Environment.NewLine;
-                            if (((uint)parsed.wdesc._bitfield & (uint)PublicWeenieDesc.BitfieldIndex.BF_PLAYER_KILLER) != 0)
-                                boolsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeBool.PK_KILLER_BOOL}, {true})" + Environment.NewLine;
+                            //if (((uint)parsed.wdesc._bitfield & (uint)PublicWeenieDesc.BitfieldIndex.BF_PLAYER_KILLER) != 0)
+                            //    boolsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeBool.PK_KILLER_BOOL}, {true})" + Environment.NewLine;
                             if (((uint)parsed.wdesc._bitfield & (uint)PublicWeenieDesc.BitfieldIndex.BF_REQUIRES_PACKSLOT) != 0)
                                 boolsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeBool.REQUIRES_BACKPACK_SLOT_BOOL}, {true})" + Environment.NewLine;
                             if (((uint)parsed.wdesc._bitfield & (uint)PublicWeenieDesc.BitfieldIndex.BF_RETAINED) != 0)
@@ -5064,8 +4431,8 @@ namespace aclogview
                                 boolsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeBool.STUCK_BOOL}, {true})" + Environment.NewLine;
                             if (((uint)parsed.wdesc._bitfield & (uint)PublicWeenieDesc.BitfieldIndex.BF_UI_HIDDEN) != 0)
                                 boolsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeBool.UI_HIDDEN_BOOL}, {true})" + Environment.NewLine;
-                            if (((uint)parsed.wdesc._bitfield & (uint)PublicWeenieDesc.BitfieldIndex.BF_VENDOR) != 0)
-                                boolsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeBool.VENDOR_SERVICE_BOOL}, {true})" + Environment.NewLine;
+                            //if (((uint)parsed.wdesc._bitfield & (uint)PublicWeenieDesc.BitfieldIndex.BF_VENDOR) != 0)
+                            //    boolsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeBool.VENDOR_SERVICE_BOOL}, {true})" + Environment.NewLine;
                             if (((uint)parsed.wdesc._bitfield & (uint)PublicWeenieDesc.BitfieldIndex.BF_WIELD_LEFT) != 0)
                                 boolsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeBool.AUTOWIELD_LEFT_BOOL}, {true})" + Environment.NewLine;
                             if (((uint)parsed.wdesc._bitfield & (uint)PublicWeenieDesc.BitfieldIndex.BF_WIELD_ON_USE) != 0)
