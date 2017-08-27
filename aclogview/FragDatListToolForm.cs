@@ -520,17 +520,23 @@ namespace aclogview
             {
                 TreeView treeView = new TreeView();
 
-                List<uint> weenieIds = new List<uint>();
-                List<uint> objectIds = new List<uint>();
+                List<uint> weenieIds = new List<uint>();                
                 Dictionary<string, List<CM_Physics.CreateObject>> weenies = new Dictionary<string, List<CM_Physics.CreateObject>>();
-                Dictionary<string, List<CM_Physics.CreateObject>> staticObjects = new Dictionary<string, List<CM_Physics.CreateObject>>();
                 Dictionary<uint, List<Position>> processedWeeniePositions = new Dictionary<uint, List<Position>>();
+
+                List<uint> objectIds = new List<uint>();
+                Dictionary<string, List<CM_Physics.CreateObject>> staticObjects = new Dictionary<string, List<CM_Physics.CreateObject>>();
+
+                bool outputAsLandblocks = true;
+                bool useLandblockTable = true;
+                Dictionary<uint, Dictionary<string, List<CM_Physics.CreateObject>>> landblockInstances = new Dictionary<uint, Dictionary<string, List<CM_Physics.CreateObject>>>();
 
                 Dictionary<uint, List<uint>> wieldedObjectsParentMap = new Dictionary<uint, List<uint>>();
                 Dictionary<uint, List<CM_Physics.CreateObject>> wieldedObjects = new Dictionary<uint, List<CM_Physics.CreateObject>>();
 
                 Dictionary<uint, List<uint>> inventoryParents = new Dictionary<uint, List<uint>>();
                 Dictionary<uint, CM_Physics.CreateObject> inventoryObjects = new Dictionary<uint, CM_Physics.CreateObject>();
+                Dictionary<uint, List<uint>> parentWieldsWeenies = new Dictionary<uint, List<uint>>();
 
                 List<uint> appraisalObjectIds = new List<uint>();
                 Dictionary<string, List<CM_Examine.SetAppraiseInfo>> appraisalObjects = new Dictionary<string, List<CM_Examine.SetAppraiseInfo>>();
@@ -548,6 +554,9 @@ namespace aclogview
                 List<uint> vendorObjectIds = new List<uint>();
                 Dictionary<string, Dictionary<uint, CM_Vendor.gmVendorUI>> vendorObjects = new Dictionary<string, Dictionary<uint, CM_Vendor.gmVendorUI>>();
                 Dictionary<uint, List<uint>> vendorSellsWeenies = new Dictionary<uint, List<uint>>();
+
+                Dictionary<uint, CM_Physics.CreateObject> weeniesTypeTemplate = new Dictionary<uint, CM_Physics.CreateObject>();
+                Dictionary<uint, CM_Physics.CreateObject> weeniesFromVendors = new Dictionary<uint, CM_Physics.CreateObject>();
 
                 while (true)
                 {
@@ -579,15 +588,17 @@ namespace aclogview
                             {
                                 var parsed = CM_Physics.CreateObject.read(fragDataReader);
 
-                                CreateStaticObjectsList(parsed, 
-                                    objectIds, staticObjects, 
-                                    weenieIds, weenies, 
-                                    processedWeeniePositions, 
-                                    appraisalObjectsCatagoryMap, appraisalObjectToWeenieId, 
-                                    weeniesWeenieType, staticObjectsWeenieType, 
+                                CreateStaticObjectsList(parsed,
+                                    objectIds, staticObjects,
+                                    outputAsLandblocks, landblockInstances,
+                                    weenieIds, weenies,
+                                    processedWeeniePositions,
+                                    appraisalObjectsCatagoryMap, appraisalObjectToWeenieId,
+                                    weeniesWeenieType, staticObjectsWeenieType,
                                     wieldedObjectsParentMap, wieldedObjects,
-                                    inventoryParents, inventoryObjects
-                                    );                                      
+                                    inventoryParents, inventoryObjects,
+                                    parentWieldsWeenies,
+                                    weeniesTypeTemplate);
                             }
 
                             if (messageCode == (uint)PacketOpcode.WEENIE_ORDERED_EVENT || messageCode == (uint)PacketOpcode.ORDERED_EVENT)
@@ -611,13 +622,15 @@ namespace aclogview
 
                                     CreateStaticObjectsList(parsed,
                                         objectIds, staticObjects,
+                                        outputAsLandblocks, landblockInstances,
                                         weenieIds, weenies,
                                         processedWeeniePositions,
                                         appraisalObjectsCatagoryMap, appraisalObjectToWeenieId,
                                         weeniesWeenieType, staticObjectsWeenieType,
                                         wieldedObjectsParentMap, wieldedObjects,
-                                        inventoryParents, inventoryObjects
-                                        );
+                                        inventoryParents, inventoryObjects,
+                                        parentWieldsWeenies,
+                                        weeniesTypeTemplate);
                                 }
 
                                 if (opCode == (uint)PacketOpcode.APPRAISAL_INFO_EVENT)
@@ -660,7 +673,9 @@ namespace aclogview
                                         objectIds, staticObjects, 
                                         weenieIds, weenies, 
                                         appraisalObjects, appraisalObjectIds, appraisalObjectsCatagoryMap, appraisalObjectToWeenieId, 
-                                        vendorObjectIds, vendorObjects, vendorSellsWeenies);
+                                        vendorObjectIds, vendorObjects, vendorSellsWeenies,
+                                        weeniesFromVendors,
+                                        weeniesTypeTemplate);
                                 }
                             }
                         }
@@ -669,6 +684,20 @@ namespace aclogview
                             totalExceptions++;
                         }
                     }
+                }
+
+                if (outputAsLandblocks && useLandblockTable)
+                {
+                    GenerateMissingWeeniesFromVendors(objectIds, staticObjects,
+                                        outputAsLandblocks, landblockInstances,
+                                        weenieIds, weenies,
+                                        processedWeeniePositions,
+                                        appraisalObjectsCatagoryMap, appraisalObjectToWeenieId,
+                                        weeniesWeenieType, staticObjectsWeenieType,
+                                        wieldedObjectsParentMap, wieldedObjects,
+                                        inventoryParents, inventoryObjects,
+                                        parentWieldsWeenies,
+                                        weeniesTypeTemplate, weeniesFromVendors);
                 }
 
                 WriteWeenieData(weenies, txtOutputFolder.Text, weeniesWeenieType);
@@ -681,17 +710,43 @@ namespace aclogview
 
                 WriteWeenieVendorObjectData(vendorObjects, txtOutputFolder.Text);
 
-                WriteStaticObjectData(staticObjects, objectIds, txtOutputFolder.Text, staticObjectsWeenieType);
+                if (outputAsLandblocks)
+                {
+                    if (useLandblockTable)
+                    {
+                        WriteLandblockTable(landblockInstances, objectIds, txtOutputFolder.Text, staticObjectsWeenieType);
 
-                WriteAppraisalObjectData(appraisalObjects, txtOutputFolder.Text);
+                        WriteParentInventory(parentWieldsWeenies, weenieIds, txtOutputFolder.Text);                        
 
-                //// WriteGeneratorObjectData(staticObjects, objectIds, txtOutputFolder.Text);
+                        WriteVendorInventory(vendorSellsWeenies, weenieIds, txtOutputFolder.Text);
+                    }
+                    else
+                    {
+                        WriteLandblockData(landblockInstances, objectIds, txtOutputFolder.Text, staticObjectsWeenieType);
 
-                WriteBookObjectData(bookObjects, txtOutputFolder.Text);
+                        WriteAppraisalObjectData(appraisalObjects, txtOutputFolder.Text);
 
-                WritePageObjectData(pageObjects, txtOutputFolder.Text);
+                        WriteBookObjectData(bookObjects, txtOutputFolder.Text);
 
-                WriteVendorObjectData(vendorObjects, txtOutputFolder.Text);
+                        WritePageObjectData(pageObjects, txtOutputFolder.Text);
+
+                        WriteVendorObjectData(vendorObjects, txtOutputFolder.Text);
+                    }
+                }
+                else
+                {
+                    WriteStaticObjectData(staticObjects, objectIds, txtOutputFolder.Text, staticObjectsWeenieType);
+
+                    WriteAppraisalObjectData(appraisalObjects, txtOutputFolder.Text);
+
+                    //// WriteGeneratorObjectData(staticObjects, objectIds, txtOutputFolder.Text);
+
+                    WriteBookObjectData(bookObjects, txtOutputFolder.Text);
+
+                    WritePageObjectData(pageObjects, txtOutputFolder.Text);
+
+                    WriteVendorObjectData(vendorObjects, txtOutputFolder.Text);
+                }
 
                 MessageBox.Show($"Export completed at {DateTime.Now.ToString()} and took {(DateTime.Now - start).TotalMinutes} minutes.");
             }
@@ -737,10 +792,193 @@ namespace aclogview
             }
         }
 
+        private void GenerateMissingWeeniesFromVendors(List<uint> objectIds, Dictionary<string, List<CM_Physics.CreateObject>> staticObjects,
+            bool saveAsLandblockInstances, Dictionary<uint, Dictionary<string, List<CM_Physics.CreateObject>>> landblockInstances,
+            List<uint> weenieIds, Dictionary<string, List<CM_Physics.CreateObject>> weenies, Dictionary<uint, List<Position>> processedWeeniePositions,
+            Dictionary<uint, string> appraisalObjectsCatagoryMap, Dictionary<uint, uint> appraisalObjectToWeenieId, Dictionary<uint, uint> weeniesWeenieType,
+            Dictionary<uint, uint> staticObjectsWeenieType, Dictionary<uint, List<uint>> wieldedObjectsParentMap, Dictionary<uint, List<CM_Physics.CreateObject>> wieldedObjects,
+            Dictionary<uint, List<uint>> inventoryParents, Dictionary<uint, CM_Physics.CreateObject> inventoryObjects,
+            Dictionary<uint, List<uint>> parentWieldsWeenies,
+            Dictionary<uint, CM_Physics.CreateObject> weeniesTypeTemplate,
+            Dictionary<uint, CM_Physics.CreateObject> weeniesFromVendors)
+        {
+            try
+            {
+                foreach (var weenie in weeniesFromVendors)
+                {
+                    if (weenieIds.Contains(weenie.Key))
+                        continue;
+
+                    var parsed = weenie.Value;
+
+                    CreateStaticObjectsList(parsed,
+                        objectIds, staticObjects,
+                        saveAsLandblockInstances, landblockInstances,
+                        weenieIds, weenies,
+                        processedWeeniePositions,
+                        appraisalObjectsCatagoryMap, appraisalObjectToWeenieId,
+                        weeniesWeenieType, staticObjectsWeenieType,
+                        wieldedObjectsParentMap, wieldedObjects,
+                        inventoryParents, inventoryObjects,
+                        parentWieldsWeenies,
+                        weeniesTypeTemplate);
+                }
+            }
+            catch (Exception ex)
+            {
+                // MessageBox.Show(ex.ToString());
+                totalExceptions++;
+            }
+        }
+
+        private void WriteParentInventory(Dictionary<uint, List<uint>> parentWieldsWeenies, List<uint> weenieIds, string outputFolder)
+        {
+            string staticFolder = Path.Combine(outputFolder, "7-parentdata");
+
+            //string sqlCommand = "INSERT";
+            string sqlCommand = "REPLACE";
+
+            if (!Directory.Exists(staticFolder))
+                Directory.CreateDirectory(staticFolder);
+
+            Dictionary<string, int> fileCount = new Dictionary<string, int>();
+
+            foreach (var parent in parentWieldsWeenies.Keys)
+            {
+                try
+                {
+                    string fullFile = Path.Combine(staticFolder, $"{parent}.sql");
+
+                    if (File.Exists(fullFile))
+                    {
+                        FileInfo fi = new FileInfo(fullFile);
+
+                        // go to the next file if it's bigger than a MB
+                        if (fi.Length > ((1048576) * 40))
+                        {
+
+                            if (File.Exists(fullFile))
+                                File.Delete(fullFile);
+                        }
+                    }
+
+                    using (FileStream fs = new FileStream(fullFile, FileMode.Append))
+                    {
+                        using (StreamWriter writer = new StreamWriter(fs))
+                        {
+                            string instanceLine = "";
+
+                            foreach (var item in parentWieldsWeenies[parent])
+                            {
+                                if (weenieIds.Contains(item))
+                                {
+                                    instanceLine += $"     , ({parent}, {item}, {(uint)DestinationType.Wield_DestinationType}" +
+                                    //$"{parsed.physicsdesc.pos.objcell_id}, " +
+                                    //$"{parsed.physicsdesc.pos.frame.m_fOrigin.x}, {parsed.physicsdesc.pos.frame.m_fOrigin.y}, {parsed.physicsdesc.pos.frame.m_fOrigin.z}, " +
+                                    //$"{parsed.physicsdesc.pos.frame.qw}, {parsed.physicsdesc.pos.frame.qx}, {parsed.physicsdesc.pos.frame.qy}, {parsed.physicsdesc.pos.frame.qz}" +
+                                    ")" + Environment.NewLine;
+                                }
+                                else
+                                {
+                                    System.Diagnostics.Debug.WriteLine($"{parent} wields ({item}) and is not in the the weenie list.");
+                                    totalExceptions++;
+                                }
+                            }
+
+                            if (instanceLine != "")
+                            {
+                                instanceLine = $"{sqlCommand} INTO `ace_object_inventory` (`aceObjectId`, `weenieClassId`, `destinationType`)" + Environment.NewLine
+                                    + "VALUES " + instanceLine.TrimStart("     ,".ToCharArray());
+                                instanceLine = instanceLine.TrimEnd(Environment.NewLine.ToCharArray()) + ";" + Environment.NewLine;
+                                writer.WriteLine(instanceLine);
+                            }
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine("Unable to export parent " + parent + ". Exception:" + Environment.NewLine + ex.ToString());
+                }
+            }
+        }
+
+        private void WriteVendorInventory(Dictionary<uint, List<uint>> vendorSellsWeenies, List<uint> weenieIds, string outputFolder)
+        {
+            string staticFolder = Path.Combine(outputFolder, "8-vendordata");
+
+            //string sqlCommand = "INSERT";
+            string sqlCommand = "REPLACE";
+
+            if (!Directory.Exists(staticFolder))
+                Directory.CreateDirectory(staticFolder);
+
+            Dictionary<string, int> fileCount = new Dictionary<string, int>();
+
+            foreach (var vendor in vendorSellsWeenies.Keys)
+            {
+                try
+                {
+                    string fullFile = Path.Combine(staticFolder, $"{vendor}.sql");
+
+                    if (File.Exists(fullFile))
+                        {
+                            FileInfo fi = new FileInfo(fullFile);
+
+                            // go to the next file if it's bigger than a MB
+                            if (fi.Length > ((1048576) * 40))
+                            {
+
+                                if (File.Exists(fullFile))
+                                    File.Delete(fullFile);
+                            }
+                        }
+
+                        using (FileStream fs = new FileStream(fullFile, FileMode.Append))
+                        {
+                            using (StreamWriter writer = new StreamWriter(fs))
+                            {
+                            string instanceLine = "";
+
+                            foreach (var item in vendorSellsWeenies[vendor])
+                            {
+                                if (weenieIds.Contains(item))
+                                {
+                                    instanceLine += $"     , ({vendor}, {item}, {(uint)DestinationType.Shop_DestinationType}" +
+                                    //$"{parsed.physicsdesc.pos.objcell_id}, " +
+                                    //$"{parsed.physicsdesc.pos.frame.m_fOrigin.x}, {parsed.physicsdesc.pos.frame.m_fOrigin.y}, {parsed.physicsdesc.pos.frame.m_fOrigin.z}, " +
+                                    //$"{parsed.physicsdesc.pos.frame.qw}, {parsed.physicsdesc.pos.frame.qx}, {parsed.physicsdesc.pos.frame.qy}, {parsed.physicsdesc.pos.frame.qz}" +
+                                    ")" + Environment.NewLine;
+                                }
+                                else
+                                {
+                                    System.Diagnostics.Debug.WriteLine($"Vendor sells ({item}) and is not in the the weenie list.");
+                                    totalExceptions++;
+                                }
+                            }
+
+                            if (instanceLine != "")
+                            {
+                                instanceLine = $"{sqlCommand} INTO `ace_object_inventory` (`aceObjectId`, `weenieClassId`, `destinationType`)" + Environment.NewLine
+                                    + "VALUES " + instanceLine.TrimStart("     ,".ToCharArray());
+                                instanceLine = instanceLine.TrimEnd(Environment.NewLine.ToCharArray()) + ";" + Environment.NewLine;
+                                writer.WriteLine(instanceLine);
+                            }
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine("Unable to export vendor " + vendor + ". Exception:" + Environment.NewLine + ex.ToString());
+                }
+            }
+        }
+
         private void CreateVendorObjectsList(CM_Vendor.gmVendorUI parsed, List<uint> objectIds, Dictionary<string, List<CM_Physics.CreateObject>> staticObjects,
             List<uint> weenieIds, Dictionary<string, List<CM_Physics.CreateObject>> weenies, Dictionary<string, List<CM_Examine.SetAppraiseInfo>> appraisalObjects,
             List<uint> appraisalObjectIds, Dictionary<uint, string> appraisalObjectsCatagoryMap, Dictionary<uint, uint> appraisalObjectToWeenieId,
-            List<uint> vendorObjectIds, Dictionary<string, Dictionary<uint, CM_Vendor.gmVendorUI>> vendorObjects, Dictionary<uint, List<uint>> vendorSellsWeenies)
+            List<uint> vendorObjectIds, Dictionary<string, Dictionary<uint, CM_Vendor.gmVendorUI>> vendorObjects, Dictionary<uint, List<uint>> vendorSellsWeenies,
+            Dictionary<uint, CM_Physics.CreateObject> weeniesFromVendors,
+            Dictionary<uint, CM_Physics.CreateObject> weeniesTypeTemplate)
         {
             try
             {
@@ -790,10 +1028,22 @@ namespace aclogview
 
                     foreach (var item in parsed.shopItemProfileList.list)
                     {
-                        if (!vendorSellsWeenies.ContainsKey(parsed.shopVendorID))
-                            vendorSellsWeenies.Add(parsed.shopVendorID, new List<uint>());
+                        //if (!vendorSellsWeenies.ContainsKey(parsed.shopVendorID))
+                        //    vendorSellsWeenies.Add(parsed.shopVendorID, new List<uint>());
 
-                        vendorSellsWeenies[parsed.shopVendorID].Add(item.pwd._wcid);
+                        //vendorSellsWeenies[parsed.shopVendorID].Add(item.pwd._wcid);
+
+                        if (!vendorSellsWeenies.ContainsKey(weenieId))
+                            vendorSellsWeenies.Add(weenieId, new List<uint>());
+
+                        if (!vendorSellsWeenies[weenieId].Contains(item.pwd._wcid))
+                            vendorSellsWeenies[weenieId].Add(item.pwd._wcid);
+
+                        if (!weeniesFromVendors.ContainsKey(item.pwd._wcid))
+                        {
+                            CreateObject newObj = GenerateCreateObjectfromVendorItemProfile(item, weeniesTypeTemplate);
+                            weeniesFromVendors.Add(item.pwd._wcid, newObj);
+                        }
                     }
 
                     if (!vendorObjectIds.Contains(weenieId) && weenieId > 0)
@@ -820,6 +1070,965 @@ namespace aclogview
             catch (Exception ex)
             {
                 totalExceptions++;
+            }
+        }
+
+        private CreateObject GenerateCreateObjectfromVendorItemProfile(CM_Vendor.ItemProfile item, Dictionary<uint, CM_Physics.CreateObject> weeniesTypeTemplate)
+        {
+            try
+            {
+                CreateObject obj = new CreateObject();
+
+                obj.object_id = item.iid;
+                // obj.object_id = item.pwd._wcid;
+                obj.wdesc = item.pwd;
+
+                CreateObject template = new CreateObject();
+
+                //if ((obj.wdesc._bitfield & (uint)CM_Physics.PublicWeenieDesc.BitfieldIndex.BF_LIFESTONE) != 0)
+                //{
+
+                //}
+                //else if ((obj.wdesc._bitfield & (uint)CM_Physics.PublicWeenieDesc.BitfieldIndex.BF_BINDSTONE) != 0)
+                //{
+
+                //}
+                //else if (obj.wdesc._wcid == 1)
+                //{
+
+                //}
+                //else if ((obj.wdesc._bitfield & (uint)CM_Physics.PublicWeenieDesc.BitfieldIndex.BF_PKSWITCH) != 0)
+                //{
+
+                //}
+                //else if ((obj.wdesc._bitfield & (uint)CM_Physics.PublicWeenieDesc.BitfieldIndex.BF_NPKSWITCH) != 0)
+                //{
+
+                //}            
+                //else if ((obj.wdesc._bitfield & (uint)CM_Physics.PublicWeenieDesc.BitfieldIndex.BF_LOCKPICK) != 0)
+                if ((obj.wdesc._bitfield & (uint)CM_Physics.PublicWeenieDesc.BitfieldIndex.BF_LOCKPICK) != 0)
+                {
+                    weeniesTypeTemplate.TryGetValue((uint)WeenieType.Lockpick_WeenieType, out template);
+                }
+                else if ((obj.wdesc._bitfield & (uint)CM_Physics.PublicWeenieDesc.BitfieldIndex.BF_FOOD) != 0)
+                {
+                    weeniesTypeTemplate.TryGetValue((uint)WeenieType.Food_WeenieType, out template);
+                }
+                else if ((obj.wdesc._bitfield & (uint)CM_Physics.PublicWeenieDesc.BitfieldIndex.BF_HEALER) != 0)
+                {
+                    weeniesTypeTemplate.TryGetValue((uint)WeenieType.Healer_WeenieType, out template);
+                }
+                else if ((obj.wdesc._bitfield & (uint)CM_Physics.PublicWeenieDesc.BitfieldIndex.BF_BOOK) != 0)
+                {
+                    weeniesTypeTemplate.TryGetValue((uint)WeenieType.Book_WeenieType, out template);
+                    if (obj.wdesc._name.m_buffer.Contains("Statue"))
+                    {
+
+                    }
+                    else if (obj.wdesc._name.m_buffer.Contains("Scroll"))
+                    {
+
+                    }
+                    else if (obj.wdesc._name.m_buffer.Contains("Pack"))
+                    {
+
+                    }
+                    else if (obj.wdesc._wcid == 9002)
+                    {
+
+                    }
+                    else if (obj.wdesc._wcid == 12774
+                        || obj.wdesc._wcid == 16908
+                        )
+                    {
+
+                    }
+                    else if (obj.object_id < 0x80000000)
+                    {
+
+                    }
+                    else
+                    {
+
+                    }
+                }
+                //else if ((obj.wdesc._bitfield & (uint)CM_Physics.PublicWeenieDesc.BitfieldIndex.BF_PORTAL) != 0)
+                //{
+                //    if (
+                //        obj.wdesc._wcid == 9620 || // W_PORTALHOUSE_CLASS
+                //        obj.wdesc._wcid == 10751 || // W_PORTALHOUSETEST_CLASS
+                //        obj.wdesc._wcid == 11730    // W_HOUSEPORTAL_CLASS
+                //        )
+                //    {
+
+                //    }
+                //    else if (obj.wdesc._wcid == 1955)
+                //    {
+
+                //    }
+                //    else if (obj.wdesc._name.m_buffer.Contains("Town Network"))
+                //    {
+
+                //    }
+                //    else if (obj.wdesc._name.m_buffer.Contains("Floating City"))
+                //    {
+
+                //    }
+                //    else if (obj.wdesc._name.m_buffer.Contains("Humming Crystal"))
+                //    {
+
+                //    }
+                //    else if (obj.wdesc._name.m_buffer.Contains("The Orphanage"))
+                //    {
+
+                //    }
+                //    else if (obj.wdesc._name.m_buffer.Contains("Golem Sanctum"))
+                //    {
+
+                //    }
+                //    else if (obj.wdesc._name.m_buffer.Contains("Destroyed"))
+                //    {
+
+                //    }
+                //    else if (obj.wdesc._name.m_buffer.Contains("Meeting Hall"))
+                //    {
+
+                //    }
+                //    else if (obj.wdesc._name.m_buffer.Contains("Portal to"))
+                //    {
+
+                //    }
+                //    else if (obj.wdesc._name.m_buffer.Contains("Portal"))
+                //    {
+
+                //    }
+                //    else
+                //    {
+
+                //    }
+                //}
+                //else if ((obj.wdesc._bitfield & (uint)CM_Physics.PublicWeenieDesc.BitfieldIndex.BF_DOOR) != 0)
+                //{
+                //    if (obj.wdesc._wcid == 412
+                //        )
+                //    {
+
+                //    }
+                //    else if (obj.wdesc._wcid == 15451)
+                //    {
+
+                //    }
+                //    else if (obj.wdesc._wcid == 577)
+                //    {
+
+                //    }
+                //    else
+                //    {
+
+                //    }
+                //}
+                //else if ((obj.wdesc._bitfield & (uint)CM_Physics.PublicWeenieDesc.BitfieldIndex.BF_VENDOR) != 0)
+                //{
+                //    if (obj.wdesc._name.m_buffer == "Babe the Blue Auroch"
+                //        || obj.wdesc._name.m_buffer == "Paul the Monouga"
+                //        )
+                //    {
+
+                //    }
+                //    else if (obj.wdesc._wcid == 43481
+                //        || obj.wdesc._wcid == 43480
+                //        )
+                //    {
+
+                //    }
+                //    else if (obj.wdesc._name.m_buffer.Contains("Crier")
+                //        && obj.wdesc._blipColor == 8)
+                //    {
+
+                //    }
+                //    else if (obj.wdesc._name.m_buffer.Contains("Pet")
+                //        || obj.wdesc._name.m_buffer.Contains("Wind-up")
+                //        || obj.wdesc._wcid == 48881
+                //        || obj.wdesc._wcid == 34902
+                //        || obj.wdesc._wcid == 48891
+                //        || obj.wdesc._wcid == 48879
+                //        || obj.wdesc._wcid == 34906
+                //        || obj.wdesc._wcid == 48887
+                //        || obj.wdesc._wcid == 48889
+                //        || obj.wdesc._wcid == 48883
+                //        || obj.wdesc._wcid == 34900
+                //        || obj.wdesc._wcid == 34901
+                //        || obj.wdesc._wcid == 34908
+                //        || obj.wdesc._wcid == 34898
+                //        )
+                //    {
+
+                //    }
+                //    else if (obj.wdesc._blipColor == 8)
+                //    {
+
+                //    }
+                //    else
+                //    {
+
+                //    }
+                //}
+                //else if (obj.wdesc._wcid == 4)
+                //{
+
+                //}
+                else if (obj.wdesc._type == ITEM_TYPE.TYPE_MISC)
+                {
+                    weeniesTypeTemplate.TryGetValue((uint)WeenieType.Generic_WeenieType, out template);
+                    if (
+                           obj.wdesc._wcid == 9548 || // W_HOUSE_CLASS
+                           obj.wdesc._wcid >= 9693 && obj.wdesc._wcid <= 10492 || // W_HOUSECOTTAGE1_CLASS to W_HOUSECOTTAGE800_CLASS
+                           obj.wdesc._wcid >= 10493 && obj.wdesc._wcid <= 10662 || // W_HOUSEVILLA801_CLASS to W_HOUSEVILLA970_CLASS
+                           obj.wdesc._wcid >= 10663 && obj.wdesc._wcid <= 10692 || // W_HOUSEMANSION971_CLASS to W_HOUSEMANSION1000_CLASS
+                           obj.wdesc._wcid >= 10746 && obj.wdesc._wcid <= 10750 || // W_HOUSETEST1_CLASS to W_HOUSETEST5_CLASS
+                           obj.wdesc._wcid >= 10829 && obj.wdesc._wcid <= 10839 || // W_HOUSETEST6_CLASS to W_HOUSETEST16_CLASS
+                           obj.wdesc._wcid >= 11677 && obj.wdesc._wcid <= 11682 || // W_HOUSETEST17_CLASS to W_HOUSETEST22_CLASS
+                           obj.wdesc._wcid >= 12311 && obj.wdesc._wcid <= 12460 || // W_HOUSECOTTAGE1001_CLASS to W_HOUSECOTTAGE1150_CLASS
+                           obj.wdesc._wcid >= 12775 && obj.wdesc._wcid <= 13024 || // W_HOUSECOTTAGE1151_CLASS to W_HOUSECOTTAGE1400_CLASS
+                           obj.wdesc._wcid >= 13025 && obj.wdesc._wcid <= 13064 || // W_HOUSEVILLA1401_CLASS to W_HOUSEVILLA1440_CLASS
+                           obj.wdesc._wcid >= 13065 && obj.wdesc._wcid <= 13074 || // W_HOUSEMANSION1441_CLASS to W_HOUSEMANSION1450_CLASS
+                           obj.wdesc._wcid == 13234 || // W_HOUSECOTTAGETEST10000_CLASS
+                           obj.wdesc._wcid == 13235 || // W_HOUSEVILLATEST10001_CLASS
+                           obj.wdesc._wcid >= 13243 && obj.wdesc._wcid <= 14042 || // W_HOUSECOTTAGE1451_CLASS to W_HOUSECOTTAGE2350_CLASS
+                           obj.wdesc._wcid >= 14043 && obj.wdesc._wcid <= 14222 || // W_HOUSEVILLA1851_CLASS to W_HOUSEVILLA2440_CLASS
+                           obj.wdesc._wcid >= 14223 && obj.wdesc._wcid <= 14242 || // W_HOUSEMANSION1941_CLASS to W_HOUSEMANSION2450_CLASS
+                           obj.wdesc._wcid >= 14938 && obj.wdesc._wcid <= 15087 || // W_HOUSECOTTAGE2451_CLASS to W_HOUSECOTTAGE2600_CLASS
+                           obj.wdesc._wcid >= 15088 && obj.wdesc._wcid <= 15127 || // W_HOUSEVILLA2601_CLASS to W_HOUSEVILLA2640_CLASS
+                           obj.wdesc._wcid >= 15128 && obj.wdesc._wcid <= 15137 || // W_HOUSEMANSION2641_CLASS to W_HOUSEMANSION2650_CLASS
+                           obj.wdesc._wcid >= 15452 && obj.wdesc._wcid <= 15457 || // W_HOUSEAPARTMENT2851_CLASS to W_HOUSEAPARTMENT2856_CLASS
+                           obj.wdesc._wcid >= 15458 && obj.wdesc._wcid <= 15607 || // W_HOUSECOTTAGE2651_CLASS to W_HOUSECOTTAGE2800_CLASS
+                           obj.wdesc._wcid >= 15612 && obj.wdesc._wcid <= 15661 || // W_HOUSEVILLA2801_CLASS to W_HOUSEVILLA2850_CLASS
+                           obj.wdesc._wcid >= 15897 && obj.wdesc._wcid <= 16890 || // W_HOUSEAPARTMENT2857_CLASS to W_HOUSEAPARTMENT3850_CLASS
+                           obj.wdesc._wcid >= 16923 && obj.wdesc._wcid <= 18923 || // W_HOUSEAPARTMENT4051_CLASS to W_HOUSEAPARTMENT6050_CLASS
+                           obj.wdesc._wcid >= 18924 && obj.wdesc._wcid <= 19073 || // W_HOUSECOTTAGE3851_CLASS to W_HOUSECOTTAGE4000_CLASS
+                           obj.wdesc._wcid >= 19077 && obj.wdesc._wcid <= 19126 || // W_HOUSEVILLA4001_CLASS to W_HOUSEVILLA4050_CLASS
+                           obj.wdesc._wcid >= 20650 && obj.wdesc._wcid <= 20799 || // W_HOUSECOTTAGE6051_CLASS to W_HOUSECOTTAGE6200_CLASS
+                           obj.wdesc._wcid >= 20800 && obj.wdesc._wcid <= 20839 || // W_HOUSEVILLA6201_CLASS to W_HOUSEVILLA6240_CLASS
+                           obj.wdesc._wcid >= 20840 && obj.wdesc._wcid <= 20849    // W_HOUSEMANSION6241_CLASS to W_HOUSEMANSION6250_CLASS
+                           )
+                    {
+                        weeniesTypeTemplate.TryGetValue((uint)WeenieType.House_WeenieType, out template);
+                    }
+                    //else if (parsed.wdesc._name.m_buffer.Contains("Essence"))
+                    //{
+                    //    weeniefileToPutItIn = "Essences";
+                    //    addWeenie = true;
+                    //}
+                    //else if (parsed.wdesc._name.m_buffer.Contains("Spirit"))
+                    //{
+                    //    weeniefileToPutItIn = "Spirits";
+                    //    addWeenie = true;
+                    //}
+                    //else if (obj.physicsdesc.setup_id == 33555088
+                    //    || obj.physicsdesc.setup_id == 33557390
+                    //    || obj.physicsdesc.setup_id == 33555594
+                    //    || obj.physicsdesc.setup_id == 33555909
+                    //    )
+                    //{
+
+                    //}
+                    else if (obj.wdesc._name.m_buffer.Contains("Residential Halls"))
+                    {
+
+                    }
+                    else if (obj.wdesc._name.m_buffer.Contains("Deed"))
+                    {
+                        weeniesTypeTemplate.TryGetValue((uint)WeenieType.Deed_WeenieType, out template);
+                    }
+                    else if (obj.wdesc._name.m_buffer.Contains("Court")
+                        || obj.wdesc._name.m_buffer.Contains("Dwellings")
+                        || obj.wdesc._name.m_buffer.Contains("SylvanDwellings")
+                        || obj.wdesc._name.m_buffer.Contains("Veranda")
+                        || obj.wdesc._name.m_buffer.Contains("Gate")
+                        || (obj.wdesc._name.m_buffer.Contains("Yard") && !obj.wdesc._name.m_buffer.Contains("Balloons"))
+                        || obj.wdesc._name.m_buffer.Contains("Gardens")
+                        || obj.wdesc._name.m_buffer.Contains("Lodge")
+                        || obj.wdesc._name.m_buffer.Contains("Grotto")
+                        || (obj.wdesc._name.m_buffer.Contains("Hollow") && !obj.wdesc._name.m_buffer.Contains("Minion"))
+                        )
+                    {
+
+                    }
+                    else if (obj.wdesc._name.m_buffer.Contains("Festival Stone"))
+                    {
+
+                    }
+                    //else if (obj.physicsdesc.setup_id == 33557463
+                    //    )
+                    //{
+
+                    //}
+                    else if (obj.wdesc._name.m_buffer.Contains("Button"))
+                    {
+                        weeniesTypeTemplate.TryGetValue((uint)WeenieType.Switch_WeenieType, out template);
+                    }
+                    else if (obj.wdesc._name.m_buffer.Contains("Lever")
+                        || obj.wdesc._name.m_buffer.Contains("Candle") && !obj.wdesc._name.m_buffer.Contains("Floating") && !obj.wdesc._name.m_buffer.Contains("Bronze")
+                        || obj.wdesc._name.m_buffer.Contains("Torch") && obj.wdesc._wcid != 293
+                        || obj.wdesc._name.m_buffer.Contains("Plant") && !obj.wdesc._name.m_buffer.Contains("Fertilized")
+                        )
+                    {
+                        weeniesTypeTemplate.TryGetValue((uint)WeenieType.Switch_WeenieType, out template);
+                    }
+                    else if (obj.object_id < 0x80000000)
+                    {
+
+                    }
+                    else
+                    {
+
+                    }
+                }
+                //else if (obj.wdesc._type == ITEM_TYPE.TYPE_PORTAL) // HOUSE PORTALS
+                //{
+                //    if (
+                //        obj.wdesc._wcid == 9620 || // W_PORTALHOUSE_CLASS
+                //        obj.wdesc._wcid == 10751 || // W_PORTALHOUSETEST_CLASS
+                //        obj.wdesc._wcid == 11730    // W_HOUSEPORTAL_CLASS
+                //                            )
+                //    {
+
+                //    }
+                //    else if (obj.wdesc._wcid == 1955)
+                //    {
+
+                //    }
+                //    else if (obj.wdesc._name.m_buffer.Contains("Town Network"))
+                //    {
+
+                //    }
+                //    else if (obj.wdesc._name.m_buffer.Contains("Floating City"))
+                //    {
+
+                //    }
+                //    else if (obj.wdesc._name.m_buffer.Contains("Humming Crystal"))
+                //    {
+
+                //    }
+                //    else if (obj.wdesc._name.m_buffer.Contains("The Orphanage"))
+                //    {
+
+                //    }
+                //    else if (obj.wdesc._name.m_buffer.Contains("Golem Sanctum"))
+                //    {
+
+                //    }
+                //    else if (obj.wdesc._name.m_buffer.Contains("Destroyed"))
+                //    {
+
+                //    }
+                //    else if (obj.wdesc._name.m_buffer.Contains("Meeting Hall"))
+                //    {
+
+                //    }
+                //    else if (obj.wdesc._name.m_buffer.Contains("Portal to"))
+                //    {
+
+                //    }
+                //    else if (obj.wdesc._name.m_buffer.Contains("Portal"))
+                //    {
+
+                //    }
+                //    else
+                //    {
+
+                //    }
+                //}
+                else if (obj.wdesc._type == ITEM_TYPE.TYPE_CONTAINER) // HOOKS AND STORAGE
+                {
+                    weeniesTypeTemplate.TryGetValue((uint)WeenieType.Container_WeenieType, out template);
+                    if (
+                        obj.wdesc._wcid == 9686 && obj.wdesc._name.m_buffer.Contains("Hook") || // W_HOOK_CLASS
+                        obj.wdesc._wcid == 11697 && obj.wdesc._name.m_buffer.Contains("Hook") || // W_HOOK_FLOOR_CLASS
+                        obj.wdesc._wcid == 11698 && obj.wdesc._name.m_buffer.Contains("Hook") || // W_HOOK_CEILING_CLASS
+                        obj.wdesc._wcid == 12678 && obj.wdesc._name.m_buffer.Contains("Hook") || // W_HOOK_ROOF_CLASS
+                        obj.wdesc._wcid == 12679 && obj.wdesc._name.m_buffer.Contains("Hook") // W_HOOK_YARD_CLASS
+                        )
+                    {
+                        weeniesTypeTemplate.TryGetValue((uint)WeenieType.Hook_WeenieType, out template);
+                    }
+                    else if (
+                            obj.wdesc._wcid == 9686 || // W_HOOK_CLASS
+                            obj.wdesc._wcid == 11697 || // W_HOOK_FLOOR_CLASS
+                            obj.wdesc._wcid == 11698 || // W_HOOK_CEILING_CLASS
+                            obj.wdesc._wcid == 12678 || // W_HOOK_ROOF_CLASS
+                            obj.wdesc._wcid == 12679  // W_HOOK_YARD_CLASS
+                            )
+                    {
+                        weeniesTypeTemplate.TryGetValue((uint)WeenieType.Hook_WeenieType, out template);
+                    }
+                    else if (
+                            obj.wdesc._wcid == 9687     // W_STORAGE_CLASS
+                            )
+                    {
+                        weeniesTypeTemplate.TryGetValue((uint)WeenieType.Storage_WeenieType, out template);
+                    }
+                    else if (obj.wdesc._wcid == 21)
+                    {
+                        weeniesTypeTemplate.TryGetValue((uint)WeenieType.Corpse_WeenieType, out template);
+                    }
+                    //else if (parsed.wdesc._name.m_buffer.Contains("Corpse"))
+                    //{
+                    //    fileToPutItIn = "Corpses";
+                    //    addIt = true;
+                    //}
+                    else if (obj.wdesc._name.m_buffer.Contains("Standing Stone"))
+                    {
+
+                    }
+                    else if (obj.wdesc._name.m_buffer.Contains("Pack")
+                        || obj.wdesc._name.m_buffer.Contains("Backpack")
+                        || obj.wdesc._name.m_buffer.Contains("Sack")
+                        || obj.wdesc._name.m_buffer.Contains("Pouch")
+                        )
+                    {
+                    }
+                    else if (
+                        obj.wdesc._name.m_buffer.Contains("Chest")
+                        || obj.wdesc._name.m_buffer.Contains("Coffer")
+                        || obj.wdesc._name.m_buffer.Contains("Vault")
+                        || obj.wdesc._name.m_buffer.Contains("Storage")
+                        || obj.wdesc._name.m_buffer.Contains("Stump")
+                        || obj.wdesc._name.m_buffer.Contains("Shelf")
+                        || obj.wdesc._name.m_buffer.Contains("Reliquary")
+                        || obj.wdesc._name.m_buffer.Contains("Crate")
+                        || obj.wdesc._name.m_buffer.Contains("Cache")
+                        || obj.wdesc._name.m_buffer.Contains("Tomb")
+                        || obj.wdesc._name.m_buffer.Contains("Sarcophagus")
+                        || obj.wdesc._name.m_buffer.Contains("Footlocker")
+                        || obj.wdesc._name.m_buffer.Contains("Holding")
+                        || obj.wdesc._name.m_buffer.Contains("Wheelbarrow")
+                        || obj.wdesc._name.m_buffer.Contains("Stash")
+                        || obj.wdesc._name.m_buffer.Contains("Trove")
+                        || obj.wdesc._name.m_buffer.Contains("Prism")
+                        || obj.wdesc._name.m_buffer.Contains("Strongbox")
+                        || obj.wdesc._name.m_buffer.Contains("Supplies")
+                        )
+                    {
+                        weeniesTypeTemplate.TryGetValue((uint)WeenieType.Chest_WeenieType, out template);
+                    }
+                    else if (obj.object_id < 0x80000000)
+                    {
+
+                    }
+                    else
+                    {
+
+                    }
+                }
+                else if (obj.wdesc._type == ITEM_TYPE.TYPE_UNDEF) // SLUMLORD OBJECTS
+                {
+                    weeniesTypeTemplate.TryGetValue((uint)WeenieType.Generic_WeenieType, out template);
+                    if (
+                        obj.wdesc._wcid == 9621 || // W_SLUMLORD_CLASS
+                        obj.wdesc._wcid == 10752 || // W_SLUMLORDTESTCHEAP_CLASS
+                        obj.wdesc._wcid == 10753 || // W_SLUMLORDTESTEXPENSIVE_CLASS
+                        obj.wdesc._wcid == 10754 || // W_SLUMLORDTESTMODERATE_CLASS
+                        obj.wdesc._wcid == 11711 || // W_SLUMLORDCOTTAGECHEAP_CLASS
+                        obj.wdesc._wcid == 11712 || // W_SLUMLORDCOTTAGEEXPENSIVE_CLASS
+                        obj.wdesc._wcid == 11713 || // W_SLUMLORDCOTTAGEMODERATE_CLASS
+                        obj.wdesc._wcid == 11714 || // W_SLUMLORDMANSIONCHEAP_CLASS
+                        obj.wdesc._wcid == 11715 || // W_SLUMLORDMANSIONEXPENSIVE_CLASS
+                        obj.wdesc._wcid == 11716 || // W_SLUMLORDMANSIONMODERATE_CLASS
+                        obj.wdesc._wcid == 11717 || // W_SLUMLORDVILLACHEAP_CLASS
+                        obj.wdesc._wcid == 11718 || // W_SLUMLORDVILLAEXPENSIVE_CLASS
+                        obj.wdesc._wcid == 11719 || // W_SLUMLORDVILLAMODERATE_CLASS
+                        obj.wdesc._wcid == 11977 || // W_SLUMLORDCOTTAGES349_579_CLASS
+                        obj.wdesc._wcid == 11978 || // W_SLUMLORDVILLA851_925_CLASS
+                        obj.wdesc._wcid == 11979 || // W_SLUMLORDCOTTAGE580_800_CLASS
+                        obj.wdesc._wcid == 11980 || // W_SLUMLORDVILLA926_970_CLASS
+                        obj.wdesc._wcid == 11980 || // W_SLUMLORDVILLA926_970_CLASS
+                        obj.wdesc._wcid == 12461 || // W_SLUMLORDCOTTAGE1001_1075_CLASS
+                        obj.wdesc._wcid == 12462 || // W_SLUMLORDCOTTAGE1076_1150_CLASS
+                        obj.wdesc._wcid == 13078 || // W_SLUMLORDCOTTAGE1151_1275_CLASS
+                        obj.wdesc._wcid == 13079 || // W_SLUMLORDCOTTAGE1276_1400_CLASS
+                        obj.wdesc._wcid == 13080 || // W_SLUMLORDVILLA1401_1440_CLASS
+                        obj.wdesc._wcid == 13081 || // W_SLUMLORDMANSION1441_1450_CLASS
+                        obj.wdesc._wcid == 14243 || // W_SLUMLORDCOTTAGE1451_1650_CLASS
+                        obj.wdesc._wcid == 14244 || // W_SLUMLORDCOTTAGE1651_1850_CLASS
+                        obj.wdesc._wcid == 14245 || // W_SLUMLORDVILLA1851_1940_CLASS
+                        obj.wdesc._wcid == 14246 || // W_SLUMLORDMANSION1941_1950_CLASS
+                        obj.wdesc._wcid == 14247 || // W_SLUMLORDCOTTAGE1951_2150_CLASS
+                        obj.wdesc._wcid == 14248 || // W_SLUMLORDCOTTAGE2151_2350_CLASS
+                        obj.wdesc._wcid == 14249 || // W_SLUMLORDVILLA2351_2440_CLASS
+                        obj.wdesc._wcid == 14250 || // W_SLUMLORDMANSION2441_2450_CLASS
+                        obj.wdesc._wcid == 14934 || // W_SLUMLORDCOTTAGE2451_2525_CLASS
+                        obj.wdesc._wcid == 14935 || // W_SLUMLORDCOTTAGE2526_2600_CLASS
+                        obj.wdesc._wcid == 14936 || // W_SLUMLORDVILLA2601_2640_CLASS
+                        obj.wdesc._wcid == 14937 || // W_SLUMLORDMANSION2641_2650_CLASS
+                                                    // parsed.wdesc._wcid == 15273 || // W_SLUMLORDFAKENUHMUDIRA_CLASS
+                        obj.wdesc._wcid == 15608 || // W_SLUMLORDAPARTMENT_CLASS
+                        obj.wdesc._wcid == 15609 || // W_SLUMLORDCOTTAGE2651_2725_CLASS
+                        obj.wdesc._wcid == 15610 || // W_SLUMLORDCOTTAGE2726_2800_CLASS
+                        obj.wdesc._wcid == 15611 || // W_SLUMLORDVILLA2801_2850_CLASS
+                        obj.wdesc._wcid == 19074 || // W_SLUMLORDCOTTAGE3851_3925_CLASS
+                        obj.wdesc._wcid == 19075 || // W_SLUMLORDCOTTAGE3926_4000_CLASS
+                        obj.wdesc._wcid == 19076 || // W_SLUMLORDVILLA4001_4050_CLASS
+                        obj.wdesc._wcid == 20850 || // W_SLUMLORDCOTTAGE6051_6125_CLASS
+                        obj.wdesc._wcid == 20851 || // W_SLUMLORDCOTTAGE6126_6200_CLASS
+                        obj.wdesc._wcid == 20852 || // W_SLUMLORDVILLA6201_6240_CLASS
+                        obj.wdesc._wcid == 20853    // W_SLUMLORDMANSION6241_6250_CLASS
+                                                    // parsed.wdesc._wcid == 22118 || // W_SLUMLORDHAUNTEDMANSION_CLASS
+                        )
+                    {
+                        weeniesTypeTemplate.TryGetValue((uint)WeenieType.SlumLord_WeenieType, out template);
+                    }
+
+                    else if (
+                                                        obj.wdesc._wcid == 15273 || // W_SLUMLORDFAKENUHMUDIRA_CLASS
+                                                        obj.wdesc._wcid == 22118    // W_SLUMLORDHAUNTEDMANSION_CLASS
+                        )
+                    {
+
+                    }
+                    else if (obj.wdesc._wcid == 10762)
+                    {
+
+                    }
+                    else if (obj.wdesc._name.m_buffer.Contains("Gen")
+                        )
+                    {
+
+                    }
+                    //else if (
+                    //    parsed.wdesc._name.m_buffer.Contains("Bolt")
+                    //    || parsed.wdesc._name.m_buffer.Contains("wave")
+                    //    || parsed.wdesc._name.m_buffer.Contains("Wave")
+                    //    || parsed.wdesc._name.m_buffer.Contains("Blast")
+                    //    || parsed.wdesc._name.m_buffer.Contains("Ring")
+                    //    || parsed.wdesc._name.m_buffer.Contains("Stream")
+                    //    || parsed.wdesc._name.m_buffer.Contains("Fist")
+                    //    || parsed.wdesc._name.m_buffer.Contains("Missile")
+                    //    || parsed.wdesc._name.m_buffer.Contains("Egg")
+                    //    || parsed.wdesc._name.m_buffer.Contains("Death")
+                    //    || parsed.wdesc._name.m_buffer.Contains("Fury")
+                    //     || parsed.wdesc._name.m_buffer.Contains("Wind")
+                    //    || parsed.wdesc._name.m_buffer.Contains("Flaming Skull")
+                    //     || parsed.wdesc._name.m_buffer.Contains("Edge")
+                    //    || parsed.wdesc._name.m_buffer.Contains("Snowball")
+                    //    || parsed.wdesc._name.m_buffer.Contains("Bomb")
+                    //    || parsed.wdesc._name.m_buffer.Contains("Blade")
+                    //    || parsed.wdesc._name.m_buffer.Contains("Stalactite")
+                    //    || parsed.wdesc._name.m_buffer.Contains("Boulder")
+                    //    || parsed.wdesc._name.m_buffer.Contains("Whirlwind")
+                    //    )
+                    //{
+                    //    weeniefileToPutItIn = "UndefObjects";
+                    //    addWeenie = true;
+                    //}
+                    else if (obj.wdesc._name.m_buffer.Contains("Generator"))
+                    {
+
+                    }
+                    //else if (parsed.wdesc._name.m_buffer.Contains("Rabbit"))
+                    //{
+                    //    fileToPutItIn = "UndefRabbits";
+                    //    addIt = true;
+                    //}
+                    else if (
+                           obj.wdesc._name.m_buffer.Contains("Bolt")
+                        || obj.wdesc._name.m_buffer.Contains("wave")
+                        || obj.wdesc._name.m_buffer.Contains("Wave")
+                        || obj.wdesc._name.m_buffer.Contains("Blast")
+                        || obj.wdesc._name.m_buffer.Contains("Ring")
+                        || obj.wdesc._name.m_buffer.Contains("Stream")
+                        || obj.wdesc._name.m_buffer.Contains("Fist")
+                        // || parsed.wdesc._name.m_buffer.Contains("Missile")
+                        // || parsed.wdesc._name.m_buffer.Contains("Egg")
+                        || obj.wdesc._name.m_buffer.Contains("Death")
+                        || obj.wdesc._name.m_buffer.Contains("Fury")
+                         || obj.wdesc._name.m_buffer.Contains("Wind")
+                        || obj.wdesc._name.m_buffer.Contains("Flaming Skull")
+                         || obj.wdesc._name.m_buffer.Contains("Edge")
+                        // || parsed.wdesc._name.m_buffer.Contains("Snowball")
+                        || obj.wdesc._name.m_buffer.Contains("Bomb")
+                        || obj.wdesc._name.m_buffer.Contains("Blade")
+                        || obj.wdesc._name.m_buffer.Contains("Stalactite")
+                        || obj.wdesc._name.m_buffer.Contains("Boulder")
+                        || obj.wdesc._name.m_buffer.Contains("Whirlwind")
+                    )
+                    {
+
+                    }
+                    else if (obj.wdesc._name.m_buffer.Contains("Missile")
+                            || obj.wdesc._name.m_buffer.Contains("Egg")
+                            || obj.wdesc._name.m_buffer.Contains("Snowball")
+                    )
+                    {
+
+                    }
+                    else if (obj.object_id < 0x80000000)
+                    {
+
+                    }
+                    else
+                    {
+
+                    }
+                }
+                else if (obj.wdesc._type == ITEM_TYPE.TYPE_WRITABLE)
+                {
+                    weeniesTypeTemplate.TryGetValue((uint)WeenieType.Generic_WeenieType, out template);
+                    if (obj.wdesc._name.m_buffer.Contains("Statue"))
+                    {
+
+                    }
+                    else if (obj.wdesc._name.m_buffer.Contains("Scroll")
+                        || obj.wdesc._name.m_buffer.Contains("Aura")
+                        || obj.wdesc._name.m_buffer.Contains("Recall")
+                        || obj.wdesc._name.m_buffer.Contains("Inscription")
+                        )
+                    {
+                        weeniesTypeTemplate.TryGetValue((uint)WeenieType.Scroll_WeenieType, out template);
+                    }
+                    else if (obj.wdesc._name.m_buffer.Contains("Pack"))
+                    {
+
+                    }
+                    else if (obj.wdesc._wcid == 9002)
+                    {
+
+                    }
+                    else if (obj.object_id < 0x80000000)
+                    {
+
+                    }
+                    else
+                    {
+
+                    }
+                }
+                //else if (obj.wdesc._type == ITEM_TYPE.TYPE_LIFESTONE)
+                //{
+
+                //}
+                ////else if ((parsed.wdesc._name.m_buffer.Contains("Scrivener")
+                ////        || parsed.wdesc._name.m_buffer.Contains("Scribe")
+                ////        || parsed.wdesc._name.m_buffer.Contains("Archmage")
+                ////        || parsed.wdesc._name.m_buffer.Contains("Healer")
+                ////        || parsed.wdesc._name.m_buffer.Contains("Weaponsmith")
+                ////        || parsed.wdesc._name.m_buffer.Contains("Weapons Master")
+                ////        || parsed.wdesc._name.m_buffer.Contains("Armorer")
+                ////        || parsed.wdesc._name.m_buffer.Contains("Grocer")
+                ////        || parsed.wdesc._name.m_buffer.Contains("Shopkeep")
+                ////        || parsed.wdesc._name.m_buffer.Contains("Shopkeeper")
+                ////        || parsed.wdesc._name.m_buffer.Contains("Jeweler")
+                ////        || parsed.wdesc._name.m_buffer.Contains("Barkeep")
+                ////        || parsed.wdesc._name.m_buffer.Contains("Barkeeper")
+                ////        || parsed.wdesc._name.m_buffer.Contains("Provisioner")
+                ////        || parsed.wdesc._name.m_buffer.Contains("Tailor")
+                ////        || parsed.wdesc._name.m_buffer.Contains("Seamstress")
+                ////        || parsed.wdesc._name.m_buffer.Contains("Fletcher")
+                ////        || parsed.wdesc._name.m_buffer.Contains("Bowyer")
+                ////        || parsed.wdesc._name.m_buffer.Contains("Marksman")
+                ////        || parsed.wdesc._name.m_buffer.Contains("Crafter")
+                ////        || parsed.wdesc._name.m_buffer.Contains("Cook")
+                ////        || parsed.wdesc._name.m_buffer.Contains("Alchemist")
+                ////        || parsed.wdesc._name.m_buffer.Contains("Woodsman")
+                ////        || parsed.wdesc._name.m_buffer.Contains("Apprentice"))
+                ////    && parsed.wdesc._type == ITEM_TYPE.TYPE_CREATURE
+                ////    && parsed.wdesc._blipColor == 8)
+                ////{
+                ////    fileToPutItIn = "Vendors";
+                ////    addIt = true;
+                ////}
+                ////else if ((parsed.wdesc._name.m_buffer == "Agent of the Arcanum"
+                ////        || parsed.wdesc._name.m_buffer == "Sentry"
+                ////        || parsed.wdesc._name.m_buffer == "Ulgrim the Unpleasant"
+                ////        || parsed.wdesc._name.m_buffer.Contains("Ulgrim")
+                ////        || parsed.wdesc._name.m_buffer == "Ned the Clever"
+                ////        || parsed.wdesc._name.m_buffer == "Wedding Planner"
+                ////        || parsed.wdesc._name.m_buffer.Contains("Collector")
+                ////        || parsed.wdesc._name.m_buffer.Contains("Guard")
+                ////        || parsed.wdesc._name.m_buffer == "Jonathan"
+                ////        || parsed.wdesc._name.m_buffer == "Farmer")
+                ////    && parsed.wdesc._type == ITEM_TYPE.TYPE_CREATURE
+                ////    && parsed.wdesc._blipColor == 8)
+                ////{
+                ////    fileToPutItIn = "OtherNPCs";
+                ////    addIt = true;
+                ////}
+                else if (obj.wdesc._type == ITEM_TYPE.TYPE_CREATURE)
+                {
+                    weeniesTypeTemplate.TryGetValue((uint)WeenieType.Creature_WeenieType, out template);
+                    if (//parsed.wdesc._name.m_buffer == "The Chicken"
+                        //|| parsed.wdesc._name.m_buffer == "Babe the Blue Auroch"
+                        obj.wdesc._name.m_buffer == "Babe the Blue Auroch"
+                        || obj.wdesc._name.m_buffer == "Paul the Monouga"
+                        //|| parsed.wdesc._name.m_buffer == "Silencia's Magma Golem"
+                        //|| parsed.wdesc._name.m_buffer == "Repair Golem"
+                        )
+                    {
+
+                    }
+                    else if (obj.wdesc._wcid == 43481
+                        || obj.wdesc._wcid == 43480
+                        )
+                    {
+
+                    }
+                    else if (obj.wdesc._name.m_buffer.Contains("Crier")
+                        && obj.wdesc._blipColor == 8)
+                    {
+
+                    }
+                    else if (obj.wdesc._name.m_buffer.Contains("Pet")
+                        || obj.wdesc._name.m_buffer.Contains("Wind-up")
+                        || obj.wdesc._wcid == 48881
+                        || obj.wdesc._wcid == 34902
+                        || obj.wdesc._wcid == 48891
+                        || obj.wdesc._wcid == 48879
+                        || obj.wdesc._wcid == 34906
+                        || obj.wdesc._wcid == 48887
+                        || obj.wdesc._wcid == 48889
+                        || obj.wdesc._wcid == 48883
+                        || obj.wdesc._wcid == 34900
+                        || obj.wdesc._wcid == 34901
+                        || obj.wdesc._wcid == 34908
+                        || obj.wdesc._wcid == 34898
+                        )
+                    {
+                        weeniesTypeTemplate.TryGetValue((uint)WeenieType.PetDevice_WeenieType, out template);
+                    }
+                    else if (obj.wdesc._blipColor == 8)
+                    {
+
+                    }
+                    else if (obj.wdesc._blipColor == 2)
+                    {
+
+                    }
+                    else if (obj.object_id < 0x80000000)
+                    {
+
+                    }
+                    else if (obj.wdesc._name.m_buffer.Contains("Statue") && !obj.wdesc._name.m_buffer.Contains("Bronze")
+                        || obj.wdesc._name.m_buffer.Contains("Shrine")
+                        // || parsed.wdesc._name.m_buffer.Contains("Altar")
+                        || obj.wdesc._name.m_buffer.Contains("Warden of")
+                        || obj.wdesc._name.m_buffer.Contains("Device")
+                        || obj.wdesc._name.m_buffer.Contains("Seed")
+                        || obj.wdesc._name.m_buffer.Contains("Forge")
+                        || obj.wdesc._name.m_buffer.Contains("Tower Guardian")
+                        || obj.wdesc._name.m_buffer.Contains("New Aluvian Champion")
+                        || obj.wdesc._name.m_buffer.Contains("Barrel")
+                        || obj.wdesc._name.m_buffer.Contains("New Aluvian War Mage Champion")
+                        || obj.wdesc._name.m_buffer.Contains("Wounded Drudge Skulker")
+                        || obj.wdesc._name.m_buffer.Contains("Servant of")
+                        || obj.wdesc._name.m_buffer.Contains("Prison")
+                        || obj.wdesc._name.m_buffer.Contains("Temple")
+                        || obj.wdesc._name.m_buffer.Contains("Mana Siphon")
+                        || obj.wdesc._name.m_buffer.Contains("Mnemosyne")
+                        || obj.wdesc._name.m_buffer.Contains("Portal")
+                        || obj.wdesc._name.m_buffer.Contains("Door")
+                        || obj.wdesc._name.m_buffer.Contains("Wall")
+                        || obj.wdesc._name.m_buffer.Contains("Pit")
+                        || obj.wdesc._name.m_buffer.Contains("Book")
+                        || obj.wdesc._name.m_buffer.Contains("The Deep")
+                        // || parsed.wdesc._name.m_buffer.Contains("Warner Brother")
+                        || obj.wdesc._name.m_buffer.Contains("Fishing")
+                        || obj.wdesc._name.m_buffer.Contains("Bookshelf")
+                        || obj.wdesc._name.m_buffer.Contains("Cavern")
+                        || obj.wdesc._name.m_buffer.Contains("Sword of Frozen Fury")
+                        || obj.wdesc._name.m_buffer.Contains("Coffin")
+                        || obj.wdesc._name.m_buffer.Contains("Silence")
+                        || obj.wdesc._name.m_buffer == "Black"
+                        || obj.wdesc._name.m_buffer.Contains("Eyes")
+                        || obj.wdesc._name.m_buffer.Contains("Bed")
+                        || obj.wdesc._name.m_buffer.Contains("Hole")
+                        || obj.wdesc._name.m_buffer.Contains("Tribunal")
+                        || obj.wdesc._name.m_buffer.Contains("Sunlight")
+                        || obj.wdesc._name.m_buffer.Contains("Wind")
+                        || obj.wdesc._name.m_buffer == "E"
+                        || obj.wdesc._name.m_buffer == "Flame"
+                        || obj.wdesc._name.m_buffer == "Death"
+                        || obj.wdesc._name.m_buffer == "Darkness"
+                        || obj.wdesc._name.m_buffer == "Time"
+                        || obj.wdesc._name.m_buffer == "Ring"
+                        || obj.wdesc._name.m_buffer == "Hope"
+                        || obj.wdesc._name.m_buffer == "Mushroom"
+                        || obj.wdesc._name.m_buffer == "Stars"
+                        || obj.wdesc._name.m_buffer == "Man"
+                        || obj.wdesc._name.m_buffer == "Nothing"
+                        || obj.wdesc._name.m_buffer.Contains("Lever")
+                        || obj.wdesc._name.m_buffer.Contains("Gateway")
+                        || obj.wdesc._name.m_buffer.Contains("Gate Stone")
+                        || obj.wdesc._name.m_buffer.Contains("Target")
+                        || obj.wdesc._name.m_buffer.Contains("Backpack")
+                        || obj.wdesc._name.m_buffer.Contains("Odd Looking Vine")
+                        || obj.wdesc._name.m_buffer.Contains("Pumpkin Vine")
+                        || obj.wdesc._name.m_buffer.Contains("Font")
+                        || obj.wdesc._name.m_buffer.Contains("Lair")
+                        || obj.wdesc._name.m_buffer.Contains("Essence")
+                        || obj.wdesc._name.m_buffer.Contains("Smelting")
+                        || obj.wdesc._name.m_buffer.Contains("Documents")
+                        || obj.wdesc._name.m_buffer.Contains("Harmonic Transference Field")
+                        || obj.wdesc._name.m_buffer.Contains("Deeper into")
+                        || obj.wdesc._name.m_buffer.Contains("Up to the")
+                        || obj.wdesc._name.m_buffer.Contains("Pool")
+                        )
+                    {
+
+                    }
+                    else if (obj.wdesc._name.m_buffer.Contains("Exploration Marker"))
+                    {
+
+                    }
+                    else if (obj.wdesc._name.m_buffer.Contains("Mysterious Hatch"))
+                    {
+
+                    }
+                    else if (obj.wdesc._name.m_buffer.Contains("Cow") && !obj.wdesc._name.m_buffer.Contains("Auroch") && !obj.wdesc._name.m_buffer.Contains("Snowman"))
+                    {
+
+                    }
+                    //else if (parsed.wdesc._name.m_buffer.Contains("Auroch"))
+                    //{
+                    //    weeniefileToPutItIn = "CreaturesAurochs";
+                    //    weenieType = WeenieType.Cow_WeenieType;
+                    //    addWeenie = true;
+                    //}
+                    else if (obj.wdesc._wcid >= 14342 && obj.wdesc._wcid <= 14347
+                        || obj.wdesc._wcid >= 14404 && obj.wdesc._wcid <= 14409
+                        )
+                    {
+
+                    }
+                    else
+                    {
+
+                    }
+                }
+                else if (obj.wdesc._type == ITEM_TYPE.TYPE_GAMEBOARD)
+                {
+
+                }
+                else if (obj.object_id < 0x80000000)
+                {
+
+                }
+                else if (obj.wdesc._type == ITEM_TYPE.TYPE_ARMOR)
+                {
+                    weeniesTypeTemplate.TryGetValue((uint)WeenieType.Clothing_WeenieType, out template);
+                }
+                else if (obj.wdesc._type == ITEM_TYPE.TYPE_MELEE_WEAPON)
+                {
+                    weeniesTypeTemplate.TryGetValue((uint)WeenieType.MeleeWeapon_WeenieType, out template);
+                }
+                else if (obj.wdesc._type == ITEM_TYPE.TYPE_CLOTHING)
+                {
+                    weeniesTypeTemplate.TryGetValue((uint)WeenieType.Clothing_WeenieType, out template);
+                }
+                else if (obj.wdesc._type == ITEM_TYPE.TYPE_JEWELRY)
+                {
+                    weeniesTypeTemplate.TryGetValue((uint)WeenieType.Clothing_WeenieType, out template);
+                }
+                else if (obj.wdesc._type == ITEM_TYPE.TYPE_FOOD)
+                {
+                    weeniesTypeTemplate.TryGetValue((uint)WeenieType.Food_WeenieType, out template);
+                }
+                else if (obj.wdesc._type == ITEM_TYPE.TYPE_MONEY)
+                {
+                    weeniesTypeTemplate.TryGetValue((uint)WeenieType.Coin_WeenieType, out template);
+                }
+                else if (obj.wdesc._type == ITEM_TYPE.TYPE_MISSILE_WEAPON)
+                {
+                    weeniesTypeTemplate.TryGetValue((uint)WeenieType.MissileLauncher_WeenieType, out template);
+                }
+                else if (obj.wdesc._type == ITEM_TYPE.TYPE_GEM)
+                {
+                    weeniesTypeTemplate.TryGetValue((uint)WeenieType.Gem_WeenieType, out template);
+                }
+                else if (obj.wdesc._type == ITEM_TYPE.TYPE_SPELL_COMPONENTS)
+                {
+                    weeniesTypeTemplate.TryGetValue((uint)WeenieType.SpellComponent_WeenieType, out template);
+                }
+                else if (obj.wdesc._type == ITEM_TYPE.TYPE_KEY)
+                {
+                    weeniesTypeTemplate.TryGetValue((uint)WeenieType.Key_WeenieType, out template);
+                }
+                else if (obj.wdesc._type == ITEM_TYPE.TYPE_CASTER)
+                {
+                    weeniesTypeTemplate.TryGetValue((uint)WeenieType.Caster_WeenieType, out template);
+                }
+                else if (obj.wdesc._type == ITEM_TYPE.TYPE_MANASTONE)
+                {
+                    weeniesTypeTemplate.TryGetValue((uint)WeenieType.ManaStone_WeenieType, out template);
+                }
+                else if (obj.wdesc._type == ITEM_TYPE.TYPE_PROMISSORY_NOTE)
+                {
+                    weeniesTypeTemplate.TryGetValue((uint)WeenieType.Generic_WeenieType, out template);
+                }
+                else if (obj.wdesc._type == ITEM_TYPE.TYPE_CRAFT_ALCHEMY_BASE)
+                {
+                    weeniesTypeTemplate.TryGetValue((uint)WeenieType.Generic_WeenieType, out template);
+                }
+                else if (obj.wdesc._type == ITEM_TYPE.TYPE_CRAFT_ALCHEMY_INTERMEDIATE)
+                {
+                    weeniesTypeTemplate.TryGetValue((uint)WeenieType.Generic_WeenieType, out template);
+                }
+                else if (obj.wdesc._type == ITEM_TYPE.TYPE_CRAFT_COOKING_BASE)
+                {
+                    weeniesTypeTemplate.TryGetValue((uint)WeenieType.Generic_WeenieType, out template);
+                }
+                else if (obj.wdesc._type == ITEM_TYPE.TYPE_CRAFT_FLETCHING_BASE)
+                {
+                    weeniesTypeTemplate.TryGetValue((uint)WeenieType.Generic_WeenieType, out template);
+                }
+                else if (obj.wdesc._type == ITEM_TYPE.TYPE_CRAFT_FLETCHING_INTERMEDIATE)
+                {
+                    weeniesTypeTemplate.TryGetValue((uint)WeenieType.Generic_WeenieType, out template);
+                }
+                else if (obj.wdesc._type == ITEM_TYPE.TYPE_TINKERING_TOOL)
+                {
+                    weeniesTypeTemplate.TryGetValue((uint)WeenieType.CraftTool_WeenieType, out template);
+                }
+                else if (obj.wdesc._type == ITEM_TYPE.TYPE_TINKERING_MATERIAL)
+                {
+                    weeniesTypeTemplate.TryGetValue((uint)WeenieType.Generic_WeenieType, out template);
+                }
+                //else if (parsed.wdesc._type == ITEM_TYPE.TYPE_USELESS)
+                //{
+                //    weeniefileToPutItIn = "UselessItems";
+                //    addWeenie = true;
+                //}
+                else if (((uint)obj.wdesc._type & (uint)ITEM_TYPE.TYPE_ITEM) > 0
+                    )
+                {
+                    weeniesTypeTemplate.TryGetValue((uint)WeenieType.Generic_WeenieType, out template);
+                }
+                else if (obj.wdesc._name.m_buffer.Contains("Light")
+                    || obj.wdesc._name.m_buffer.Contains("Lantern")
+                    || obj.wdesc._name.m_buffer.Contains("Candelabra")
+                    || obj.wdesc._name.m_buffer.Contains("Stove")
+                    || obj.wdesc._name.m_buffer.Contains("Flame")
+                    || obj.wdesc._name.m_buffer.Contains("Lamp")
+                    || obj.wdesc._name.m_buffer.Contains("Chandelier")
+                    || obj.wdesc._name.m_buffer.Contains("Torch")
+                    || obj.wdesc._name.m_buffer.Contains("Hearth")
+                    )
+                {
+                    weeniesTypeTemplate.TryGetValue((uint)WeenieType.LightSource_WeenieType, out template);
+                }
+                else
+                {
+                    weeniesTypeTemplate.TryGetValue((uint)WeenieType.Generic_WeenieType, out template);
+                }
+
+                obj.physicsdesc = template.physicsdesc;
+                obj.objdesc = template.objdesc;
+
+                return obj;
+            }
+            catch (Exception ex)
+            {
+                totalExceptions++;
+                return null;
             }
         }
 
@@ -2460,17 +3669,21 @@ namespace aclogview
             }
         }
 
-        private void CreateStaticObjectsList(CM_Physics.CreateObject parsed, List<uint> objectIds, Dictionary<string, List<CM_Physics.CreateObject>> staticObjects, 
+        private void CreateStaticObjectsList(CM_Physics.CreateObject parsed, List<uint> objectIds, Dictionary<string, List<CM_Physics.CreateObject>> staticObjects,
+            bool saveAsLandblockInstances, Dictionary<uint, Dictionary<string, List<CM_Physics.CreateObject>>> landblockInstances,
             List<uint> weenieIds, Dictionary<string, List<CM_Physics.CreateObject>> weenies, Dictionary<uint, List<Position>> processedWeeniePositions, 
             Dictionary<uint, string> appraisalObjectsCatagoryMap, Dictionary<uint, uint> appraisalObjectToWeenieId, Dictionary<uint, uint> weeniesWeenieType, 
             Dictionary<uint, uint> staticObjectsWeenieType, Dictionary<uint, List<uint>> wieldedObjectsParentMap, Dictionary<uint, List<CM_Physics.CreateObject>> wieldedObjects,
-            Dictionary<uint, List<uint>> inventoryParents, Dictionary<uint, CM_Physics.CreateObject> inventoryObjects)
+            Dictionary<uint, List<uint>> inventoryParents, Dictionary<uint, CM_Physics.CreateObject> inventoryObjects,
+            Dictionary<uint, List<uint>> parentWieldsWeenies,
+            Dictionary<uint, CM_Physics.CreateObject> weeniesTypeTemplate)
         {
             try
             {
                 // don't need undefined crap or players
                 //if (parsed.wdesc._wcid == 1 || objectIds.Contains(parsed.object_id))
-                if (objectIds.Contains(parsed.object_id))
+                //if (objectIds.Contains(parsed.object_id))
+                if (objectIds.Contains(parsed.object_id) && weenieIds.Contains(parsed.wdesc._wcid))
                     return;
 
                 bool addIt = false;
@@ -2836,7 +4049,7 @@ namespace aclogview
                         || parsed.wdesc._name.m_buffer.Contains("Gardens")
                         || parsed.wdesc._name.m_buffer.Contains("Lodge")
                         || parsed.wdesc._name.m_buffer.Contains("Grotto")
-                        || parsed.wdesc._name.m_buffer.Contains("Hollow")
+                        || (parsed.wdesc._name.m_buffer.Contains("Hollow") && !parsed.wdesc._name.m_buffer.Contains("Minion"))
                         )
                     {
                         fileToPutItIn = "MiscResidentialHallSigns";
@@ -3543,7 +4756,7 @@ namespace aclogview
                     weenieType = WeenieType.Game_WeenieType;
                     addIt = true;
                 }
-                else if (parsed.object_id < 0x80000000)
+                else if (parsed.object_id < 0x80000000 && parsed.object_id != 50945534)
                 {
                     fileToPutItIn = "LandscapeStatics";
                     weenieType = WeenieType.Generic_WeenieType;
@@ -3761,8 +4974,26 @@ namespace aclogview
                                 {
                                     if (child == parsed.object_id)
                                     {
-                                        fileToPutItIn = weeniefileToPutItIn;
-                                        addIt = true;
+                                        //fileToPutItIn = weeniefileToPutItIn;
+                                        //addIt = true;
+
+                                        uint weenieId = 0;
+                                        appraisalObjectToWeenieId.TryGetValue(parsed.physicsdesc.parent_id, out weenieId);
+
+                                        if (weenieId > 0)
+                                        {
+                                            if (!parentWieldsWeenies.ContainsKey(weenieId))
+                                                parentWieldsWeenies.Add(weenieId, new List<uint>());
+
+                                            if (!parentWieldsWeenies[weenieId].Contains(parsed.wdesc._wcid))
+                                                parentWieldsWeenies[weenieId].Add(parsed.wdesc._wcid);
+                                        }
+
+                                        //if (!parentWieldsWeenies.ContainsKey(parsed.physicsdesc.parent_id))
+                                        //    parentWieldsWeenies.Add(parsed.physicsdesc.parent_id, new List<uint>());
+
+                                        //parentWieldsWeenies[parsed.physicsdesc.parent_id].Add(parsed.wdesc._wcid);
+
                                         break;
                                     }
                                 }
@@ -3771,6 +5002,24 @@ namespace aclogview
                     }               
                 }
 
+                if (!weeniesTypeTemplate.ContainsKey((uint)weenieType))
+                {
+                    bool skip = false;
+                    
+                    switch (weenieType)
+                    {
+                        //case WeenieType.Scroll_WeenieType:
+
+                        //    break;
+                        default:
+                            skip = false;
+                            break;
+                    }
+
+                    if (!skip)
+                        weeniesTypeTemplate.Add((uint)weenieType, parsed);
+                }
+                
                 // de-dupe based on position and wcid
                 if (addIt && !PositionRecorded(parsed, processedWeeniePositions[parsed.wdesc._wcid], parsed.physicsdesc.pos, margin))
                 // if (addIt) //&& !PositionRecorded(parsed, processedWeeniePositions[parsed.wdesc._wcid], parsed.physicsdesc.pos, margin))
@@ -3792,10 +5041,24 @@ namespace aclogview
                             weeniesWeenieType.Add(parsed.wdesc._wcid, (uint)weenieType);
                     }
 
-                    if (!staticObjects.ContainsKey(fileToPutItIn))
-                        staticObjects.Add(fileToPutItIn, new List<CM_Physics.CreateObject>());
+                    if (!saveAsLandblockInstances)
+                    {
+                        if (!staticObjects.ContainsKey(fileToPutItIn))
+                            staticObjects.Add(fileToPutItIn, new List<CM_Physics.CreateObject>());
 
-                    staticObjects[fileToPutItIn].Add(parsed);
+                        staticObjects[fileToPutItIn].Add(parsed);                        
+                    }
+                    else
+                    {
+                        uint landblock = (parsed.physicsdesc.pos.objcell_id >> 16);
+                        if (!landblockInstances.ContainsKey(landblock))
+                            landblockInstances.Add(landblock, new Dictionary<string, List<CreateObject>>());
+
+                        if (!landblockInstances[landblock].ContainsKey(fileToPutItIn))
+                            landblockInstances[landblock].Add(fileToPutItIn, new List<CM_Physics.CreateObject>());
+
+                        landblockInstances[landblock][fileToPutItIn].Add(parsed);
+                    }
                     objectIds.Add(parsed.object_id);
 
                     if (!appraisalObjectToWeenieId.ContainsKey(parsed.object_id))
@@ -3820,10 +5083,41 @@ namespace aclogview
                                 if (wieldedObjectsParentMap[parsed.object_id].Contains(child.object_id))
                                 {
                                     string newfileToPutItIn = fileToPutItIn;
-                                    if (!staticObjects.ContainsKey(newfileToPutItIn))
-                                        staticObjects.Add(newfileToPutItIn, new List<CM_Physics.CreateObject>());
+                                    if (!saveAsLandblockInstances)
+                                    {
+                                        if (!staticObjects.ContainsKey(newfileToPutItIn))
+                                            staticObjects.Add(newfileToPutItIn, new List<CM_Physics.CreateObject>());
 
-                                    staticObjects[newfileToPutItIn].Add(child);
+                                        staticObjects[newfileToPutItIn].Add(child);
+                                    }
+                                    else
+                                    {
+                                        //uint landblock = (child.physicsdesc.pos.objcell_id >> 16);
+                                        //if (!landblockInstances.ContainsKey(landblock))
+                                        //    landblockInstances.Add(landblock, new Dictionary<string, List<CreateObject>>());
+
+                                        //if (!landblockInstances[landblock].ContainsKey(fileToPutItIn))
+                                        //    landblockInstances[landblock].Add(fileToPutItIn, new List<CM_Physics.CreateObject>());
+
+                                        //landblockInstances[landblock][fileToPutItIn].Add(child);
+
+                                        //if (!parentWieldsWeenies.ContainsKey(child.physicsdesc.parent_id))
+                                        //    parentWieldsWeenies.Add(child.physicsdesc.parent_id, new List<uint>());
+
+                                        //parentWieldsWeenies[child.physicsdesc.parent_id].Add(child.wdesc._wcid);
+
+                                        uint weenieId = 0;
+                                        appraisalObjectToWeenieId.TryGetValue(child.physicsdesc.parent_id, out weenieId);
+
+                                        if (weenieId > 0)
+                                        {
+                                            if (!parentWieldsWeenies.ContainsKey(weenieId))
+                                                parentWieldsWeenies.Add(weenieId, new List<uint>());
+
+                                            if (!parentWieldsWeenies[weenieId].Contains(child.wdesc._wcid))
+                                                parentWieldsWeenies[weenieId].Add(child.wdesc._wcid);
+                                        }
+                                    }
                                     objectIds.Add(child.object_id);
 
                                     if (!appraisalObjectToWeenieId.ContainsKey(child.object_id))
@@ -4090,6 +5384,588 @@ namespace aclogview
                     catch (Exception ex)
                     {
                         System.Diagnostics.Debug.WriteLine("Unable to export object " + parsed.object_id + ". Exception:" + Environment.NewLine + ex.ToString());
+                    }
+                }
+            }
+        }
+
+        private void WriteLandblockTable(Dictionary<uint, Dictionary<string, List<CM_Physics.CreateObject>>> landblockInstances, List<uint> objectIds, string outputFolder, Dictionary<uint, uint> staticObjectsWeenieType)
+        {
+            bool useHex = true;
+            bool useCategories = false;
+            string staticFolder = Path.Combine(outputFolder, "6-landblocks");
+
+            string sqlCommand = "INSERT";
+            //string sqlCommand = "REPLACE";
+
+            if (!Directory.Exists(staticFolder))
+                Directory.CreateDirectory(staticFolder);
+
+            //Dictionary<string, int> fileCount = new Dictionary<string, int>();
+
+            foreach (uint landblock in landblockInstances.Keys)
+            {
+                foreach (string key in landblockInstances[landblock].Keys)
+                {
+                    //foreach (var parsed in landblockInstances[landblock][key])
+                    //{
+                    try
+                    {
+                        string landblockString = landblock.ToString();
+                        if (useHex)
+                            landblockString = landblock.ToString("X4");
+                        //if (!fileCount.ContainsKey(key))
+                        //    fileCount.Add(key, 0);
+
+                        //string fullFile = Path.Combine(staticFolder, $"{key}_{fileCount[key]}.sql");
+                        string fullFile = "";
+
+                        if (useCategories)
+                            fullFile = Path.Combine(staticFolder, $"{landblockString}_{key}.sql");
+                        else
+                            fullFile = Path.Combine(staticFolder, $"{landblockString}.sql");
+
+                        if (File.Exists(fullFile))
+                        {
+                            FileInfo fi = new FileInfo(fullFile);
+
+                            // go to the next file if it's bigger than a MB
+                            if (fi.Length > ((1048576) * 40))
+                            {
+                                //fileCount[key]++;
+                                //fullFile = Path.Combine(staticFolder, $"{key}_{fileCount[key]}.sql");
+                                if (useCategories)
+                                    fullFile = Path.Combine(staticFolder, $"{landblockString}_{key}.sql");
+                                else
+                                    fullFile = Path.Combine(staticFolder, $"{landblockString}.sql");
+
+                                if (useCategories)
+                                {
+                                    if (File.Exists(fullFile))
+                                        File.Delete(fullFile);
+                                }
+                            }
+                        }
+
+                        using (FileStream fs = new FileStream(fullFile, FileMode.Append))
+                        {
+                            using (StreamWriter writer = new StreamWriter(fs))
+                            {
+
+
+                                string instanceLine = ""; //intsLine = "", bigintsLine = "", floatsLine = "", boolsLine = "", strsLine = "", didsLine = "", iidsLine = "";
+
+                                //intsLine += $"     , ({vendor.shopVendorID}, {(uint)STypeInt.MERCHANDISE_ITEM_TYPES_INT}, {(uint)vendor.shopVendorProfile.item_types})" + Environment.NewLine;
+                                //intsLine += $"     , ({vendor.shopVendorID}, {(uint)STypeInt.MERCHANDISE_MIN_VALUE_INT}, {(uint)vendor.shopVendorProfile.min_value})" + Environment.NewLine;
+                                //intsLine += $"     , ({vendor.shopVendorID}, {(uint)STypeInt.MERCHANDISE_MAX_VALUE_INT}, {(uint)vendor.shopVendorProfile.max_value})" + Environment.NewLine;
+
+                                //if (vendor.shopVendorProfile.magic == 1)
+                                //    boolsLine += $"     , ({vendor.shopVendorID}, {(uint)STypeBool.DEAL_MAGICAL_ITEMS_BOOL}, {true})" + Environment.NewLine;
+
+                                //floatsLine += $"     , ({vendor.shopVendorID}, {(uint)STypeFloat.BUY_PRICE_FLOAT}, {(float)vendor.shopVendorProfile.buy_price})" + Environment.NewLine;
+                                //floatsLine += $"     , ({vendor.shopVendorID}, {(uint)STypeFloat.SELL_PRICE_FLOAT}, {(float)vendor.shopVendorProfile.sell_price})" + Environment.NewLine;
+
+                                //line = $"{sqlCommand} INTO `ace_position` (`aceObjectId`, `positionType`, `landblockRaw`, `posX`, `posY`, `posZ`, `qW`, `qX`, `qY`, `qZ`)" + Environment.NewLine +
+                                //    //line = $"{sqlCommand} INTO `ace_position` (`aceObjectId`, `positionType`, `landblockRaw`, `landblock`, `cell`, `posX`, `posY`, `posZ`, `qW`, `qX`, `qY`, `qZ`)" + Environment.NewLine +
+                                //    $"VALUES ({parsed.object_id}, {(uint)STypePosition.LOCATION_POSITION}, {parsed.physicsdesc.pos.objcell_id}, " +
+                                //    //$"{parsed.physicsdesc.pos.objcell_id >> 16}, {parsed.physicsdesc.pos.objcell_id & 0xFFFF}, " +
+                                //    $"{parsed.physicsdesc.pos.frame.m_fOrigin.x}, {parsed.physicsdesc.pos.frame.m_fOrigin.y}, {parsed.physicsdesc.pos.frame.m_fOrigin.z}, " +
+                                //    $"{parsed.physicsdesc.pos.frame.qw}, {parsed.physicsdesc.pos.frame.qx}, {parsed.physicsdesc.pos.frame.qy}, {parsed.physicsdesc.pos.frame.qz});" +
+                                //    Environment.NewLine;
+
+                                foreach (var parsed in landblockInstances[landblock][key])
+                                {
+                                    instanceLine += $"     , ({parsed.wdesc._wcid}, {parsed.object_id}, " +
+                                            $"{parsed.physicsdesc.pos.objcell_id}, " +
+                                            $"{parsed.physicsdesc.pos.frame.m_fOrigin.x}, {parsed.physicsdesc.pos.frame.m_fOrigin.y}, {parsed.physicsdesc.pos.frame.m_fOrigin.z}, " +
+                                            $"{parsed.physicsdesc.pos.frame.qw}, {parsed.physicsdesc.pos.frame.qx}, {parsed.physicsdesc.pos.frame.qy}, {parsed.physicsdesc.pos.frame.qz}" +
+                                        ")" + Environment.NewLine;
+                                }
+
+                                if (instanceLine != "")
+                                {
+                                    if (useCategories)
+                                    {
+                                        instanceLine = $"{sqlCommand} INTO `ace_landblock` (`weenieClassId`, `preassignedGuid`, `landblockRaw`, `posX`, `posY`, `posZ`, `qW`, `qX`, `qY`, `qZ`)" + Environment.NewLine 
+                                            + "VALUES " + instanceLine.TrimStart("     ,".ToCharArray());
+                                    }
+                                    else
+                                    {
+                                        instanceLine = $"/* {key} */" + Environment.NewLine
+                                            + $"{sqlCommand} INTO `ace_landblock` (`weenieClassId`, `preassignedGuid`, `landblockRaw`, `posX`, `posY`, `posZ`, `qW`, `qX`, `qY`, `qZ`)" + Environment.NewLine
+                                            + "VALUES " + instanceLine.TrimStart("     ,".ToCharArray());
+                                    }
+                                    instanceLine = instanceLine.TrimEnd(Environment.NewLine.ToCharArray()) + ";" + Environment.NewLine;
+                                    writer.WriteLine(instanceLine);
+                                }
+
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        System.Diagnostics.Debug.WriteLine("Unable to export landblock " + landblock + ". Exception:" + Environment.NewLine + ex.ToString());
+                    }
+                    // }
+                }
+            }
+        }
+
+        private void WriteLandblockData(Dictionary<uint, Dictionary<string, List<CM_Physics.CreateObject>>> landblockInstances, List<uint> objectIds, string outputFolder, Dictionary<uint, uint> staticObjectsWeenieType)
+        {
+            bool useHex = true;
+            bool useCategories = false;
+            string staticFolder = Path.Combine(outputFolder, "6-landblocks");
+
+            string sqlCommand = "INSERT";
+            //string sqlCommand = "REPLACE";
+
+            if (!Directory.Exists(staticFolder))
+                Directory.CreateDirectory(staticFolder);
+
+            //Dictionary<string, int> fileCount = new Dictionary<string, int>();
+
+            foreach (uint landblock in landblockInstances.Keys)
+            {
+                foreach (string key in landblockInstances[landblock].Keys)
+                {
+                    foreach (var parsed in landblockInstances[landblock][key])
+                    {
+                        try
+                        {
+                            string landblockString = landblock.ToString();
+                            if (useHex)
+                                landblockString = landblock.ToString("X4");
+                            //if (!fileCount.ContainsKey(key))
+                            //    fileCount.Add(key, 0);
+
+                            //string fullFile = Path.Combine(staticFolder, $"{key}_{fileCount[key]}.sql");
+                            string fullFile = "";
+                            if (useCategories)
+                                fullFile = Path.Combine(staticFolder, $"{landblockString}_{key}.sql");
+                            else
+                                fullFile = Path.Combine(staticFolder, $"{landblockString}.sql");
+
+                            if (File.Exists(fullFile))
+                            {
+                                FileInfo fi = new FileInfo(fullFile);
+
+                                // go to the next file if it's bigger than a MB
+                                if (fi.Length > ((1048576) * 40))
+                                {
+                                    //fileCount[key]++;
+                                    //fullFile = Path.Combine(staticFolder, $"{key}_{fileCount[key]}.sql");
+                                    if (useCategories)
+                                        fullFile = Path.Combine(staticFolder, $"{landblockString}_{key}.sql");
+                                    else
+                                        fullFile = Path.Combine(staticFolder, $"{landblockString}.sql");
+
+                                    if (useCategories)
+                                    {
+                                        if (File.Exists(fullFile))
+                                            File.Delete(fullFile);
+                                    }
+                                }
+                            }
+
+                            using (FileStream fs = new FileStream(fullFile, FileMode.Append))
+                            {
+                                using (StreamWriter writer = new StreamWriter(fs))
+                                {
+                                    string intsLine = "", bigintsLine = "", floatsLine = "", boolsLine = "", strsLine = "", didsLine = "", iidsLine = "";
+
+                                    string line = $"{sqlCommand} INTO `ace_object` (`" +
+                                    "aceObjectId`, `aceObjectDescriptionFlags`, " +
+                                    "`weenieClassId`, `weenieHeaderFlags`, " +
+                                    "`currentMotionState`, " +
+                                    "`physicsDescriptionFlag`" +
+                                    ")" + Environment.NewLine + "VALUES (" +
+
+                                    $"{parsed.object_id}, {parsed.wdesc._bitfield}, " +
+                                    $"{parsed.wdesc._wcid}, {parsed.wdesc.header}, "; //+
+                                    didsLine += $"     , ({parsed.object_id}, {(uint)STypeDID.ICON_DID}, {(uint)parsed.wdesc._iconID})" + Environment.NewLine;
+                                    if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_IconOverlay) != 0)
+                                        didsLine += $"     , ({parsed.object_id}, {(uint)STypeDID.ICON_OVERLAY_DID}, {(uint)parsed.wdesc._iconOverlayID})" + Environment.NewLine;
+                                    if ((parsed.wdesc.header2 & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader2.PWD2_Packed_IconUnderlay) != 0)
+                                        didsLine += $"     , ({parsed.object_id}, {(uint)STypeDID.ICON_UNDERLAY_DID}, {(uint)parsed.wdesc._iconUnderlayID})" + Environment.NewLine;
+
+                                    if ((parsed.physicsdesc.bitfield & (uint)PhysicsDesc.PhysicsDescInfo.CSetup) != 0)
+                                        didsLine += $"     , ({parsed.object_id}, {(uint)STypeDID.SETUP_DID}, {(uint)parsed.physicsdesc.setup_id})" + Environment.NewLine;
+                                    if ((parsed.physicsdesc.bitfield & (uint)PhysicsDesc.PhysicsDescInfo.STABLE) != 0)
+                                        didsLine += $"     , ({parsed.object_id}, {(uint)STypeDID.SOUND_TABLE_DID}, {(uint)parsed.physicsdesc.stable_id})" + Environment.NewLine;
+                                    if ((parsed.physicsdesc.bitfield & (uint)PhysicsDesc.PhysicsDescInfo.MTABLE) != 0)
+                                        didsLine += $"     , ({parsed.object_id}, {(uint)STypeDID.MOTION_TABLE_DID}, {(uint)parsed.physicsdesc.mtable_id})" + Environment.NewLine;
+                                    if ((parsed.physicsdesc.bitfield & (uint)PhysicsDesc.PhysicsDescInfo.MOVEMENT) != 0)
+                                        line += $"'{ConvertMovementBufferToString(parsed.physicsdesc.movement_buffer)}', ";
+                                    else
+                                        line += $"NULL, ";
+                                    if ((parsed.physicsdesc.bitfield & (uint)PhysicsDesc.PhysicsDescInfo.ANIMFRAME_ID) != 0)
+                                        intsLine += $"     , ({parsed.object_id}, {(uint)STypeInt.PLACEMENT_POSITION_INT}, {(uint)parsed.physicsdesc.animframe_id})" + Environment.NewLine;
+                                    if ((parsed.physicsdesc.bitfield & (uint)PhysicsDesc.PhysicsDescInfo.PETABLE) != 0)
+                                        didsLine += $"     , ({parsed.object_id}, {(uint)STypeDID.PHYSICS_EFFECT_TABLE_DID}, {(uint)parsed.physicsdesc.phstable_id})" + Environment.NewLine;
+                                    line += $"{parsed.physicsdesc.bitfield}";
+                                    if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_SpellID) != 0)
+                                        didsLine += $"     , ({parsed.object_id}, {(uint)STypeDID.SPELL_DID}, {(uint)parsed.wdesc._spellID})" + Environment.NewLine;
+                                    if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_PScript) != 0)
+                                        didsLine += $"     , ({parsed.object_id}, {(uint)STypeDID.PHYSICS_SCRIPT_DID}, {(uint)parsed.wdesc._pscript})" + Environment.NewLine;
+                                    if ((parsed.physicsdesc.bitfield & (uint)PhysicsDesc.PhysicsDescInfo.DEFAULT_SCRIPT) != 0)
+                                        didsLine += $"     , ({parsed.object_id}, {(uint)STypeDID.USE_USER_ANIMATION_DID}, {(uint)parsed.physicsdesc.default_script})" + Environment.NewLine;
+
+                                    line += ");" + Environment.NewLine;
+
+                                    writer.WriteLine(line);
+
+                                    if ((parsed.physicsdesc.bitfield & (uint)PhysicsDesc.PhysicsDescInfo.POSITION) != 0)
+                                    {
+                                        line = $"{sqlCommand} INTO `ace_position` (`aceObjectId`, `positionType`, `landblockRaw`, `posX`, `posY`, `posZ`, `qW`, `qX`, `qY`, `qZ`)" + Environment.NewLine +
+                                        //line = $"{sqlCommand} INTO `ace_position` (`aceObjectId`, `positionType`, `landblockRaw`, `landblock`, `cell`, `posX`, `posY`, `posZ`, `qW`, `qX`, `qY`, `qZ`)" + Environment.NewLine +
+                                        $"VALUES ({parsed.object_id}, {(uint)STypePosition.LOCATION_POSITION}, {parsed.physicsdesc.pos.objcell_id}, " +
+                                        //$"{parsed.physicsdesc.pos.objcell_id >> 16}, {parsed.physicsdesc.pos.objcell_id & 0xFFFF}, " +
+                                        $"{parsed.physicsdesc.pos.frame.m_fOrigin.x}, {parsed.physicsdesc.pos.frame.m_fOrigin.y}, {parsed.physicsdesc.pos.frame.m_fOrigin.z}, " +
+                                        $"{parsed.physicsdesc.pos.frame.qw}, {parsed.physicsdesc.pos.frame.qx}, {parsed.physicsdesc.pos.frame.qy}, {parsed.physicsdesc.pos.frame.qz});" +
+                                        Environment.NewLine;
+
+                                        writer.WriteLine(line);
+                                    }
+
+                                    strsLine += $"     , ({parsed.object_id}, {(uint)STypeString.NAME_STRING}, '{parsed.wdesc._name.m_buffer.Replace("'", "''")}')" + Environment.NewLine;
+
+                                    intsLine += $"     , ({parsed.object_id}, {(uint)STypeInt.ITEM_TYPE_INT}, {(uint)parsed.wdesc._type})" + Environment.NewLine;
+
+                                    if (parsed.objdesc.subpalettes.Count > 0)
+                                        //intsLine += $"     , ({parsed.object_id}, {(uint)STypeInt.PALETTE_TEMPLATE_INT}, {parsed.objdesc.paletteID})" + Environment.NewLine;
+                                        didsLine += $"     , ({parsed.object_id}, {(uint)STypeDID.PALETTE_BASE_DID}, {(uint)parsed.objdesc.paletteID})" + Environment.NewLine;
+
+                                    if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_AmmoType) != 0)
+                                        intsLine += $"     , ({parsed.object_id}, {(uint)STypeInt.AMMO_TYPE_INT}, {(uint)parsed.wdesc._ammoType})" + Environment.NewLine;
+                                    if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_BlipColor) != 0)
+                                        intsLine += $"     , ({parsed.object_id}, {(uint)STypeInt.RADARBLIP_COLOR_INT}, {parsed.wdesc._blipColor})" + Environment.NewLine;
+                                    if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_Burden) != 0)
+                                        intsLine += $"     , ({parsed.object_id}, {(uint)STypeInt.ENCUMB_VAL_INT}, {parsed.wdesc._burden})" + Environment.NewLine;
+                                    if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_CombatUse) != 0)
+                                        intsLine += $"     , ({parsed.object_id}, {(uint)STypeInt.COMBAT_USE_INT}, {parsed.wdesc._combatUse})" + Environment.NewLine;
+                                    if ((parsed.wdesc.header2 & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader2.PWD2_Packed_CooldownDuration) != 0)
+                                        floatsLine += $"     , ({parsed.object_id}, {(uint)STypeFloat.COOLDOWN_DURATION_FLOAT}, {parsed.wdesc._cooldown_duration})" + Environment.NewLine;
+                                    if ((parsed.wdesc.header2 & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader2.PWD2_Packed_CooldownID) != 0)
+                                        intsLine += $"     , ({parsed.object_id}, {(uint)STypeInt.SHARED_COOLDOWN_INT}, {parsed.wdesc._cooldown_id})" + Environment.NewLine;
+                                    if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_UIEffects) != 0)
+                                        intsLine += $"     , ({parsed.object_id}, {(uint)STypeInt.UI_EFFECTS_INT}, {parsed.wdesc._effects})" + Environment.NewLine;
+                                    if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_ContainersCapacity) != 0)
+                                        intsLine += $"     , ({parsed.object_id}, {(uint)STypeInt.CONTAINERS_CAPACITY_INT}, {parsed.wdesc._containersCapacity})" + Environment.NewLine;
+                                    if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_HookType) != 0)
+                                        intsLine += $"     , ({parsed.object_id}, {(uint)STypeInt.HOOK_TYPE_INT}, {(uint)parsed.wdesc._hook_type})" + Environment.NewLine;
+                                    if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_HookItemTypes) != 0)
+                                        intsLine += $"     , ({parsed.object_id}, {(uint)STypeInt.HOOK_ITEM_TYPE_INT}, {parsed.wdesc._hook_item_types})" + Environment.NewLine;
+                                    if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_ItemsCapacity) != 0)
+                                        intsLine += $"     , ({parsed.object_id}, {(uint)STypeInt.ITEMS_CAPACITY_INT}, {parsed.wdesc._itemsCapacity})" + Environment.NewLine;
+                                    if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_Location) != 0)
+                                        intsLine += $"     , ({parsed.object_id}, {(uint)STypeInt.CURRENT_WIELDED_LOCATION_INT}, {parsed.wdesc._location})" + Environment.NewLine;
+                                    if ((parsed.wdesc.header & unchecked((uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_MaterialType)) != 0)
+                                        intsLine += $"     , ({parsed.object_id}, {(uint)STypeInt.MATERIAL_TYPE_INT}, {(uint)parsed.wdesc._material_type})" + Environment.NewLine;
+                                    if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_MaxStackSize) != 0)
+                                        intsLine += $"     , ({parsed.object_id}, {(uint)STypeInt.MAX_STACK_SIZE_INT}, {parsed.wdesc._maxStackSize})" + Environment.NewLine;
+                                    if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_MaxStructure) != 0)
+                                        intsLine += $"     , ({parsed.object_id}, {(uint)STypeInt.MAX_STRUCTURE_INT}, {parsed.wdesc._maxStructure})" + Environment.NewLine;
+                                    if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_RadarEnum) != 0)
+                                        intsLine += $"     , ({parsed.object_id}, {(uint)STypeInt.SHOWABLE_ON_RADAR_INT}, {(uint)parsed.wdesc._radar_enum})" + Environment.NewLine;
+                                    if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_StackSize) != 0)
+                                        intsLine += $"     , ({parsed.object_id}, {(uint)STypeInt.STACK_SIZE_INT}, {parsed.wdesc._stackSize})" + Environment.NewLine;
+                                    if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_Structure) != 0)
+                                        intsLine += $"     , ({parsed.object_id}, {(uint)STypeInt.STRUCTURE_INT}, {parsed.wdesc._structure})" + Environment.NewLine;
+                                    if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_TargetType) != 0)
+                                        intsLine += $"     , ({parsed.object_id}, {(uint)STypeInt.TARGET_TYPE_INT}, {(uint)parsed.wdesc._targetType})" + Environment.NewLine;
+                                    if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_Useability) != 0)
+                                        intsLine += $"     , ({parsed.object_id}, {(uint)STypeInt.ITEM_USEABLE_INT}, {(uint)parsed.wdesc._useability})" + Environment.NewLine;
+                                    if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_UseRadius) != 0)
+                                        floatsLine += $"     , ({parsed.object_id}, {(uint)STypeFloat.USE_RADIUS_FLOAT}, {parsed.wdesc._useRadius})" + Environment.NewLine;
+                                    if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_ValidLocations) != 0)
+                                        intsLine += $"     , ({parsed.object_id}, {(uint)STypeInt.LOCATIONS_INT}, {parsed.wdesc._valid_locations})" + Environment.NewLine;
+                                    if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_Value) != 0)
+                                        intsLine += $"     , ({parsed.object_id}, {(uint)STypeInt.VALUE_INT}, {parsed.wdesc._value})" + Environment.NewLine;
+                                    //if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_ContainerID) != 0)
+
+                                    // if (((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_ContainerID) != 0) && objectIds.Contains(parsed.wdesc._containerID))
+                                    //    iidsLine += $"     , ({parsed.object_id}, {(uint)STypeIID.CONTAINER_IID}, {(uint)parsed.wdesc._containerID})" + Environment.NewLine;
+
+                                    //{
+                                    //    line = $"{sqlCommand} INTO `ace_object_properties_int` (`aceObjectId`, `intPropertyId`, `propertyValue`)" + Environment.NewLine;
+                                    //    line += $"VALUES ({parsed.object_id}, {(uint)STypeInt.???}, {parsed.wdesc._containerID})" + Environment.NewLine;
+                                    //    line = line.TrimEnd(Environment.NewLine.ToCharArray()) + ";" + Environment.NewLine;
+                                    //    writer.WriteLine(line);
+                                    //}
+                                    //if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_WielderID) != 0)
+                                    //{
+                                    //    line = $"{sqlCommand} INTO `ace_object_properties_int` (`aceObjectId`, `intPropertyId`, `propertyValue`)" + Environment.NewLine;
+                                    //    line += $"VALUES ({parsed.object_id}, {(uint)STypeInt.???}, {parsed.wdesc._wielderID})" + Environment.NewLine;
+                                    //    line = line.TrimEnd(Environment.NewLine.ToCharArray()) + ";" + Environment.NewLine;
+                                    //    writer.WriteLine(line);
+                                    //}
+                                    //if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_WielderID) != 0)
+                                    //    intsLine += $"     , ({parsed.object_id}, {(uint)STypeIID.WIELDER_IID}, {parsed.wdesc._wielderID})" + Environment.NewLine;
+
+                                    // if (((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_WielderID) != 0) && objectIds.Contains(parsed.wdesc._wielderID))
+                                    //    iidsLine += $"     , ({parsed.object_id}, {(uint)STypeIID.WIELDER_IID}, {(uint)parsed.wdesc._wielderID})" + Environment.NewLine;
+
+                                    //if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_HouseOwner) != 0)
+                                    //{
+                                    //    line = $"{sqlCommand} INTO `ace_object_properties_int` (`aceObjectId`, `intPropertyId`, `propertyValue`)" + Environment.NewLine;
+                                    //    line += $"VALUES ({parsed.object_id}, {(uint)STypeInt.???}, {parsed.wdesc._house_owner_iid})" + Environment.NewLine;
+                                    //    line = line.TrimEnd(Environment.NewLine.ToCharArray()) + ";" + Environment.NewLine;
+                                    //    writer.WriteLine(line);
+                                    //}
+                                    //if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_HouseRestrictions) != 0)
+                                    //{
+                                    //    line = $"{sqlCommand} INTO `ace_object_properties_int` (`aceObjectId`, `intPropertyId`, `propertyValue`)" + Environment.NewLine;
+                                    //    line += $"VALUES ({parsed.object_id}, {(uint)STypeInt.???}, {parsed.wdesc.???})" + Environment.NewLine;
+                                    //    line = line.TrimEnd(Environment.NewLine.ToCharArray()) + ";" + Environment.NewLine;
+                                    //    writer.WriteLine(line);
+                                    //}
+                                    //if ((parsed.wdesc.header2 & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader2.PWD2_Packed_PetOwner) != 0)
+                                    //{
+                                    //    line = $"{sqlCommand} INTO `ace_object_properties_int` (`aceObjectId`, `intPropertyId`, `propertyValue`)" + Environment.NewLine;
+                                    //    line += $"VALUES ({parsed.object_id}, {(uint)STypeInt.???}, {parsed.wdesc._pet_owner})" + Environment.NewLine;
+                                    //    line = line.TrimEnd(Environment.NewLine.ToCharArray()) + ";" + Environment.NewLine;
+                                    //    writer.WriteLine(line);
+                                    //}
+                                    //if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_Monarch) != 0)
+                                    //{
+                                    //    line = $"{sqlCommand} INTO `ace_object_properties_int` (`aceObjectId`, `intPropertyId`, `propertyValue`)" + Environment.NewLine;
+                                    //    line += $"VALUES ({parsed.object_id}, {(uint)STypeInt.???}, {parsed.wdesc._monarch})" + Environment.NewLine;
+                                    //    line = line.TrimEnd(Environment.NewLine.ToCharArray()) + ";" + Environment.NewLine;
+                                    //    writer.WriteLine(line);
+                                    //}
+                                    //if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_Workmanship) != 0)
+                                    //{
+                                    //    line = $"{sqlCommand} INTO `ace_object_properties_int` (`aceObjectId`, `intPropertyId`, `propertyValue`)" + Environment.NewLine;
+                                    //    line += $"VALUES ({parsed.object_id}, {(uint)STypeInt.ITEM_WORKMANSHIP_INT}, {parsed.wdesc._workmanship})" + Environment.NewLine;
+                                    //    line = line.TrimEnd(Environment.NewLine.ToCharArray()) + ";" + Environment.NewLine;
+                                    //    writer.WriteLine(line);
+                                    //}
+                                    if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_PluralName) != 0)
+                                        strsLine += $"     , ({parsed.object_id}, {(uint)STypeString.PLURAL_NAME_STRING}, '{parsed.wdesc._plural_name.m_buffer.Replace("'", "''")}')" + Environment.NewLine;
+                                    if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_Priority) != 0)
+                                        intsLine += $"     , ({parsed.object_id}, {(uint)STypeInt.CLOTHING_PRIORITY_INT}, {parsed.wdesc._priority})" + Environment.NewLine;
+                                    if ((parsed.physicsdesc.bitfield & (uint)PhysicsDesc.PhysicsDescInfo.DEFAULT_SCRIPT_INTENSITY) != 0)
+                                        floatsLine += $"     , ({parsed.object_id}, {(uint)STypeFloat.PHYSICS_SCRIPT_INTENSITY_FLOAT}, {parsed.physicsdesc.default_script_intensity})" + Environment.NewLine;
+                                    if ((parsed.physicsdesc.bitfield & (uint)PhysicsDesc.PhysicsDescInfo.ELASTICITY) != 0)
+                                        floatsLine += $"     , ({parsed.object_id}, {(uint)STypeFloat.ELASTICITY_FLOAT}, {parsed.physicsdesc.elasticity})" + Environment.NewLine;
+                                    if ((parsed.physicsdesc.bitfield & (uint)PhysicsDesc.PhysicsDescInfo.FRICTION) != 0)
+                                        floatsLine += $"     , ({parsed.object_id}, {(uint)STypeFloat.FRICTION_FLOAT}, {parsed.physicsdesc.friction})" + Environment.NewLine;
+                                    if ((parsed.physicsdesc.bitfield & (uint)PhysicsDesc.PhysicsDescInfo.PARENT) != 0)
+                                    {
+                                        //line = $"{sqlCommand} INTO `ace_object_properties_int` (`aceObjectId`, `intPropertyId`, `propertyValue`)" + Environment.NewLine;
+
+                                        // iidsLine += $"     , ({parsed.object_id}, {(uint)STypeIID.OWNER_IID}, {(uint)parsed.physicsdesc.parent_id})" + Environment.NewLine;
+
+                                        //line += $"VALUES ({parsed.object_id}, {STypeInt.???}, {parsed.physicsdesc.parent_id})" + Environment.NewLine;
+                                        //line = line.TrimEnd(Environment.NewLine.ToCharArray()) + ";" + Environment.NewLine;
+                                        //writer.WriteLine(line);
+
+                                        //line = $"{sqlCommand} INTO `ace_object_properties_int` (`aceObjectId`, `intPropertyId`, `propertyValue`)" + Environment.NewLine;
+                                        intsLine += $"     , ({parsed.object_id}, {(uint)STypeInt.PARENT_LOCATION_INT}, {parsed.physicsdesc.location_id})" + Environment.NewLine;
+                                        //line = line.TrimEnd(Environment.NewLine.ToCharArray()) + ";" + Environment.NewLine;
+                                        //writer.WriteLine(line);
+                                    }
+                                    if ((parsed.physicsdesc.bitfield & (uint)PhysicsDesc.PhysicsDescInfo.OBJSCALE) != 0)
+                                        floatsLine += $"     , ({parsed.object_id}, {(uint)STypeFloat.DEFAULT_SCALE_FLOAT}, {parsed.physicsdesc.object_scale})" + Environment.NewLine;
+
+                                    intsLine += $"     , ({parsed.object_id}, {(uint)STypeInt.PHYSICS_STATE_INT}, {(uint)parsed.physicsdesc.state})" + Environment.NewLine;
+                                    ////if (((uint)parsed.physicsdesc.state & (uint)PhysicsState.STATIC_PS) != 0)
+                                    ////    boolsLine += $"     , ({parsed.object_id}, {(uint)STypeBool.STUCK_BOOL}, {true})" + Environment.NewLine;
+                                    if (((uint)parsed.physicsdesc.state & (uint)PhysicsState.ETHEREAL_PS) != 0)
+                                        boolsLine += $"     , ({parsed.object_id}, {(uint)STypeBool.ETHEREAL_BOOL}, {true})" + Environment.NewLine;
+                                    if (((uint)parsed.physicsdesc.state & (uint)PhysicsState.REPORT_COLLISIONS_PS) != 0)
+                                        boolsLine += $"     , ({parsed.object_id}, {(uint)STypeBool.REPORT_COLLISIONS_BOOL}, {true})" + Environment.NewLine;
+                                    if (((uint)parsed.physicsdesc.state & (uint)PhysicsState.IGNORE_COLLISIONS_PS) != 0)
+                                        boolsLine += $"     , ({parsed.object_id}, {(uint)STypeBool.IGNORE_COLLISIONS_BOOL}, {true})" + Environment.NewLine;
+                                    if (((uint)parsed.physicsdesc.state & (uint)PhysicsState.NODRAW_PS) != 0)
+                                        boolsLine += $"     , ({parsed.object_id}, {(uint)STypeBool.NODRAW_BOOL}, {true})" + Environment.NewLine;
+                                    if (((uint)parsed.physicsdesc.state & (uint)PhysicsState.GRAVITY_PS) != 0)
+                                        boolsLine += $"     , ({parsed.object_id}, {(uint)STypeBool.GRAVITY_STATUS_BOOL}, {true})" + Environment.NewLine;
+                                    if (((uint)parsed.physicsdesc.state & (uint)PhysicsState.LIGHTING_ON_PS) != 0)
+                                        boolsLine += $"     , ({parsed.object_id}, {(uint)STypeBool.LIGHTS_STATUS_BOOL}, {true})" + Environment.NewLine;
+                                    if (((uint)parsed.physicsdesc.state & (uint)PhysicsState.HIDDEN_PS) != 0)
+                                        boolsLine += $"     , ({parsed.object_id}, {(uint)STypeBool.VISIBILITY_BOOL}, {true})" + Environment.NewLine;
+                                    if (((uint)parsed.physicsdesc.state & (uint)PhysicsState.SCRIPTED_COLLISION_PS) != 0)
+                                        boolsLine += $"     , ({parsed.object_id}, {(uint)STypeBool.SCRIPTED_COLLISION_BOOL}, {true})" + Environment.NewLine;
+                                    if (((uint)parsed.physicsdesc.state & (uint)PhysicsState.INELASTIC_PS) != 0)
+                                        boolsLine += $"     , ({parsed.object_id}, {(uint)STypeBool.INELASTIC_BOOL}, {true})" + Environment.NewLine;
+                                    ////if (((uint)parsed.physicsdesc.state & (uint)PhysicsState.CLOAKED_PS) != 0)
+                                    ////    boolsLine += $"     , ({parsed.object_id}, {(uint)STypeBool.HIDDEN_ADMIN_BOOL}, {true})" + Environment.NewLine;
+                                    if (((uint)parsed.physicsdesc.state & (uint)PhysicsState.REPORT_COLLISIONS_AS_ENVIRONMENT_PS) != 0)
+                                        boolsLine += $"     , ({parsed.object_id}, {(uint)STypeBool.REPORT_COLLISIONS_AS_ENVIRONMENT_BOOL}, {true})" + Environment.NewLine;
+                                    if (((uint)parsed.physicsdesc.state & (uint)PhysicsState.EDGE_SLIDE_PS) != 0)
+                                        boolsLine += $"     , ({parsed.object_id}, {(uint)STypeBool.ALLOW_EDGE_SLIDE_BOOL}, {true})" + Environment.NewLine;
+                                    if (((uint)parsed.physicsdesc.state & (uint)PhysicsState.FROZEN_PS) != 0)
+                                        boolsLine += $"     , ({parsed.object_id}, {(uint)STypeBool.IS_FROZEN_BOOL}, {true})" + Environment.NewLine;
+
+                                    if ((parsed.physicsdesc.bitfield & (uint)PhysicsDesc.PhysicsDescInfo.TRANSLUCENCY) != 0)
+                                        floatsLine += $"     , ({parsed.object_id}, {(uint)STypeFloat.TRANSLUCENCY_FLOAT}, {parsed.physicsdesc.translucency})" + Environment.NewLine;
+                                    //if ((parsed.physicsdesc.bitfield & (uint)PhysicsDesc.PhysicsDescInfo.VELOCITY) != 0)
+                                    //{
+                                    //    line = $"{sqlCommand} INTO `ace_object_properties_double` (`aceObjectId`, `dblPropertyId`, `propertyValue`)" + Environment.NewLine;
+                                    //    line += $"VALUES ({parsed.object_id}, {(uint)STypeFloat.MAXIMUM_VELOCITY_FLOAT}, {parsed.physicsdesc.velocity})" + Environment.NewLine;
+                                    //    line = line.TrimEnd(Environment.NewLine.ToCharArray()) + ";" + Environment.NewLine;
+                                    //    writer.WriteLine(line);
+                                    //}
+
+                                    if (((uint)parsed.wdesc._bitfield & (uint)PublicWeenieDesc.BitfieldIndex.BF_ATTACKABLE) != 0)
+                                        boolsLine += $"     , ({parsed.object_id}, {(uint)STypeBool.ATTACKABLE_BOOL}, {true})" + Environment.NewLine;
+                                    if (((uint)parsed.wdesc._bitfield & (uint)PublicWeenieDesc.BitfieldIndex.BF_HIDDEN_ADMIN) != 0)
+                                        boolsLine += $"     , ({parsed.object_id}, {(uint)STypeBool.HIDDEN_ADMIN_BOOL}, {true})" + Environment.NewLine;
+                                    if (((uint)parsed.wdesc._bitfield & (uint)PublicWeenieDesc.BitfieldIndex.BF_IMMUNE_CELL_RESTRICTIONS) != 0)
+                                        boolsLine += $"     , ({parsed.object_id}, {(uint)STypeBool.IGNORE_HOUSE_BARRIERS_BOOL}, {true})" + Environment.NewLine;
+                                    if (((uint)parsed.wdesc._bitfield & (uint)PublicWeenieDesc.BitfieldIndex.BF_INSCRIBABLE) != 0)
+                                        boolsLine += $"     , ({parsed.object_id}, {(uint)STypeBool.INSCRIBABLE_BOOL}, {true})" + Environment.NewLine;
+                                    //if (((uint)parsed.wdesc._bitfield & (uint)PublicWeenieDesc.BitfieldIndex.BF_PLAYER_KILLER) != 0)
+                                    //    boolsLine += $"     , ({parsed.object_id}, {(uint)STypeBool.PK_KILLER_BOOL}, {true})" + Environment.NewLine;
+                                    if (((uint)parsed.wdesc._bitfield & (uint)PublicWeenieDesc.BitfieldIndex.BF_REQUIRES_PACKSLOT) != 0)
+                                        boolsLine += $"     , ({parsed.object_id}, {(uint)STypeBool.REQUIRES_BACKPACK_SLOT_BOOL}, {true})" + Environment.NewLine;
+                                    if (((uint)parsed.wdesc._bitfield & (uint)PublicWeenieDesc.BitfieldIndex.BF_RETAINED) != 0)
+                                        boolsLine += $"     , ({parsed.object_id}, {(uint)STypeBool.RETAINED_BOOL}, {true})" + Environment.NewLine;
+                                    if (((uint)parsed.wdesc._bitfield & (uint)PublicWeenieDesc.BitfieldIndex.BF_STUCK) != 0)
+                                        boolsLine += $"     , ({parsed.object_id}, {(uint)STypeBool.STUCK_BOOL}, {true})" + Environment.NewLine;
+                                    if (((uint)parsed.wdesc._bitfield & (uint)PublicWeenieDesc.BitfieldIndex.BF_UI_HIDDEN) != 0)
+                                        boolsLine += $"     , ({parsed.object_id}, {(uint)STypeBool.UI_HIDDEN_BOOL}, {true})" + Environment.NewLine;
+                                    //if (((uint)parsed.wdesc._bitfield & (uint)PublicWeenieDesc.BitfieldIndex.BF_VENDOR) != 0)
+                                    //    boolsLine += $"     , ({parsed.object_id}, {(uint)STypeBool.VENDOR_SERVICE_BOOL}, {true})" + Environment.NewLine;
+                                    if (((uint)parsed.wdesc._bitfield & (uint)PublicWeenieDesc.BitfieldIndex.BF_WIELD_LEFT) != 0)
+                                        boolsLine += $"     , ({parsed.object_id}, {(uint)STypeBool.AUTOWIELD_LEFT_BOOL}, {true})" + Environment.NewLine;
+                                    if (((uint)parsed.wdesc._bitfield & (uint)PublicWeenieDesc.BitfieldIndex.BF_WIELD_ON_USE) != 0)
+                                        boolsLine += $"     , ({parsed.object_id}, {(uint)STypeBool.WIELD_ON_USE_BOOL}, {true})" + Environment.NewLine;
+                                    //if (((uint)parsed.wdesc._bitfield & (uint)PublicWeenieDesc.BitfieldIndex.BF_ADMIN) != 0)
+                                    //    boolsLine += $"     , ({parsed.object_id}, {(uint)STypeBool.IS_ADMIN_BOOL}, {true})" + Environment.NewLine;
+
+                                    if (staticObjectsWeenieType.ContainsKey(parsed.object_id))
+                                    {
+                                        uint weenieType;
+                                        staticObjectsWeenieType.TryGetValue(parsed.object_id, out weenieType);
+                                        intsLine += $"     , ({parsed.object_id}, {(uint)9007}, {weenieType})" + Environment.NewLine;
+                                    }
+
+                                    if (strsLine != "")
+                                    {
+                                        strsLine = $"{sqlCommand} INTO `ace_object_properties_string` (`aceObjectId`, `strPropertyId`, `propertyValue`)" + Environment.NewLine
+                                            + "VALUES " + strsLine.TrimStart("     ,".ToCharArray());
+                                        strsLine = strsLine.TrimEnd(Environment.NewLine.ToCharArray()) + ";" + Environment.NewLine;
+                                        writer.WriteLine(strsLine);
+                                    }
+                                    if (didsLine != "")
+                                    {
+                                        didsLine = $"{sqlCommand} INTO `ace_object_properties_did` (`aceObjectId`, `didPropertyId`, `propertyValue`)" + Environment.NewLine
+                                            + "VALUES " + didsLine.TrimStart("     ,".ToCharArray());
+                                        didsLine = didsLine.TrimEnd(Environment.NewLine.ToCharArray()) + ";" + Environment.NewLine;
+                                        writer.WriteLine(didsLine);
+                                    }
+                                    if (iidsLine != "")
+                                    {
+                                        iidsLine = $"{sqlCommand} INTO `ace_object_properties_iid` (`aceObjectId`, `iidPropertyId`, `propertyValue`)" + Environment.NewLine
+                                            + "VALUES " + iidsLine.TrimStart("     ,".ToCharArray());
+                                        iidsLine = iidsLine.TrimEnd(Environment.NewLine.ToCharArray()) + ";" + Environment.NewLine;
+                                        writer.WriteLine(iidsLine);
+                                    }
+                                    if (intsLine != "")
+                                    {
+                                        intsLine = $"{sqlCommand} INTO `ace_object_properties_int` (`aceObjectId`, `intPropertyId`, `propertyValue`)" + Environment.NewLine
+                                            + "VALUES " + intsLine.TrimStart("     ,".ToCharArray());
+                                        intsLine = intsLine.TrimEnd(Environment.NewLine.ToCharArray()) + ";" + Environment.NewLine;
+                                        writer.WriteLine(intsLine);
+                                    }
+                                    if (bigintsLine != "")
+                                    {
+                                        bigintsLine = $"{sqlCommand} INTO `ace_object_properties_bigint` (`aceObjectId`, `bigIntPropertyId`, `propertyValue`)" + Environment.NewLine
+                                            + "VALUES " + bigintsLine.TrimStart("     ,".ToCharArray());
+                                        bigintsLine = bigintsLine.TrimEnd(Environment.NewLine.ToCharArray()) + ";" + Environment.NewLine;
+                                        writer.WriteLine(bigintsLine);
+                                    }
+                                    if (floatsLine != "")
+                                    {
+                                        floatsLine = $"{sqlCommand} INTO `ace_object_properties_double` (`aceObjectId`, `dblPropertyId`, `propertyValue`)" + Environment.NewLine
+                                            + "VALUES " + floatsLine.TrimStart("     ,".ToCharArray());
+                                        floatsLine = floatsLine.TrimEnd(Environment.NewLine.ToCharArray()) + ";" + Environment.NewLine;
+                                        writer.WriteLine(floatsLine);
+                                    }
+                                    if (boolsLine != "")
+                                    {
+                                        boolsLine = $"{sqlCommand} INTO `ace_object_properties_bool` (`aceObjectId`, `boolPropertyId`, `propertyValue`)" + Environment.NewLine
+                                            + "VALUES " + boolsLine.TrimStart("     ,".ToCharArray());
+                                        boolsLine = boolsLine.TrimEnd(Environment.NewLine.ToCharArray()) + ";" + Environment.NewLine;
+                                        writer.WriteLine(boolsLine);
+                                    }
+
+
+                                    bool once = false;
+                                    if (parsed.objdesc.subpalettes.Count > 0)
+                                    {
+                                        line = $"{sqlCommand} INTO `ace_object_palette_change` (`aceObjectId`, `subPaletteId`, `offset`, `length`)" + Environment.NewLine;
+
+                                        foreach (var subPalette in parsed.objdesc.subpalettes)
+                                        {
+                                            if (once)
+                                            {
+                                                line += $"     , ({parsed.object_id}, {subPalette.subID}, {subPalette.offset}, {subPalette.numcolors})" + Environment.NewLine;
+                                            }
+                                            else
+                                            {
+                                                line += $"VALUES ({parsed.object_id}, {subPalette.subID}, {subPalette.offset}, {subPalette.numcolors})" + Environment.NewLine;
+                                                once = true;
+                                            }
+                                        }
+
+                                        line = line.TrimEnd(Environment.NewLine.ToCharArray()) + ";" + Environment.NewLine;
+                                        writer.WriteLine(line);
+                                    }
+
+                                    once = false;
+                                    if (parsed.objdesc.tmChanges.Count > 0)
+                                    {
+                                        line = $"{sqlCommand} INTO `ace_object_texture_map_change` (`aceObjectId`, `index`, `oldId`, `newId`)" + Environment.NewLine;
+
+                                        foreach (var texture in parsed.objdesc.tmChanges)
+                                        {
+                                            if (once)
+                                            {
+                                                line += $"     , ({parsed.object_id}, {texture.part_index}, {texture.old_tex_id}, {texture.new_tex_id})" + Environment.NewLine;
+                                            }
+                                            else
+                                            {
+                                                line += $"VALUES ({parsed.object_id}, {texture.part_index}, {texture.old_tex_id}, {texture.new_tex_id})" + Environment.NewLine;
+                                                once = true;
+                                            }
+                                        }
+
+                                        line = line.TrimEnd(Environment.NewLine.ToCharArray()) + ";" + Environment.NewLine;
+                                        writer.WriteLine(line);
+                                    }
+
+                                    once = false;
+                                    if (parsed.objdesc.apChanges.Count > 0)
+                                    {
+                                        line = $"{sqlCommand} INTO `ace_object_animation_change` (`aceObjectId`, `index`, `animationId`)" + Environment.NewLine;
+
+                                        foreach (var animation in parsed.objdesc.apChanges)
+                                        {
+                                            if (once)
+                                            {
+                                                line += $"     , ({parsed.object_id}, {animation.part_index}, {animation.part_id})" + Environment.NewLine;
+                                            }
+                                            else
+                                            {
+                                                line += $"VALUES ({parsed.object_id}, {animation.part_index}, {animation.part_id})" + Environment.NewLine;
+                                                once = true;
+                                            }
+                                        }
+
+                                        line = line.TrimEnd(Environment.NewLine.ToCharArray()) + ";" + Environment.NewLine;
+                                        writer.WriteLine(line);
+                                    }
+                                }
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            System.Diagnostics.Debug.WriteLine("Unable to export object " + parsed.object_id + ". Exception:" + Environment.NewLine + ex.ToString());
+                        }
                     }
                 }
             }
@@ -4640,12 +6516,20 @@ namespace aclogview
                             line = $"{sqlCommand} INTO `ace_object` (`" +
                                 "aceObjectId`, `aceObjectDescriptionFlags`, " +
                                 "`weenieClassId`, `weenieHeaderFlags`, " +
+                                "`weenieHeaderFlags2`, " +
                                 "`currentMotionState`, " +
                                 "`physicsDescriptionFlag`" +
                                 ")" + Environment.NewLine + "VALUES (" +
 
                             $"{parsed.wdesc._wcid}, {parsed.wdesc._bitfield}, " +
                             $"{parsed.wdesc._wcid}, {parsed.wdesc.header}, "; //+
+
+
+                            if ((parsed.wdesc._bitfield & (uint)PublicWeenieDesc.BitfieldIndex.BF_INCLUDES_SECOND_HEADER) != 0)
+                                line += $"{parsed.wdesc.header2}, "; //+
+                            else
+                                line += $"NULL, "; //+
+
                             didsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeDID.ICON_DID}, {(uint)parsed.wdesc._iconID})" + Environment.NewLine;
                             if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_IconOverlay) != 0)
                                 didsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeDID.ICON_OVERLAY_DID}, {(uint)parsed.wdesc._iconOverlayID})" + Environment.NewLine;
