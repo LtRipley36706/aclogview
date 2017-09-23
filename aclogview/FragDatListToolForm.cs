@@ -3016,7 +3016,7 @@ namespace aclogview
                     if (!foundInWeenieIds)
                         return;
 
-                    parsed.i_objid = weenieId;
+                    // parsed.i_objid = weenieId;
                 }
 
                 // de-dupe based on position and wcid
@@ -3056,7 +3056,27 @@ namespace aclogview
                         parsedClone.i_objid = weenieId;
                         parsedClone.i_prof = parsed.i_prof;
 
-                        parsedClone.i_objid = weenieId;
+                        //parsedClone.i_objid = weenieId;
+                        if (appraisalObjectIds.Contains(parsedClone.i_objid))
+                        {
+                            int i = 0;
+                            for (int ListIndex = 0; ListIndex < appraisalObjects[fileToPutItIn].Count; ListIndex++)
+                            {
+                                if (appraisalObjects[fileToPutItIn][ListIndex].i_objid == parsedClone.i_objid)
+                                {
+                                    i = ListIndex;
+                                    break;
+                                }
+                            }
+                            if (appraisalObjects[fileToPutItIn][i].i_prof.success_flag == 0)
+                            {
+                                appraisalObjects[fileToPutItIn].RemoveAt(i);
+                                appraisalObjectIds.Remove(parsedClone.i_objid);
+                            }
+                            else
+                                return;
+                        }
+
                         appraisalObjects[fileToPutItIn].Add(parsedClone);
                         appraisalObjectIds.Add(parsedClone.i_objid);
                     }
