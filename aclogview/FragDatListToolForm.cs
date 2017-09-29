@@ -165,6 +165,7 @@ namespace aclogview
         private readonly FragDatListFile appraisalInfoFragDatFile = new FragDatListFile();
         private readonly FragDatListFile bookFragDatFile = new FragDatListFile();
         private readonly FragDatListFile vendorFragDatFile = new FragDatListFile();
+        private readonly FragDatListFile slumlordFragDatFile = new FragDatListFile();
         private readonly FragDatListFile aceWorldFragDatFile = new FragDatListFile();
 
         private void DoBuild()
@@ -177,6 +178,7 @@ namespace aclogview
             appraisalInfoFragDatFile.CreateFile(Path.Combine(txtOutputFolder.Text, "AppraisalInfo.frags"), chkCompressOutput.Checked ? FragDatListFile.CompressionType.DeflateStream : FragDatListFile.CompressionType.None);
             bookFragDatFile.CreateFile(Path.Combine(txtOutputFolder.Text, "Book.frags"), chkCompressOutput.Checked ? FragDatListFile.CompressionType.DeflateStream : FragDatListFile.CompressionType.None);
             vendorFragDatFile.CreateFile(Path.Combine(txtOutputFolder.Text, "Vendor.frags"), chkCompressOutput.Checked ? FragDatListFile.CompressionType.DeflateStream : FragDatListFile.CompressionType.None);
+            slumlordFragDatFile.CreateFile(Path.Combine(txtOutputFolder.Text, "SlumLord.frags"), chkCompressOutput.Checked ? FragDatListFile.CompressionType.DeflateStream : FragDatListFile.CompressionType.None);
             aceWorldFragDatFile.CreateFile(Path.Combine(txtOutputFolder.Text, "ACE-World.frags"), chkCompressOutput.Checked ? FragDatListFile.CompressionType.DeflateStream : FragDatListFile.CompressionType.None);
 
             // Do not parallel this search
@@ -203,6 +205,7 @@ namespace aclogview
             appraisalInfoFragDatFile.CloseFile();
             bookFragDatFile.CloseFile();
             vendorFragDatFile.CloseFile();
+            slumlordFragDatFile.CloseFile();
             aceWorldFragDatFile.CloseFile();
         }
 
@@ -219,6 +222,7 @@ namespace aclogview
             var appraisalInfoFrags = new List<FragDatListFile.FragDatInfo>();
             var bookFrags = new List<FragDatListFile.FragDatInfo>();
             var vendorFrags = new List<FragDatListFile.FragDatInfo>();
+            var slumlordFrags = new List<FragDatListFile.FragDatInfo>();
             var aceWorldFrags = new List<FragDatListFile.FragDatInfo>();
 
             foreach (var record in records)
@@ -317,6 +321,17 @@ namespace aclogview
                         aceWorldFrags.Add(new FragDatListFile.FragDatInfo(packetDirection, record.index, record.data));
                     }
 
+                    if (messageCode == (uint)PacketOpcode.Evt_House__Recv_HouseProfile_ID
+                        || messageCode == (uint)PacketOpcode.Evt_House__Recv_HouseData_ID
+                        )
+                    {
+                        Interlocked.Increment(ref totalHits);
+
+                        slumlordFrags.Add(new FragDatListFile.FragDatInfo(packetDirection, record.index, record.data));
+
+                        aceWorldFrags.Add(new FragDatListFile.FragDatInfo(packetDirection, record.index, record.data));
+                    }
+
                     if (messageCode == (uint)PacketOpcode.WEENIE_ORDERED_EVENT || messageCode == (uint)PacketOpcode.ORDERED_EVENT) 
                     {
                         uint opCode = 0;
@@ -398,6 +413,17 @@ namespace aclogview
 
                             aceWorldFrags.Add(new FragDatListFile.FragDatInfo(packetDirection, record.index, record.data));
                         }
+
+                        if (opCode == (uint)PacketOpcode.Evt_House__Recv_HouseProfile_ID 
+                            || opCode == (uint)PacketOpcode.Evt_House__Recv_HouseData_ID
+                            )
+                        {
+                            Interlocked.Increment(ref totalHits);
+
+                            slumlordFrags.Add(new FragDatListFile.FragDatInfo(packetDirection, record.index, record.data));
+
+                            aceWorldFrags.Add(new FragDatListFile.FragDatInfo(packetDirection, record.index, record.data));
+                        }
                     }
                 }
                 catch
@@ -418,6 +444,7 @@ namespace aclogview
             appraisalInfoFragDatFile.Write(new KeyValuePair<string, IList<FragDatListFile.FragDatInfo>>(outputFileName, appraisalInfoFrags));
             bookFragDatFile.Write(new KeyValuePair<string, IList<FragDatListFile.FragDatInfo>>(outputFileName, bookFrags));
             vendorFragDatFile.Write(new KeyValuePair<string, IList<FragDatListFile.FragDatInfo>>(outputFileName, vendorFrags));
+            slumlordFragDatFile.Write(new KeyValuePair<string, IList<FragDatListFile.FragDatInfo>>(outputFileName, slumlordFrags));
             aceWorldFragDatFile.Write(new KeyValuePair<string, IList<FragDatListFile.FragDatInfo>>(outputFileName, aceWorldFrags));
 
             Interlocked.Increment(ref filesProcessed);
@@ -560,6 +587,11 @@ namespace aclogview
                 Dictionary<string, Dictionary<uint, CM_Vendor.gmVendorUI>> vendorObjects = new Dictionary<string, Dictionary<uint, CM_Vendor.gmVendorUI>>();
                 Dictionary<uint, List<uint>> vendorSellsWeenies = new Dictionary<uint, List<uint>>();
 
+                List<uint> slumlordObjectIds = new List<uint>();
+                Dictionary<string, Dictionary<uint, CM_House.HouseProfile>> slumlordObjects = new Dictionary<string, Dictionary<uint, CM_House.HouseProfile>>();
+                Dictionary<uint, List<uint>> slumlordBuyHouseWeenies = new Dictionary<uint, List<uint>>();
+                Dictionary<uint, List<uint>> slumlordRentHouseWeenies = new Dictionary<uint, List<uint>>();
+
                 Dictionary<uint, CM_Physics.CreateObject> weeniesTypeTemplate = new Dictionary<uint, CM_Physics.CreateObject>();
                 Dictionary<uint, CM_Physics.CreateObject> weeniesFromVendors = new Dictionary<uint, CM_Physics.CreateObject>();
 
@@ -686,6 +718,18 @@ namespace aclogview
                                         weeniesFromVendors,
                                         weeniesTypeTemplate);
                                 }
+
+                                if (opCode == (uint)PacketOpcode.Evt_House__Recv_HouseProfile_ID)
+                                {
+                                    var parsed = CM_House.Recv_HouseProfile.read(fragDataReader);
+
+                                    CreateSlumlordObjectsList(parsed,
+                                        objectIds, staticObjects,
+                                        weenieIds, weenies,
+                                        appraisalObjects, appraisalObjectIds, appraisalObjectsCatagoryMap, appraisalObjectToWeenieId,
+                                        slumlordObjectIds, slumlordObjects,
+                                        weeniesTypeTemplate);
+                                }
                             }
                         }
                         catch (EndOfStreamException) // This can happen when a frag is incomplete and we try to parse it
@@ -726,6 +770,8 @@ namespace aclogview
                     WriteAppendedVendorInventory(vendorSellsWeenies, weenieIds, weenieObjectsCatagoryMap, txtOutputFolder.Text);
                     // WriteParentInventory(parentWieldsWeenies, weenieIds, txtOutputFolder.Text);
                     WriteAppendedParentInventory(parentWieldsWeenies, weenieIds, weenieObjectsCatagoryMap, txtOutputFolder.Text);
+
+                    WriteAppendedSlumlordInventory(slumlordObjects, weenieIds, weenieObjectsCatagoryMap, txtOutputFolder.Text);
 
                     if (outputAsLandblocks)
                     {
@@ -847,6 +893,149 @@ namespace aclogview
                 }
 
                 File.Delete(Path.Combine(txtOutputFolder.Text, kvp.Key + ".csv.temp"));
+            }
+        }
+
+        private void WriteAppendedSlumlordInventory(Dictionary<string, Dictionary<uint, CM_House.HouseProfile>> slumlordObjects, List<uint> weenieIds, Dictionary<uint, string> appraisalObjectsCatagoryMap, string outputFolder)
+        {
+            string staticFolder = Path.Combine(outputFolder, "1-weenies");
+
+            //string sqlCommand = "INSERT";
+            string sqlCommand = "REPLACE";
+
+            //if (!Directory.Exists(staticFolder))
+            //    Directory.CreateDirectory(staticFolder);
+
+            //Dictionary<string, int> fileCount = new Dictionary<string, int>();
+
+            foreach (var key in slumlordObjects.Keys)
+            {
+                foreach (var slumlord in slumlordObjects[key])
+                {
+                    try
+                    {
+                        // string key = "";
+                        // appraisalObjectsCatagoryMap.TryGetValue(vendor, out key);
+
+                        string keyFolder = Path.Combine(staticFolder, key);
+
+                        string fullFile = Path.Combine(keyFolder, $"{slumlord.Key}.sql");
+
+                        //string fullFile = Path.Combine(staticFolder, $"{vendor}.sql");
+
+                        //if (File.Exists(fullFile))
+                        //{
+                        //    FileInfo fi = new FileInfo(fullFile);
+
+                        //    // go to the next file if it's bigger than a MB
+                        //    if (fi.Length > ((1048576) * 40))
+                        //    {
+
+                        //        if (File.Exists(fullFile))
+                        //            File.Delete(fullFile);
+                        //    }
+                        //}
+
+                        using (FileStream fs = new FileStream(fullFile, FileMode.Append))
+                        {
+                            using (StreamWriter writer = new StreamWriter(fs))
+                            {
+                                string header = $"/* Slumlord Extended Properties */" + Environment.NewLine;
+                                writer.WriteLine(header);
+
+                                string instanceLine = "", didsLine = "",  intsLine = "", boolsLine = "";
+
+                                //didsLine += $"     , ({slumlord.Key}, {(uint)STypeDID.HOUSEID_DID}, {(uint)slumlord.Value._id}) /* {Enum.GetName(typeof(STypeDID), STypeDID.HOUSEID_DID)} */" + Environment.NewLine;
+
+                                intsLine += $"     , ({slumlord.Key}, {(uint)STypeInt.HOUSE_TYPE_INT}, {(uint)slumlord.Value._type}) /* {Enum.GetName(typeof(STypeInt), STypeInt.HOUSE_TYPE_INT)} */" + Environment.NewLine;
+                                intsLine += $"     , ({slumlord.Key}, {(uint)STypeInt.HOUSE_STATUS_INT}, {(uint)slumlord.Value._bitmask}) /* {Enum.GetName(typeof(STypeInt), STypeInt.HOUSE_STATUS_INT)} */" + Environment.NewLine;
+                                if (slumlord.Value._min_level > -1)
+                                    intsLine += $"     , ({slumlord.Key}, {(uint)STypeInt.MIN_LEVEL_INT}, {(uint)slumlord.Value._min_level}) /* {Enum.GetName(typeof(STypeInt), STypeInt.MIN_LEVEL_INT)} */" + Environment.NewLine;
+                                if (slumlord.Value._max_level > -1)
+                                    intsLine += $"     , ({slumlord.Key}, {(uint)STypeInt.MAX_LEVEL_INT}, {(uint)slumlord.Value._max_level}) /* {Enum.GetName(typeof(STypeInt), STypeInt.MAX_LEVEL_INT)} */" + Environment.NewLine;
+                                if (slumlord.Value._min_alleg_rank > -1)
+                                    intsLine += $"     , ({slumlord.Key}, {(uint)STypeInt.ALLEGIANCE_MIN_LEVEL_INT}, {(uint)slumlord.Value._min_alleg_rank}) /* {Enum.GetName(typeof(STypeInt), STypeInt.ALLEGIANCE_MIN_LEVEL_INT)} */" + Environment.NewLine;
+                                if (slumlord.Value._max_alleg_rank > -1)
+                                    intsLine += $"     , ({slumlord.Key}, {(uint)STypeInt.ALLEGIANCE_MAX_LEVEL_INT}, {(uint)slumlord.Value._max_alleg_rank}) /* {Enum.GetName(typeof(STypeInt), STypeInt.ALLEGIANCE_MAX_LEVEL_INT)} */" + Environment.NewLine;
+
+                                if (slumlord.Value._maintenance_free == 0)
+                                    boolsLine += $"     , ({slumlord.Key}, {(uint)STypeBool.ROT_PROOF_BOOL}, {false}) /* {Enum.GetName(typeof(STypeBool), STypeBool.ROT_PROOF_BOOL)} */" + Environment.NewLine;
+                                else
+                                    boolsLine += $"     , ({slumlord.Key}, {(uint)STypeBool.ROT_PROOF_BOOL}, {true}) /* {Enum.GetName(typeof(STypeBool), STypeBool.ROT_PROOF_BOOL)} */" + Environment.NewLine;
+
+                                foreach (var item in slumlord.Value._buy.list)
+                                {
+                                    if (weenieIds.Contains(item.wcid))
+                                    {
+                                        instanceLine += $"     , ({slumlord.Key}, {(uint)DestinationType.HouseBuy_DestinationType}, {item.wcid}, {item.num}" +
+                                        //$"{parsed.physicsdesc.pos.objcell_id}, " +
+                                        //$"{parsed.physicsdesc.pos.frame.m_fOrigin.x}, {parsed.physicsdesc.pos.frame.m_fOrigin.y}, {parsed.physicsdesc.pos.frame.m_fOrigin.z}, " +
+                                        //$"{parsed.physicsdesc.pos.frame.qw}, {parsed.physicsdesc.pos.frame.qx}, {parsed.physicsdesc.pos.frame.qy}, {parsed.physicsdesc.pos.frame.qz}" +
+                                        $") /* {item.name} */" + Environment.NewLine;
+                                    }
+                                    else
+                                    {
+                                        System.Diagnostics.Debug.WriteLine($"Slumlord buy list requests ({item.name} - {item.wcid}) and is not in the the weenie list.");
+                                        totalExceptions++;
+                                    }
+                                }
+
+                                foreach (var item in slumlord.Value._rent.list)
+                                {
+                                    if (weenieIds.Contains(item.wcid))
+                                    {
+                                        instanceLine += $"     , ({slumlord.Key}, {(uint)DestinationType.HouseRent_DestinationType}, {item.wcid}, {item.num}" +
+                                        //$"{parsed.physicsdesc.pos.objcell_id}, " +
+                                        //$"{parsed.physicsdesc.pos.frame.m_fOrigin.x}, {parsed.physicsdesc.pos.frame.m_fOrigin.y}, {parsed.physicsdesc.pos.frame.m_fOrigin.z}, " +
+                                        //$"{parsed.physicsdesc.pos.frame.qw}, {parsed.physicsdesc.pos.frame.qx}, {parsed.physicsdesc.pos.frame.qy}, {parsed.physicsdesc.pos.frame.qz}" +
+                                        $") /* {item.name} */" + Environment.NewLine;
+                                    }
+                                    else
+                                    {
+                                        System.Diagnostics.Debug.WriteLine($"Slumlord rent list requests ({item.name} - {item.wcid}) and is not in the the weenie list.");
+                                        totalExceptions++;
+                                    }
+                                }
+
+                                if (didsLine != "")
+                                {
+                                    didsLine = $"{sqlCommand} INTO `ace_object_properties_did` (`aceObjectId`, `didPropertyId`, `propertyValue`)" + Environment.NewLine
+                                        + "VALUES " + didsLine.TrimStart("     ,".ToCharArray());
+                                    didsLine = didsLine.TrimEnd(Environment.NewLine.ToCharArray()) + ";" + Environment.NewLine;
+                                    writer.WriteLine(didsLine);
+                                }
+
+                                if (intsLine != "")
+                                {
+                                    intsLine = $"{sqlCommand} INTO `ace_object_properties_int` (`aceObjectId`, `intPropertyId`, `propertyValue`)" + Environment.NewLine
+                                        + "VALUES " + intsLine.TrimStart("     ,".ToCharArray());
+                                    intsLine = intsLine.TrimEnd(Environment.NewLine.ToCharArray()) + ";" + Environment.NewLine;
+                                    writer.WriteLine(intsLine);
+                                }
+
+                                if (boolsLine != "")
+                                {
+                                    boolsLine = $"{sqlCommand} INTO `ace_object_properties_bool` (`aceObjectId`, `boolPropertyId`, `propertyValue`)" + Environment.NewLine
+                                        + "VALUES " + boolsLine.TrimStart("     ,".ToCharArray());
+                                    boolsLine = boolsLine.TrimEnd(Environment.NewLine.ToCharArray()) + ";" + Environment.NewLine;
+                                    writer.WriteLine(boolsLine);
+                                }
+
+                                if (instanceLine != "")
+                                {
+                                    instanceLine = $"{sqlCommand} INTO `ace_object_inventory` (`aceObjectId`, `destinationType`, `weenieClassId`, `stackSize`)" + Environment.NewLine
+                                        + "VALUES " + instanceLine.TrimStart("     ,".ToCharArray());
+                                    instanceLine = instanceLine.TrimEnd(Environment.NewLine.ToCharArray()) + ";" + Environment.NewLine;
+                                    writer.WriteLine(instanceLine);
+                                }
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        System.Diagnostics.Debug.WriteLine("Unable to export slumlord " + slumlord + ". Exception:" + Environment.NewLine + ex.ToString());
+                    }
+                }
             }
         }
 
@@ -1192,6 +1381,114 @@ namespace aclogview
                 {
                     System.Diagnostics.Debug.WriteLine("Unable to export vendor " + vendor + ". Exception:" + Environment.NewLine + ex.ToString());
                 }
+            }
+        }
+
+        private void CreateSlumlordObjectsList(CM_House.Recv_HouseProfile parsed, List<uint> objectIds, Dictionary<string, List<CM_Physics.CreateObject>> staticObjects,
+                    List<uint> weenieIds, Dictionary<string, List<CM_Physics.CreateObject>> weenies, Dictionary<string, List<CM_Examine.SetAppraiseInfo>> appraisalObjects,
+                    List<uint> appraisalObjectIds, Dictionary<uint, string> appraisalObjectsCatagoryMap, Dictionary<uint, uint> appraisalObjectToWeenieId,
+                    List<uint> slumlordObjectIds, Dictionary<string, Dictionary<uint, CM_House.HouseProfile>> slumlordObjects, 
+                    Dictionary<uint, CM_Physics.CreateObject> weeniesTypeTemplate)
+        {
+            try
+            {
+                uint weenieId = 0;
+                bool foundInObjectIds = false;
+                bool foundInWeenieIds = false;
+                foundInObjectIds = objectIds.Contains(parsed.lord);
+                appraisalObjectToWeenieId.TryGetValue(parsed.lord, out weenieId);
+                foundInWeenieIds = weenieIds.Contains(weenieId);
+
+                if (!foundInObjectIds && !(weenieId > 0))
+                    return;
+
+                bool addIt = true;
+                //bool addWeenie = false;
+                string fileToPutItIn = "HouseData";
+
+
+                appraisalObjectsCatagoryMap.TryGetValue(parsed.lord, out fileToPutItIn);
+
+                if (fileToPutItIn == null)
+                    fileToPutItIn = "0-HouseData";
+
+                if (!foundInObjectIds && weenieId > 0)
+                {
+                    if (!foundInWeenieIds)
+                        return;
+
+                    parsed.lord = weenieId;
+                }
+
+                if (slumlordObjectIds.Contains(weenieId))
+                    return;
+
+                parsed.lord = weenieId;
+
+                // de-dupe based on position and wcid
+                if (addIt) //&& !PositionRecorded(parsed, processedWeeniePositions[parsed.wdesc._wcid], parsed.physicsdesc.pos, margin))
+                {
+                    if (!slumlordObjects.ContainsKey(fileToPutItIn))
+                    {
+                        slumlordObjects.Add(fileToPutItIn, new Dictionary<uint, CM_House.HouseProfile>());
+                    }
+
+                    if (slumlordObjectIds.Contains(parsed.lord))
+                    {
+                        return;
+                    }
+
+                    slumlordObjects[fileToPutItIn].Add(parsed.lord, parsed.prof);
+                    slumlordObjectIds.Add(parsed.lord);
+
+                    //foreach (var item in parsed.shopItemProfileList.list)
+                    //{
+                    //    //if (!vendorSellsWeenies.ContainsKey(parsed.shopVendorID))
+                    //    //    vendorSellsWeenies.Add(parsed.shopVendorID, new List<uint>());
+
+                    //    //vendorSellsWeenies[parsed.shopVendorID].Add(item.pwd._wcid);
+
+                    //    if (!vendorSellsWeenies.ContainsKey(weenieId))
+                    //        vendorSellsWeenies.Add(weenieId, new List<uint>());
+
+                    //    if (!vendorSellsWeenies[weenieId].Contains(item.pwd._wcid))
+                    //        vendorSellsWeenies[weenieId].Add(item.pwd._wcid);
+
+                    //    if (!weeniesFromVendors.ContainsKey(item.pwd._wcid))
+                    //    {
+                    //        CreateObject newObj = GenerateCreateObjectfromVendorItemProfile(item, weeniesTypeTemplate);
+
+                    //        if (newObj == null)
+                    //            continue;
+
+                    //        weeniesFromVendors.Add(item.pwd._wcid, newObj);
+                    //    }
+                    //}
+
+                    //if (!vendorObjectIds.Contains(weenieId) && weenieId > 0)
+                    //{
+                    //    CM_Vendor.gmVendorUI parsedClone;
+
+                    //    parsedClone = new CM_Vendor.gmVendorUI();
+                    //    parsedClone.shopVendorID = weenieId;
+
+                    //    parsedClone.shopVendorProfile = parsed.shopVendorProfile;
+                    //    parsedClone.shopItemProfileList = parsed.shopItemProfileList;
+
+                    //    if (!vendorObjects.ContainsKey(fileToPutItIn))
+                    //    {
+                    //        vendorObjects.Add(fileToPutItIn, new Dictionary<uint, CM_Vendor.gmVendorUI>());
+                    //    }
+
+                    //    vendorObjects[fileToPutItIn].Add(parsedClone.shopVendorID, parsedClone);
+                    //    vendorObjectIds.Add(parsedClone.shopVendorID);
+                    //}
+                    totalHits++;
+                }
+            }
+            catch (Exception ex)
+            {
+                totalExceptions++;
             }
         }
 
@@ -2269,7 +2566,7 @@ namespace aclogview
 
         private void WriteAppendedWeenieVendorObjectData(Dictionary<string, Dictionary<uint, CM_Vendor.gmVendorUI>> vendorObjects, string outputFolder)
         {
-            string staticFolder = Path.Combine(outputFolder, "1-weenie");
+            string staticFolder = Path.Combine(outputFolder, "1-weenies");
 
             //string sqlCommand = "INSERT";
             string sqlCommand = "REPLACE";
@@ -4100,7 +4397,7 @@ namespace aclogview
                             using (StreamWriter writer = new StreamWriter(fs))
                             {
 
-                                string header = $"/* Extended Apprasial Data */" + Environment.NewLine;
+                                string header = $"/* Extended Appraisal Data */" + Environment.NewLine;
                                 writer.WriteLine(header);
 
                                 //if (parsed.i_objid > 65535)
