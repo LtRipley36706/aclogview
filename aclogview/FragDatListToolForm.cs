@@ -1131,7 +1131,7 @@ namespace aclogview
 
                                 if (weenieIds.Contains(item))
                                 {
-                                    instanceLine += $"     , ({parent}, {item}, {(uint)DestinationType.Wield_DestinationType}" +
+                                    instanceLine += $"     , ({parent}, {(uint)DestinationType.Wield_DestinationType}, {item}" +
                                     //$"{parsed.physicsdesc.pos.objcell_id}, " +
                                     //$"{parsed.physicsdesc.pos.frame.m_fOrigin.x}, {parsed.physicsdesc.pos.frame.m_fOrigin.y}, {parsed.physicsdesc.pos.frame.m_fOrigin.z}, " +
                                     //$"{parsed.physicsdesc.pos.frame.qw}, {parsed.physicsdesc.pos.frame.qx}, {parsed.physicsdesc.pos.frame.qy}, {parsed.physicsdesc.pos.frame.qz}" +
@@ -1146,7 +1146,7 @@ namespace aclogview
 
                             if (instanceLine != "")
                             {
-                                instanceLine = $"{sqlCommand} INTO `ace_object_inventory` (`aceObjectId`, `weenieClassId`, `destinationType`)" + Environment.NewLine
+                                instanceLine = $"{sqlCommand} INTO `ace_object_inventory` (`aceObjectId`, `destinationType`, `weenieClassId`)" + Environment.NewLine
                                     + "VALUES " + instanceLine.TrimStart("     ,".ToCharArray());
                                 instanceLine = instanceLine.TrimEnd(Environment.NewLine.ToCharArray()) + ";" + Environment.NewLine;
                                 writer.WriteLine(instanceLine);
@@ -1283,7 +1283,7 @@ namespace aclogview
                             {
                                 if (weenieIds.Contains(item))
                                 {
-                                    instanceLine += $"     , ({vendor}, {item}, {(uint)DestinationType.Shop_DestinationType}" +
+                                    instanceLine += $"     , ({vendor}, {(uint)DestinationType.Shop_DestinationType}, {item}" +
                                     //$"{parsed.physicsdesc.pos.objcell_id}, " +
                                     //$"{parsed.physicsdesc.pos.frame.m_fOrigin.x}, {parsed.physicsdesc.pos.frame.m_fOrigin.y}, {parsed.physicsdesc.pos.frame.m_fOrigin.z}, " +
                                     //$"{parsed.physicsdesc.pos.frame.qw}, {parsed.physicsdesc.pos.frame.qx}, {parsed.physicsdesc.pos.frame.qy}, {parsed.physicsdesc.pos.frame.qz}" +
@@ -1298,7 +1298,7 @@ namespace aclogview
 
                             if (instanceLine != "")
                             {
-                                instanceLine = $"{sqlCommand} INTO `ace_object_inventory` (`aceObjectId`, `weenieClassId`, `destinationType`)" + Environment.NewLine
+                                instanceLine = $"{sqlCommand} INTO `ace_object_inventory` (`aceObjectId`, `destinationType`, `weenieClassId`)" + Environment.NewLine
                                     + "VALUES " + instanceLine.TrimStart("     ,".ToCharArray());
                                 instanceLine = instanceLine.TrimEnd(Environment.NewLine.ToCharArray()) + ";" + Environment.NewLine;
                                 writer.WriteLine(instanceLine);
@@ -2614,7 +2614,7 @@ namespace aclogview
                         {
                             using (StreamWriter writer = new StreamWriter(fs))
                             {
-                                string header = $"/* Vendor Data */" + Environment.NewLine;
+                                string header = $"/* Extended Vendor Data */" + Environment.NewLine;
                                 writer.WriteLine(header);
 
                                 string intsLine = "", bigintsLine = "", floatsLine = "", boolsLine = "", strsLine = "", didsLine = "", iidsLine = "";
@@ -3293,7 +3293,7 @@ namespace aclogview
                         {
                             using (StreamWriter writer = new StreamWriter(fs))
                             {
-                                string header = $"/* Book Data */" + Environment.NewLine;
+                                string header = $"/* Extended Book Data */" + Environment.NewLine;
                                 writer.WriteLine(header);
 
                                 string intsLine = "", bigintsLine = "", floatsLine = "", boolsLine = "", strsLine = "", didsLine = "", iidsLine = "";
@@ -3779,7 +3779,7 @@ namespace aclogview
                             {
                                 using (StreamWriter writer = new StreamWriter(fs))
                                 {
-                                    string header = $"/* Page Data */" + Environment.NewLine;
+                                    string header = $"/* Extended Page Data */" + Environment.NewLine;
                                     writer.WriteLine(header);
 
                                     string pagesLine = "";
