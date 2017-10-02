@@ -6015,6 +6015,12 @@ namespace aclogview
                         weenieType = WeenieType.GamePiece_WeenieType;
                         addWeenie = true;
                     }
+                    //else if (parsed.wdesc._radar_enum == RadarEnum.ShowNever_RadarEnum)
+                    //{
+                    //    fileToPutItIn = "CreaturesNeverShows";
+                    //    weenieType = WeenieType.Creature_WeenieType;
+                    //    addIt = true;
+                    //}
                     else
                     {
                         fileToPutItIn = "CreaturesUnsorted";
@@ -7938,8 +7944,12 @@ namespace aclogview
                                 intsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeInt.SHOWABLE_ON_RADAR_INT}, {(uint)parsed.wdesc._radar_enum}) /* {Enum.GetName(typeof(STypeInt), STypeInt.SHOWABLE_ON_RADAR_INT)} */" + Environment.NewLine;
                             //if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_StackSize) != 0)
                             //    intsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeInt.STACK_SIZE_INT}, {parsed.wdesc._stackSize})" + Environment.NewLine;
+                            if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_StackSize) != 0)
+                                intsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeInt.STACK_SIZE_INT}, 1) /* {Enum.GetName(typeof(STypeInt), STypeInt.STACK_SIZE_INT)} */" + Environment.NewLine;
                             //if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_Structure) != 0)
                             //    intsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeInt.STRUCTURE_INT}, {parsed.wdesc._structure})" + Environment.NewLine;
+                            if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_Structure) != 0)
+                                intsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeInt.STRUCTURE_INT}, {parsed.wdesc._maxStructure}) /* {Enum.GetName(typeof(STypeInt), STypeInt.STRUCTURE_INT)} */" + Environment.NewLine;
                             if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_TargetType) != 0)
                                 intsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeInt.TARGET_TYPE_INT}, {(uint)parsed.wdesc._targetType}) /* {Enum.GetName(typeof(STypeInt), STypeInt.TARGET_TYPE_INT)} */" + Environment.NewLine;
                             if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_Useability) != 0)
