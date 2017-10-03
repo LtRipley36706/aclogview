@@ -5974,6 +5974,7 @@ namespace aclogview
                         || parsed.wdesc._name.m_buffer.Contains("Deeper into")
                         || parsed.wdesc._name.m_buffer.Contains("Up to the")
                         || parsed.wdesc._name.m_buffer.Contains("Pool")
+                        || parsed.wdesc._name.m_buffer == "Hollow"
                         )
                     {
                         fileToPutItIn = "CreaturesOtherNPCs";
