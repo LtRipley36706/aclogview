@@ -551,6 +551,8 @@ namespace aclogview
                 Dictionary<string, List<CM_Physics.CreateObject>> weenies = new Dictionary<string, List<CM_Physics.CreateObject>>();
                 Dictionary<uint, List<Position>> processedWeeniePositions = new Dictionary<uint, List<Position>>();
 
+                Dictionary<uint, string> weenieNames = new Dictionary<uint, string>();
+
                 List<uint> objectIds = new List<uint>();
                 Dictionary<string, List<CM_Physics.CreateObject>> staticObjects = new Dictionary<string, List<CM_Physics.CreateObject>>();
 
@@ -595,6 +597,12 @@ namespace aclogview
                 Dictionary<uint, CM_Physics.CreateObject> weeniesTypeTemplate = new Dictionary<uint, CM_Physics.CreateObject>();
                 Dictionary<uint, CM_Physics.CreateObject> weeniesFromVendors = new Dictionary<uint, CM_Physics.CreateObject>();
 
+                Dictionary<uint, List<uint>> corpseObjectsDroppedItems = new Dictionary<uint, List<uint>>();
+                Dictionary<uint, uint> corpseObjectsInstances = new Dictionary<uint, uint>();
+
+                Dictionary<uint, List<uint>> chestObjectsContainedItems = new Dictionary<uint, List<uint>>();
+                Dictionary<uint, uint> chestObjectsInstances = new Dictionary<uint, uint>();
+
                 while (true)
                 {
                     if (searchAborted || Disposing || IsDisposed)
@@ -630,6 +638,7 @@ namespace aclogview
                                     outputAsLandblocks, landblockInstances,
                                     weenieIds, weenies,
                                     processedWeeniePositions, dedupeWeenies,
+                                    weenieNames,
                                     appraisalObjectsCatagoryMap, appraisalObjectToWeenieId,
                                     weenieObjectsCatagoryMap,
                                     weeniesWeenieType, staticObjectsWeenieType,
@@ -637,7 +646,9 @@ namespace aclogview
                                     inventoryParents, inventoryObjects,
                                     parentWieldsWeenies,
                                     weeniesTypeTemplate,
-                                    exportEverything);
+                                    exportEverything,
+                                    corpseObjectsDroppedItems, corpseObjectsInstances,
+                                    chestObjectsContainedItems, chestObjectsInstances);
                             }
 
                             if (messageCode == (uint)PacketOpcode.WEENIE_ORDERED_EVENT || messageCode == (uint)PacketOpcode.ORDERED_EVENT)
@@ -664,6 +675,7 @@ namespace aclogview
                                         outputAsLandblocks, landblockInstances,
                                         weenieIds, weenies,
                                         processedWeeniePositions, dedupeWeenies,
+                                        weenieNames,
                                         appraisalObjectsCatagoryMap, appraisalObjectToWeenieId,
                                         weenieObjectsCatagoryMap,
                                         weeniesWeenieType, staticObjectsWeenieType,
@@ -671,7 +683,9 @@ namespace aclogview
                                         inventoryParents, inventoryObjects,
                                         parentWieldsWeenies,
                                         weeniesTypeTemplate,
-                                        exportEverything);
+                                        exportEverything,
+                                        corpseObjectsDroppedItems, corpseObjectsInstances,
+                                        chestObjectsContainedItems, chestObjectsInstances);
                                 }
 
                                 if (opCode == (uint)PacketOpcode.APPRAISAL_INFO_EVENT)
@@ -744,14 +758,16 @@ namespace aclogview
                     GenerateMissingWeeniesFromVendors(objectIds, staticObjects,
                                         outputAsLandblocks, landblockInstances,
                                         weenieIds, weenies,
-                                        processedWeeniePositions,
+                                        processedWeeniePositions, weenieNames,
                                         appraisalObjectsCatagoryMap, appraisalObjectToWeenieId,
                                         weenieObjectsCatagoryMap,
                                         weeniesWeenieType, staticObjectsWeenieType,
                                         wieldedObjectsParentMap, wieldedObjects,
                                         inventoryParents, inventoryObjects,
                                         parentWieldsWeenies,
-                                        weeniesTypeTemplate, weeniesFromVendors);
+                                        weeniesTypeTemplate, weeniesFromVendors,
+                                        corpseObjectsDroppedItems, corpseObjectsInstances,
+                                        chestObjectsContainedItems, chestObjectsInstances);
                 }
 
                 if (outputWeenieFiles)
@@ -768,13 +784,17 @@ namespace aclogview
                     // WriteWeeniePageObjectData(pageObjects, txtOutputFolder.Text);
                     WriteAppendedWeeniePageObjectData(pageObjects, txtOutputFolder.Text);
                     // WriteWeenieVendorObjectData(vendorObjects, txtOutputFolder.Text);
-                    WriteAppendedWeenieVendorObjectData(vendorObjects, txtOutputFolder.Text);
+                    WriteAppendedWeenieVendorObjectData(vendorObjects, txtOutputFolder.Text, weenieNames);
                     // WriteVendorInventory(vendorSellsWeenies, weenieIds, txtOutputFolder.Text);
-                    WriteAppendedVendorInventory(vendorSellsWeenies, weenieIds, weenieObjectsCatagoryMap, txtOutputFolder.Text);
+                    WriteAppendedVendorInventory(vendorSellsWeenies, weenieIds, weenieObjectsCatagoryMap, txtOutputFolder.Text, weenieNames);
                     // WriteParentInventory(parentWieldsWeenies, weenieIds, txtOutputFolder.Text);
-                    WriteAppendedParentInventory(parentWieldsWeenies, weenieIds, weenieObjectsCatagoryMap, txtOutputFolder.Text);
+                    WriteAppendedParentInventory(parentWieldsWeenies, weenieIds, weenieObjectsCatagoryMap, txtOutputFolder.Text, weenieNames);
 
                     WriteAppendedSlumlordInventory(slumlordObjects, weenieIds, weenieObjectsCatagoryMap, txtOutputFolder.Text);
+
+                    WriteAppendedCorpseInventory(corpseObjectsDroppedItems, weenieIds, weenieObjectsCatagoryMap, txtOutputFolder.Text, weenieNames);
+
+                    WriteAppendedChestInventory(chestObjectsContainedItems, weenieIds, weenieObjectsCatagoryMap, txtOutputFolder.Text, weenieNames);
 
                     if (outputAsLandblocks)
                     {
@@ -1115,7 +1135,7 @@ namespace aclogview
                                         //$"{parsed.physicsdesc.pos.objcell_id}, " +
                                         //$"{parsed.physicsdesc.pos.frame.m_fOrigin.x}, {parsed.physicsdesc.pos.frame.m_fOrigin.y}, {parsed.physicsdesc.pos.frame.m_fOrigin.z}, " +
                                         //$"{parsed.physicsdesc.pos.frame.qw}, {parsed.physicsdesc.pos.frame.qx}, {parsed.physicsdesc.pos.frame.qy}, {parsed.physicsdesc.pos.frame.qz}" +
-                                        $") /* {item.name} */" + Environment.NewLine;
+                                        $") /* Buy Cost - {item.name} (x{item.num.ToString("N0")}) */" + Environment.NewLine;
                                     }
                                     else
                                     {
@@ -1132,7 +1152,7 @@ namespace aclogview
                                         //$"{parsed.physicsdesc.pos.objcell_id}, " +
                                         //$"{parsed.physicsdesc.pos.frame.m_fOrigin.x}, {parsed.physicsdesc.pos.frame.m_fOrigin.y}, {parsed.physicsdesc.pos.frame.m_fOrigin.z}, " +
                                         //$"{parsed.physicsdesc.pos.frame.qw}, {parsed.physicsdesc.pos.frame.qx}, {parsed.physicsdesc.pos.frame.qy}, {parsed.physicsdesc.pos.frame.qz}" +
-                                        $") /* {item.name} */" + Environment.NewLine;
+                                        $") /* Rent Cost - {item.name} (x{item.num.ToString("N0")}) */" + Environment.NewLine;
                                     }
                                     else
                                     {
@@ -1186,13 +1206,16 @@ namespace aclogview
         private void GenerateMissingWeeniesFromVendors(List<uint> objectIds, Dictionary<string, List<CM_Physics.CreateObject>> staticObjects,
             bool saveAsLandblockInstances, Dictionary<uint, Dictionary<string, List<CM_Physics.CreateObject>>> landblockInstances,
             List<uint> weenieIds, Dictionary<string, List<CM_Physics.CreateObject>> weenies, Dictionary<uint, List<Position>> processedWeeniePositions,
+            Dictionary<uint, string> weenieNames,
             Dictionary<uint, string> appraisalObjectsCatagoryMap, Dictionary<uint, uint> appraisalObjectToWeenieId,
             Dictionary<uint, string> weenieObjectsCatagoryMap, Dictionary<uint, uint> weeniesWeenieType,
             Dictionary<uint, uint> staticObjectsWeenieType, Dictionary<uint, List<uint>> wieldedObjectsParentMap, Dictionary<uint, List<CM_Physics.CreateObject>> wieldedObjects,
             Dictionary<uint, List<uint>> inventoryParents, Dictionary<uint, CM_Physics.CreateObject> inventoryObjects,
             Dictionary<uint, List<uint>> parentWieldsWeenies,
             Dictionary<uint, CM_Physics.CreateObject> weeniesTypeTemplate,
-            Dictionary<uint, CM_Physics.CreateObject> weeniesFromVendors)
+            Dictionary<uint, CM_Physics.CreateObject> weeniesFromVendors,
+            Dictionary<uint, List<uint>> corpseObjectsDroppedItems, Dictionary<uint, uint> corpseObjectsInstances,
+            Dictionary<uint, List<uint>> chestObjectsContainedItems, Dictionary<uint, uint> chestObjectsInstances)
         {
             try
             {
@@ -1208,6 +1231,7 @@ namespace aclogview
                         saveAsLandblockInstances, landblockInstances,
                         weenieIds, weenies,
                         processedWeeniePositions, true,
+                        weenieNames,
                         appraisalObjectsCatagoryMap, appraisalObjectToWeenieId,
                         weenieObjectsCatagoryMap,
                         weeniesWeenieType, staticObjectsWeenieType,
@@ -1215,7 +1239,9 @@ namespace aclogview
                         inventoryParents, inventoryObjects,
                         parentWieldsWeenies,
                         weeniesTypeTemplate,
-                        false);
+                        false,
+                        corpseObjectsDroppedItems, corpseObjectsInstances,
+                        chestObjectsContainedItems, chestObjectsInstances);
                 }
             }
             catch (Exception ex)
@@ -1225,7 +1251,172 @@ namespace aclogview
             }
         }
 
-        private void WriteAppendedParentInventory(Dictionary<uint, List<uint>> parentWieldsWeenies, List<uint> weenieIds, Dictionary<uint, string> appraisalObjectsCatagoryMap, string outputFolder)
+        private void WriteAppendedChestInventory(Dictionary<uint, List<uint>> chestObjectsContainedItems, List<uint> weenieIds, Dictionary<uint, string> appraisalObjectsCatagoryMap, string outputFolder,
+            Dictionary<uint, string> weenieNames)
+        {
+            string staticFolder = Path.Combine(outputFolder, "1-weenies");
+
+            //string sqlCommand = "INSERT";
+            string sqlCommand = "REPLACE";
+
+            //if (!Directory.Exists(staticFolder))
+            //    Directory.CreateDirectory(staticFolder);
+
+            //Dictionary<string, int> fileCount = new Dictionary<string, int>();
+
+            foreach (var parent in chestObjectsContainedItems.Keys)
+            {
+                try
+                {
+                    string key = "";
+                    appraisalObjectsCatagoryMap.TryGetValue(parent, out key);
+
+                    string keyFolder = Path.Combine(staticFolder, key);
+
+                    string fullFile = Path.Combine(keyFolder, $"{parent}.sql");
+                    //string fullFile = Path.Combine(staticFolder, $"{parent}.sql");
+
+                    //if (File.Exists(fullFile))
+                    //{
+                    //    FileInfo fi = new FileInfo(fullFile);
+
+                    //    // go to the next file if it's bigger than a MB
+                    //    if (fi.Length > ((1048576) * 40))
+                    //    {
+
+                    //        if (File.Exists(fullFile))
+                    //            File.Delete(fullFile);
+                    //    }
+                    //}
+
+                    using (FileStream fs = new FileStream(fullFile, FileMode.Append))
+                    {
+                        using (StreamWriter writer = new StreamWriter(fs))
+                        {
+                            string instanceLine = "";
+
+                            string header = $"/* Chest Treasure List */" + Environment.NewLine;
+                            if (chestObjectsContainedItems[parent].Count > 0)
+                                writer.WriteLine(header);
+
+                            foreach (var item in chestObjectsContainedItems[parent])
+                            {
+                                if (weenieIds.Contains(item))
+                                {
+                                    instanceLine += $"     , ({parent}, {(uint)DestinationType.Treasure_DestinationType}, {item}" +
+                                    //$"{parsed.physicsdesc.pos.objcell_id}, " +
+                                    //$"{parsed.physicsdesc.pos.frame.m_fOrigin.x}, {parsed.physicsdesc.pos.frame.m_fOrigin.y}, {parsed.physicsdesc.pos.frame.m_fOrigin.z}, " +
+                                    //$"{parsed.physicsdesc.pos.frame.qw}, {parsed.physicsdesc.pos.frame.qx}, {parsed.physicsdesc.pos.frame.qy}, {parsed.physicsdesc.pos.frame.qz}" +
+                                    $") /* {weenieNames[item]} */" + Environment.NewLine;
+                                }
+                                else
+                                {
+                                    System.Diagnostics.Debug.WriteLine($"{parent} wields ({item}) and is not in the the weenie list.");
+                                    totalExceptions++;
+                                }
+                            }
+
+                            if (instanceLine != "")
+                            {
+                                instanceLine = $"{sqlCommand} INTO `ace_object_inventory` (`aceObjectId`, `destinationType`, `weenieClassId`)" + Environment.NewLine
+                                    + "VALUES " + instanceLine.TrimStart("     ,".ToCharArray());
+                                instanceLine = instanceLine.TrimEnd(Environment.NewLine.ToCharArray()) + ";" + Environment.NewLine;
+                                writer.WriteLine(instanceLine);
+                            }
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine("Unable to export parent " + parent + ". Exception:" + Environment.NewLine + ex.ToString());
+                }
+            }
+        }
+
+        private void WriteAppendedCorpseInventory(Dictionary<uint, List<uint>> corpseObjectsDroppedItem, List<uint> weenieIds, Dictionary<uint, string> appraisalObjectsCatagoryMap, string outputFolder,
+            Dictionary<uint, string> weenieNames)
+        {
+            string staticFolder = Path.Combine(outputFolder, "1-weenies");
+
+            //string sqlCommand = "INSERT";
+            string sqlCommand = "REPLACE";
+
+            //if (!Directory.Exists(staticFolder))
+            //    Directory.CreateDirectory(staticFolder);
+
+            //Dictionary<string, int> fileCount = new Dictionary<string, int>();
+
+            foreach (var parent in corpseObjectsDroppedItem.Keys)
+            {
+                try
+                {
+                    string key = "";
+                    appraisalObjectsCatagoryMap.TryGetValue(parent, out key);
+
+                    string keyFolder = Path.Combine(staticFolder, key);
+
+                    string fullFile = Path.Combine(keyFolder, $"{parent}.sql");
+                    //string fullFile = Path.Combine(staticFolder, $"{parent}.sql");
+
+                    //if (File.Exists(fullFile))
+                    //{
+                    //    FileInfo fi = new FileInfo(fullFile);
+
+                    //    // go to the next file if it's bigger than a MB
+                    //    if (fi.Length > ((1048576) * 40))
+                    //    {
+
+                    //        if (File.Exists(fullFile))
+                    //            File.Delete(fullFile);
+                    //    }
+                    //}
+
+                    using (FileStream fs = new FileStream(fullFile, FileMode.Append))
+                    {
+                        using (StreamWriter writer = new StreamWriter(fs))
+                        {
+                            string instanceLine = "";
+
+                            string header = $"/* Corpse Treasure List */" + Environment.NewLine;
+                            if (corpseObjectsDroppedItem[parent].Count > 0)
+                                writer.WriteLine(header);
+
+                            foreach (var item in corpseObjectsDroppedItem[parent])
+                            {
+                                if (weenieIds.Contains(item))
+                                {
+                                    instanceLine += $"     , ({parent}, {(uint)DestinationType.Treasure_DestinationType}, {item}" +
+                                    //$"{parsed.physicsdesc.pos.objcell_id}, " +
+                                    //$"{parsed.physicsdesc.pos.frame.m_fOrigin.x}, {parsed.physicsdesc.pos.frame.m_fOrigin.y}, {parsed.physicsdesc.pos.frame.m_fOrigin.z}, " +
+                                    //$"{parsed.physicsdesc.pos.frame.qw}, {parsed.physicsdesc.pos.frame.qx}, {parsed.physicsdesc.pos.frame.qy}, {parsed.physicsdesc.pos.frame.qz}" +
+                                    $") /* {weenieNames[item]} */" + Environment.NewLine;
+                                }
+                                else
+                                {
+                                    System.Diagnostics.Debug.WriteLine($"{parent} wields ({item}) and is not in the the weenie list.");
+                                    totalExceptions++;
+                                }
+                            }
+
+                            if (instanceLine != "")
+                            {
+                                instanceLine = $"{sqlCommand} INTO `ace_object_inventory` (`aceObjectId`, `destinationType`, `weenieClassId`)" + Environment.NewLine
+                                    + "VALUES " + instanceLine.TrimStart("     ,".ToCharArray());
+                                instanceLine = instanceLine.TrimEnd(Environment.NewLine.ToCharArray()) + ";" + Environment.NewLine;
+                                writer.WriteLine(instanceLine);
+                            }
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine("Unable to export parent " + parent + ". Exception:" + Environment.NewLine + ex.ToString());
+                }
+            }
+        }
+
+        private void WriteAppendedParentInventory(Dictionary<uint, List<uint>> parentWieldsWeenies, List<uint> weenieIds, Dictionary<uint, string> appraisalObjectsCatagoryMap, string outputFolder,
+            Dictionary<uint, string> weenieNames)
         {
             string staticFolder = Path.Combine(outputFolder, "1-weenies");
 
@@ -1279,7 +1470,7 @@ namespace aclogview
                                     //$"{parsed.physicsdesc.pos.objcell_id}, " +
                                     //$"{parsed.physicsdesc.pos.frame.m_fOrigin.x}, {parsed.physicsdesc.pos.frame.m_fOrigin.y}, {parsed.physicsdesc.pos.frame.m_fOrigin.z}, " +
                                     //$"{parsed.physicsdesc.pos.frame.qw}, {parsed.physicsdesc.pos.frame.qx}, {parsed.physicsdesc.pos.frame.qy}, {parsed.physicsdesc.pos.frame.qz}" +
-                                    ")" + Environment.NewLine;
+                                    $") /* {weenieNames[item]} */" + Environment.NewLine;
                                 }
                                 else
                                 {
@@ -1376,7 +1567,8 @@ namespace aclogview
             }
         }
 
-        private void WriteAppendedVendorInventory(Dictionary<uint, List<uint>> vendorSellsWeenies, List<uint> weenieIds, Dictionary<uint, string> appraisalObjectsCatagoryMap, string outputFolder)
+        private void WriteAppendedVendorInventory(Dictionary<uint, List<uint>> vendorSellsWeenies, List<uint> weenieIds, Dictionary<uint, string> appraisalObjectsCatagoryMap, string outputFolder,
+            Dictionary<uint, string> weenieNames)
         {
             string staticFolder = Path.Combine(outputFolder, "1-weenies");
 
@@ -1431,7 +1623,7 @@ namespace aclogview
                                     //$"{parsed.physicsdesc.pos.objcell_id}, " +
                                     //$"{parsed.physicsdesc.pos.frame.m_fOrigin.x}, {parsed.physicsdesc.pos.frame.m_fOrigin.y}, {parsed.physicsdesc.pos.frame.m_fOrigin.z}, " +
                                     //$"{parsed.physicsdesc.pos.frame.qw}, {parsed.physicsdesc.pos.frame.qx}, {parsed.physicsdesc.pos.frame.qy}, {parsed.physicsdesc.pos.frame.qz}" +
-                                    ")" + Environment.NewLine;
+                                    $") /* {weenieNames[item]} */" + Environment.NewLine;
                                 }
                                 else
                                 {
@@ -2708,7 +2900,8 @@ namespace aclogview
             }
         }
 
-        private void WriteAppendedWeenieVendorObjectData(Dictionary<string, Dictionary<uint, CM_Vendor.gmVendorUI>> vendorObjects, string outputFolder)
+        private void WriteAppendedWeenieVendorObjectData(Dictionary<string, Dictionary<uint, CM_Vendor.gmVendorUI>> vendorObjects, string outputFolder,
+            Dictionary<uint, string> weenieNames)
         {
             string staticFolder = Path.Combine(outputFolder, "1-weenies");
 
@@ -2772,6 +2965,9 @@ namespace aclogview
 
                                 floatsLine += $"     , ({vendor.shopVendorID}, {(uint)STypeFloat.BUY_PRICE_FLOAT}, {(float)vendor.shopVendorProfile.buy_price}) /* {Enum.GetName(typeof(STypeFloat), STypeFloat.BUY_PRICE_FLOAT)} */" + Environment.NewLine;
                                 floatsLine += $"     , ({vendor.shopVendorID}, {(uint)STypeFloat.SELL_PRICE_FLOAT}, {(float)vendor.shopVendorProfile.sell_price}) /* {Enum.GetName(typeof(STypeFloat), STypeFloat.SELL_PRICE_FLOAT)} */" + Environment.NewLine;
+
+                                if (vendor.shopVendorProfile.trade_id > 0)
+                                    didsLine += $"     , ({vendor.shopVendorID}, {(uint)STypeDID.ALTERNATE_CURRENCY_DID}, {(uint)vendor.shopVendorProfile.trade_id}) /* {Enum.GetName(typeof(STypeDID), STypeDID.ALTERNATE_CURRENCY_DID)} - {vendor.shopVendorProfile.trade_name} */" + Environment.NewLine;
 
 
                                 if (strsLine != "")
@@ -5038,13 +5234,16 @@ namespace aclogview
         private void CreateStaticObjectsList(CM_Physics.CreateObject parsed, List<uint> objectIds, Dictionary<string, List<CM_Physics.CreateObject>> staticObjects,
             bool saveAsLandblockInstances, Dictionary<uint, Dictionary<string, List<CM_Physics.CreateObject>>> landblockInstances,
             List<uint> weenieIds, Dictionary<string, List<CM_Physics.CreateObject>> weenies, Dictionary<uint, List<Position>> processedWeeniePositions, bool dedupeWeenies,
+            Dictionary<uint, string> weenieNames,
             Dictionary<uint, string> appraisalObjectsCatagoryMap, Dictionary<uint, uint> appraisalObjectToWeenieId,
             Dictionary<uint, string> weenieObjectsCatagoryMap, Dictionary<uint, uint> weeniesWeenieType, 
             Dictionary<uint, uint> staticObjectsWeenieType, Dictionary<uint, List<uint>> wieldedObjectsParentMap, Dictionary<uint, List<CM_Physics.CreateObject>> wieldedObjects,
             Dictionary<uint, List<uint>> inventoryParents, Dictionary<uint, CM_Physics.CreateObject> inventoryObjects,
             Dictionary<uint, List<uint>> parentWieldsWeenies,
             Dictionary<uint, CM_Physics.CreateObject> weeniesTypeTemplate,
-            bool addEverything)
+            bool addEverything,
+            Dictionary<uint, List<uint>> corpseObjectsDroppedItems, Dictionary<uint, uint> corpseObjectsInstances,
+            Dictionary<uint, List<uint>> chestObjectsContainedItems, Dictionary<uint, uint> chestObjectsInstances)
         {
             try
             {
@@ -5650,13 +5849,14 @@ namespace aclogview
                     else if (parsed.wdesc._name.m_buffer.Contains("Standing Stone"))
                     {
                         fileToPutItIn = "ContainersStandingStones";
-                        weenieType = WeenieType.Container_WeenieType;
+                        weenieType = WeenieType.Chest_WeenieType;
                         addIt = true;
                     }
                     else if (parsed.wdesc._name.m_buffer.Contains("Pack")
                         || parsed.wdesc._name.m_buffer.Contains("Backpack")
                         || parsed.wdesc._name.m_buffer.Contains("Sack")
                         || parsed.wdesc._name.m_buffer.Contains("Pouch")
+                        || parsed.wdesc._name.m_buffer.Contains("Basket")
                         )
                     {
                         fileToPutItIn = "ContainersPacks";
@@ -5692,13 +5892,13 @@ namespace aclogview
                     else if (parsed.object_id < 0x80000000)
                     {
                         fileToPutItIn = "ContainersStatics";
-                        weenieType = WeenieType.Container_WeenieType;
+                        weenieType = WeenieType.Chest_WeenieType;
                         addIt = true;
                     }
                     else
                     {
                         fileToPutItIn = "Containers";
-                        weenieType = WeenieType.Container_WeenieType;
+                        weenieType = WeenieType.Chest_WeenieType;
                         addWeenie = true;
                     }
                 }
@@ -6341,6 +6541,89 @@ namespace aclogview
 
                 // }
 
+                if (parsed.wdesc._wcid == 21)
+                {
+                    bool corpse = false;
+                    bool treasure = false;
+
+                    if (parsed.wdesc._name.m_buffer.StartsWith("Corpse of"))
+                        corpse = true;
+
+                    if (parsed.wdesc._name.m_buffer.StartsWith("Treasure of"))
+                        treasure = true;
+
+                    string nameToMatch = "";
+                    if (corpse)
+                        nameToMatch = parsed.wdesc._name.m_buffer.Replace("Corpse of ","");
+                    if (treasure)
+                        nameToMatch = parsed.wdesc._name.m_buffer.Replace("Treasure of ", "");
+
+                    if (weenieNames.Values.Contains(nameToMatch))
+                    {
+                        foreach(var weenie in weenieNames)
+                        {
+                            if (weenie.Value == nameToMatch)
+                            {
+                                if (!corpseObjectsDroppedItems.ContainsKey(weenie.Key))
+                                    corpseObjectsDroppedItems.Add(weenie.Key, new List<uint>());
+
+                                if (!corpseObjectsInstances.ContainsKey(parsed.object_id))
+                                    corpseObjectsInstances.Add(parsed.object_id, weenie.Key);
+                                break;
+                            }
+                        }
+                    }
+                }
+                                
+                if (weenieType == WeenieType.Chest_WeenieType)
+                {
+                    //bool corpse = false;
+                    //bool treasure = false;
+
+                    //if (parsed.wdesc._name.m_buffer.StartsWith("Corpse of"))
+                    //    corpse = true;
+
+                    //if (parsed.wdesc._name.m_buffer.StartsWith("Treasure of"))
+                    //    treasure = true;
+
+                    //string nameToMatch = "";
+                    //if (corpse)
+                    //    nameToMatch = parsed.wdesc._name.m_buffer.Replace("Corpse of ", "");
+                    //if (treasure)
+                    //    nameToMatch = parsed.wdesc._name.m_buffer.Replace("Treasure of ", "");
+
+                    //if (weenieNames.Values.Contains(nameToMatch))
+                    //{
+                    //    foreach (var weenie in weenieNames)
+                    //    {
+                    //        if (weenie.Value == nameToMatch)
+                    //        {
+                    if (!chestObjectsContainedItems.ContainsKey(parsed.wdesc._wcid))
+                        chestObjectsContainedItems.Add(parsed.wdesc._wcid, new List<uint>());
+
+                    if (!chestObjectsInstances.ContainsKey(parsed.object_id))
+                        chestObjectsInstances.Add(parsed.object_id, parsed.wdesc._wcid);
+                    //            break;
+                    //        }
+                    //    }
+                    //}
+                }
+
+                if (parsed.wdesc._containerID > 0)
+                {
+                    if (corpseObjectsInstances.Keys.Contains(parsed.wdesc._containerID))
+                    {
+                        if (!corpseObjectsDroppedItems[corpseObjectsInstances[parsed.wdesc._containerID]].Contains(parsed.wdesc._wcid))
+                            corpseObjectsDroppedItems[corpseObjectsInstances[parsed.wdesc._containerID]].Add(parsed.wdesc._wcid);
+                    }
+
+                    if (chestObjectsInstances.Keys.Contains(parsed.wdesc._containerID))
+                    {
+                        if (!chestObjectsContainedItems[chestObjectsInstances[parsed.wdesc._containerID]].Contains(parsed.wdesc._wcid))
+                            chestObjectsContainedItems[chestObjectsInstances[parsed.wdesc._containerID]].Add(parsed.wdesc._wcid);
+                    }
+                }
+
                 if (!processedWeeniePositions.ContainsKey(parsed.wdesc._wcid))
                     processedWeeniePositions.Add(parsed.wdesc._wcid, new List<Position>());
 
@@ -6468,6 +6751,9 @@ namespace aclogview
 
                         if (!weeniesWeenieType.ContainsKey(parsed.wdesc._wcid))
                             weeniesWeenieType.Add(parsed.wdesc._wcid, (uint)weenieType);
+
+                        if (!weenieNames.ContainsKey(parsed.wdesc._wcid))
+                            weenieNames.Add(parsed.wdesc._wcid, parsed.wdesc._name.m_buffer);
                     }
 
                     if (!saveAsLandblockInstances)
@@ -6586,6 +6872,9 @@ namespace aclogview
 
                         if (!weeniesWeenieType.ContainsKey(parsed.wdesc._wcid))
                             weeniesWeenieType.Add(parsed.wdesc._wcid, (uint)weenieType);
+
+                        if (!weenieNames.ContainsKey(parsed.wdesc._wcid))
+                            weenieNames.Add(parsed.wdesc._wcid, parsed.wdesc._name.m_buffer);
 
                         totalHits++;
                     }
