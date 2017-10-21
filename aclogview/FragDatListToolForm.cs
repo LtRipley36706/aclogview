@@ -800,7 +800,7 @@ namespace aclogview
                     {
                         if (useLandblockTable && !exportEverything)
                         {
-                            WriteLandblockTable(landblockInstances, objectIds, txtOutputFolder.Text, staticObjectsWeenieType);
+                            WriteLandblockTable(landblockInstances, objectIds, txtOutputFolder.Text, staticObjectsWeenieType, weenieNames);
 
                             // WriteParentInventory(parentWieldsWeenies, weenieIds, txtOutputFolder.Text);
 
@@ -838,7 +838,7 @@ namespace aclogview
                     {
                         if (useLandblockTable && !exportEverything)
                         {
-                            WriteLandblockTable(landblockInstances, objectIds, txtOutputFolder.Text, staticObjectsWeenieType);
+                            WriteLandblockTable(landblockInstances, objectIds, txtOutputFolder.Text, staticObjectsWeenieType, weenieNames);
 
                             WriteParentInventory(parentWieldsWeenies, weenieIds, txtOutputFolder.Text);
 
@@ -7110,7 +7110,9 @@ namespace aclogview
             }
         }
 
-        private void WriteLandblockTable(Dictionary<uint, Dictionary<string, List<CM_Physics.CreateObject>>> landblockInstances, List<uint> objectIds, string outputFolder, Dictionary<uint, uint> staticObjectsWeenieType)
+        private void WriteLandblockTable(Dictionary<uint, Dictionary<string, List<CM_Physics.CreateObject>>> landblockInstances, List<uint> objectIds, string outputFolder, 
+            Dictionary<uint, uint> staticObjectsWeenieType,
+            Dictionary<uint, string> weenieNames)
         {
             bool useHex = true;
             bool useCategories = false;
@@ -7200,7 +7202,7 @@ namespace aclogview
                                             $"{parsed.physicsdesc.pos.objcell_id}, " +
                                             $"{parsed.physicsdesc.pos.frame.m_fOrigin.x}, {parsed.physicsdesc.pos.frame.m_fOrigin.y}, {parsed.physicsdesc.pos.frame.m_fOrigin.z}, " +
                                             $"{parsed.physicsdesc.pos.frame.qw}, {parsed.physicsdesc.pos.frame.qx}, {parsed.physicsdesc.pos.frame.qy}, {parsed.physicsdesc.pos.frame.qz}" +
-                                        ")" + Environment.NewLine;
+                                        $") /* {weenieNames[parsed.wdesc._wcid]} */" + Environment.NewLine;
                                 }
 
                                 if (instanceLine != "")
