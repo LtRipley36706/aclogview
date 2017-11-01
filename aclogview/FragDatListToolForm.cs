@@ -989,21 +989,21 @@ namespace aclogview
                             calcValue = parsed.wdesc._value / parsed.wdesc._stackSize;
 
                             if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_Burden) != 0)
-                                intsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeInt.ENCUMB_VAL_INT}, {calcBurden}) /* {Enum.GetName(typeof(STypeInt), STypeInt.ENCUMB_VAL_INT)} */" + Environment.NewLine;
+                                intsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeInt.ENCUMB_VAL_INT}, {(int)calcBurden}) /* {Enum.GetName(typeof(STypeInt), STypeInt.ENCUMB_VAL_INT)} */" + Environment.NewLine;
                             if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_MaxStackSize) != 0)
-                                intsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeInt.MAX_STACK_SIZE_INT}, {parsed.wdesc._maxStackSize}) /* {Enum.GetName(typeof(STypeInt), STypeInt.MAX_STACK_SIZE_INT)} */" + Environment.NewLine;
+                                intsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeInt.MAX_STACK_SIZE_INT}, {(int)parsed.wdesc._maxStackSize}) /* {Enum.GetName(typeof(STypeInt), STypeInt.MAX_STACK_SIZE_INT)} */" + Environment.NewLine;
                             //if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_MaxStructure) != 0)
                             //    intsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeInt.MAX_STRUCTURE_INT}, {parsed.wdesc._maxStructure}) /* {Enum.GetName(typeof(STypeInt), STypeInt.MAX_STRUCTURE_INT)} */" + Environment.NewLine;
                             //if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_StackSize) != 0)
                             //    intsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeInt.STACK_SIZE_INT}, {parsed.wdesc._stackSize})" + Environment.NewLine;
                             if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_StackSize) != 0)
-                                intsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeInt.STACK_SIZE_INT}, {stackSize}) /* {Enum.GetName(typeof(STypeInt), STypeInt.STACK_SIZE_INT)} */" + Environment.NewLine;
+                                intsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeInt.STACK_SIZE_INT}, {(int)stackSize}) /* {Enum.GetName(typeof(STypeInt), STypeInt.STACK_SIZE_INT)} */" + Environment.NewLine;
                             //if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_Structure) != 0)
                             //    intsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeInt.STRUCTURE_INT}, {parsed.wdesc._structure})" + Environment.NewLine;
                             //if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_Structure) != 0)
                             //    intsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeInt.STRUCTURE_INT}, {parsed.wdesc._maxStructure}) /* {Enum.GetName(typeof(STypeInt), STypeInt.STRUCTURE_INT)} */" + Environment.NewLine;
                             if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_Value) != 0)
-                                intsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeInt.VALUE_INT}, {calcValue}) /* {Enum.GetName(typeof(STypeInt), STypeInt.VALUE_INT)} */" + Environment.NewLine;
+                                intsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeInt.VALUE_INT}, {(int)calcValue}) /* {Enum.GetName(typeof(STypeInt), STypeInt.VALUE_INT)} */" + Environment.NewLine;
 
                             if (strsLine != "")
                             {
@@ -1111,16 +1111,16 @@ namespace aclogview
 
                                 //didsLine += $"     , ({slumlord.Key}, {(uint)STypeDID.HOUSEID_DID}, {(uint)slumlord.Value._id}) /* {Enum.GetName(typeof(STypeDID), STypeDID.HOUSEID_DID)} */" + Environment.NewLine;
 
-                                intsLine += $"     , ({slumlord.Key}, {(uint)STypeInt.HOUSE_TYPE_INT}, {(uint)slumlord.Value._type}) /* {Enum.GetName(typeof(STypeInt), STypeInt.HOUSE_TYPE_INT)} */" + Environment.NewLine;
-                                intsLine += $"     , ({slumlord.Key}, {(uint)STypeInt.HOUSE_STATUS_INT}, {(uint)slumlord.Value._bitmask}) /* {Enum.GetName(typeof(STypeInt), STypeInt.HOUSE_STATUS_INT)} */" + Environment.NewLine;
+                                intsLine += $"     , ({slumlord.Key}, {(uint)STypeInt.HOUSE_TYPE_INT}, {(int)slumlord.Value._type}) /* {Enum.GetName(typeof(STypeInt), STypeInt.HOUSE_TYPE_INT)} */" + Environment.NewLine;
+                                intsLine += $"     , ({slumlord.Key}, {(uint)STypeInt.HOUSE_STATUS_INT}, {(int)slumlord.Value._bitmask}) /* {Enum.GetName(typeof(STypeInt), STypeInt.HOUSE_STATUS_INT)} */" + Environment.NewLine;
                                 if (slumlord.Value._min_level > -1)
-                                    intsLine += $"     , ({slumlord.Key}, {(uint)STypeInt.MIN_LEVEL_INT}, {(uint)slumlord.Value._min_level}) /* {Enum.GetName(typeof(STypeInt), STypeInt.MIN_LEVEL_INT)} */" + Environment.NewLine;
+                                    intsLine += $"     , ({slumlord.Key}, {(uint)STypeInt.MIN_LEVEL_INT}, {(int)slumlord.Value._min_level}) /* {Enum.GetName(typeof(STypeInt), STypeInt.MIN_LEVEL_INT)} */" + Environment.NewLine;
                                 if (slumlord.Value._max_level > -1)
-                                    intsLine += $"     , ({slumlord.Key}, {(uint)STypeInt.MAX_LEVEL_INT}, {(uint)slumlord.Value._max_level}) /* {Enum.GetName(typeof(STypeInt), STypeInt.MAX_LEVEL_INT)} */" + Environment.NewLine;
+                                    intsLine += $"     , ({slumlord.Key}, {(uint)STypeInt.MAX_LEVEL_INT}, {(int)slumlord.Value._max_level}) /* {Enum.GetName(typeof(STypeInt), STypeInt.MAX_LEVEL_INT)} */" + Environment.NewLine;
                                 if (slumlord.Value._min_alleg_rank > -1)
-                                    intsLine += $"     , ({slumlord.Key}, {(uint)STypeInt.ALLEGIANCE_MIN_LEVEL_INT}, {(uint)slumlord.Value._min_alleg_rank}) /* {Enum.GetName(typeof(STypeInt), STypeInt.ALLEGIANCE_MIN_LEVEL_INT)} */" + Environment.NewLine;
+                                    intsLine += $"     , ({slumlord.Key}, {(uint)STypeInt.ALLEGIANCE_MIN_LEVEL_INT}, {(int)slumlord.Value._min_alleg_rank}) /* {Enum.GetName(typeof(STypeInt), STypeInt.ALLEGIANCE_MIN_LEVEL_INT)} */" + Environment.NewLine;
                                 if (slumlord.Value._max_alleg_rank > -1)
-                                    intsLine += $"     , ({slumlord.Key}, {(uint)STypeInt.ALLEGIANCE_MAX_LEVEL_INT}, {(uint)slumlord.Value._max_alleg_rank}) /* {Enum.GetName(typeof(STypeInt), STypeInt.ALLEGIANCE_MAX_LEVEL_INT)} */" + Environment.NewLine;
+                                    intsLine += $"     , ({slumlord.Key}, {(uint)STypeInt.ALLEGIANCE_MAX_LEVEL_INT}, {(int)slumlord.Value._max_alleg_rank}) /* {Enum.GetName(typeof(STypeInt), STypeInt.ALLEGIANCE_MAX_LEVEL_INT)} */" + Environment.NewLine;
 
                                 if (slumlord.Value._maintenance_free == 0)
                                     boolsLine += $"     , ({slumlord.Key}, {(uint)STypeBool.ROT_PROOF_BOOL}, {false}) /* {Enum.GetName(typeof(STypeBool), STypeBool.ROT_PROOF_BOOL)} */" + Environment.NewLine;
@@ -2956,9 +2956,9 @@ namespace aclogview
 
                                 string intsLine = "", bigintsLine = "", floatsLine = "", boolsLine = "", strsLine = "", didsLine = "", iidsLine = "";
 
-                                intsLine += $"     , ({vendor.shopVendorID}, {(uint)STypeInt.MERCHANDISE_ITEM_TYPES_INT}, {(uint)vendor.shopVendorProfile.item_types}) /* {Enum.GetName(typeof(STypeInt), STypeInt.MERCHANDISE_ITEM_TYPES_INT)} */" + Environment.NewLine;
-                                intsLine += $"     , ({vendor.shopVendorID}, {(uint)STypeInt.MERCHANDISE_MIN_VALUE_INT}, {(uint)vendor.shopVendorProfile.min_value}) /* {Enum.GetName(typeof(STypeInt), STypeInt.MERCHANDISE_MIN_VALUE_INT)} */" + Environment.NewLine;
-                                intsLine += $"     , ({vendor.shopVendorID}, {(uint)STypeInt.MERCHANDISE_MAX_VALUE_INT}, {(uint)vendor.shopVendorProfile.max_value}) /* {Enum.GetName(typeof(STypeInt), STypeInt.MERCHANDISE_MAX_VALUE_INT)} */" + Environment.NewLine;
+                                intsLine += $"     , ({vendor.shopVendorID}, {(uint)STypeInt.MERCHANDISE_ITEM_TYPES_INT}, {(int)vendor.shopVendorProfile.item_types}) /* {Enum.GetName(typeof(STypeInt), STypeInt.MERCHANDISE_ITEM_TYPES_INT)} */" + Environment.NewLine;
+                                intsLine += $"     , ({vendor.shopVendorID}, {(uint)STypeInt.MERCHANDISE_MIN_VALUE_INT}, {(int)vendor.shopVendorProfile.min_value}) /* {Enum.GetName(typeof(STypeInt), STypeInt.MERCHANDISE_MIN_VALUE_INT)} */" + Environment.NewLine;
+                                intsLine += $"     , ({vendor.shopVendorID}, {(uint)STypeInt.MERCHANDISE_MAX_VALUE_INT}, {(int)vendor.shopVendorProfile.max_value}) /* {Enum.GetName(typeof(STypeInt), STypeInt.MERCHANDISE_MAX_VALUE_INT)} */" + Environment.NewLine;
 
                                 if (vendor.shopVendorProfile.magic == 1)
                                     boolsLine += $"     , ({vendor.shopVendorID}, {(uint)STypeBool.DEAL_MAGICAL_ITEMS_BOOL}, {true}) /* {Enum.GetName(typeof(STypeBool), STypeBool.DEAL_MAGICAL_ITEMS_BOOL)} */" + Environment.NewLine;
@@ -3638,10 +3638,10 @@ namespace aclogview
 
                                 string intsLine = "", bigintsLine = "", floatsLine = "", boolsLine = "", strsLine = "", didsLine = "", iidsLine = "";
 
-                                intsLine += $"     , ({book.i_bookID}, {(uint)STypeInt.APPRAISAL_PAGES_INT}, {(uint)book.numPages}) /* {Enum.GetName(typeof(STypeInt), STypeInt.APPRAISAL_PAGES_INT)} */" + Environment.NewLine;
-                                intsLine += $"     , ({book.i_bookID}, {(uint)STypeInt.APPRAISAL_MAX_PAGES_INT}, {(uint)book.i_maxNumPages}) /* {Enum.GetName(typeof(STypeInt), STypeInt.APPRAISAL_MAX_PAGES_INT)} */" + Environment.NewLine;
+                                intsLine += $"     , ({book.i_bookID}, {(uint)STypeInt.APPRAISAL_PAGES_INT}, {(int)book.numPages}) /* {Enum.GetName(typeof(STypeInt), STypeInt.APPRAISAL_PAGES_INT)} */" + Environment.NewLine;
+                                intsLine += $"     , ({book.i_bookID}, {(uint)STypeInt.APPRAISAL_MAX_PAGES_INT}, {(int)book.i_maxNumPages}) /* {Enum.GetName(typeof(STypeInt), STypeInt.APPRAISAL_MAX_PAGES_INT)} */" + Environment.NewLine;
 
-                                intsLine += $"     , ({book.i_bookID}, {(uint)STypeInt.AVAILABLE_CHARACTER_INT}, {(uint)book.maxNumCharsPerPage}) /* {Enum.GetName(typeof(STypeInt), STypeInt.AVAILABLE_CHARACTER_INT)} */" + Environment.NewLine;
+                                intsLine += $"     , ({book.i_bookID}, {(uint)STypeInt.AVAILABLE_CHARACTER_INT}, {(int)book.maxNumCharsPerPage}) /* {Enum.GetName(typeof(STypeInt), STypeInt.AVAILABLE_CHARACTER_INT)} */" + Environment.NewLine;
 
                                 //if (book.authorId > 0)
                                 //    iidsLine += $"     , ({book.i_bookID}, {(uint)STypeIID.SCRIBE_IID}, {(uint)book.authorId})" + Environment.NewLine;
@@ -4789,7 +4789,7 @@ namespace aclogview
                                             )
                                             continue;
 
-                                            intsLine += $"     , ({parsed.i_objid}, {(uint)stat.Key}, {(uint)stat.Value}) /* {Enum.GetName(typeof(STypeInt), stat.Key)} */" + Environment.NewLine;
+                                            intsLine += $"     , ({parsed.i_objid}, {(uint)stat.Key}, {stat.Value}) /* {Enum.GetName(typeof(STypeInt), stat.Key)} */" + Environment.NewLine;
                                     }
                                 }
 
@@ -4831,10 +4831,10 @@ namespace aclogview
 
                                 if ((parsed.i_prof.header & (uint)CM_Examine.AppraisalProfile.AppraisalProfilePackHeader.Packed_WeaponProfile) != 0)
                                 {
-                                    intsLine += $"     , ({parsed.i_objid}, {(uint)STypeInt.DAMAGE_TYPE_INT}, {(uint)parsed.i_prof._weaponProfileTable._damage_type}) /* {Enum.GetName(typeof(STypeInt), STypeInt.DAMAGE_TYPE_INT)} */" + Environment.NewLine;
-                                    intsLine += $"     , ({parsed.i_objid}, {(uint)STypeInt.WEAPON_TIME_INT}, {(uint)parsed.i_prof._weaponProfileTable._weapon_time}) /* {Enum.GetName(typeof(STypeInt), STypeInt.WEAPON_TIME_INT)} */" + Environment.NewLine;
-                                    intsLine += $"     , ({parsed.i_objid}, {(uint)STypeInt.WEAPON_SKILL_INT}, {(uint)parsed.i_prof._weaponProfileTable._weapon_skill}) /* {Enum.GetName(typeof(STypeInt), STypeInt.WEAPON_SKILL_INT)} */" + Environment.NewLine;
-                                    intsLine += $"     , ({parsed.i_objid}, {(uint)STypeInt.DAMAGE_INT}, {(uint)parsed.i_prof._weaponProfileTable._weapon_damage}) /* {Enum.GetName(typeof(STypeInt), STypeInt.DAMAGE_INT)} */" + Environment.NewLine;
+                                    intsLine += $"     , ({parsed.i_objid}, {(uint)STypeInt.DAMAGE_TYPE_INT}, {(int)parsed.i_prof._weaponProfileTable._damage_type}) /* {Enum.GetName(typeof(STypeInt), STypeInt.DAMAGE_TYPE_INT)} */" + Environment.NewLine;
+                                    intsLine += $"     , ({parsed.i_objid}, {(uint)STypeInt.WEAPON_TIME_INT}, {(int)parsed.i_prof._weaponProfileTable._weapon_time}) /* {Enum.GetName(typeof(STypeInt), STypeInt.WEAPON_TIME_INT)} */" + Environment.NewLine;
+                                    intsLine += $"     , ({parsed.i_objid}, {(uint)STypeInt.WEAPON_SKILL_INT}, {(int)parsed.i_prof._weaponProfileTable._weapon_skill}) /* {Enum.GetName(typeof(STypeInt), STypeInt.WEAPON_SKILL_INT)} */" + Environment.NewLine;
+                                    intsLine += $"     , ({parsed.i_objid}, {(uint)STypeInt.DAMAGE_INT}, {(int)parsed.i_prof._weaponProfileTable._weapon_damage}) /* {Enum.GetName(typeof(STypeInt), STypeInt.DAMAGE_INT)} */" + Environment.NewLine;
                                     floatsLine += $"     , ({parsed.i_objid}, {(uint)STypeFloat.DAMAGE_VARIANCE_FLOAT}, {(float)parsed.i_prof._weaponProfileTable._damage_variance}) /* {Enum.GetName(typeof(STypeFloat), STypeFloat.DAMAGE_VARIANCE_FLOAT)} */" + Environment.NewLine;
                                     floatsLine += $"     , ({parsed.i_objid}, {(uint)STypeFloat.DAMAGE_MOD_FLOAT}, {(float)parsed.i_prof._weaponProfileTable._damage_mod}) /* {Enum.GetName(typeof(STypeFloat), STypeFloat.DAMAGE_MOD_FLOAT)} */" + Environment.NewLine;
                                     floatsLine += $"     , ({parsed.i_objid}, {(uint)STypeFloat.WEAPON_LENGTH_FLOAT}, {(float)parsed.i_prof._weaponProfileTable._weapon_length}) /* {Enum.GetName(typeof(STypeFloat), STypeFloat.WEAPON_LENGTH_FLOAT)} */" + Environment.NewLine;
@@ -4845,8 +4845,8 @@ namespace aclogview
 
                                 if ((parsed.i_prof.header & (uint)CM_Examine.AppraisalProfile.AppraisalProfilePackHeader.Packed_HookProfile) != 0)
                                 {
-                                    intsLine += $"     , ({parsed.i_objid}, {(uint)STypeInt.LOCATIONS_INT}, {(uint)parsed.i_prof._hookProfileTable._validLocations}) /* {Enum.GetName(typeof(STypeInt), STypeInt.LOCATIONS_INT)} */" + Environment.NewLine;
-                                    intsLine += $"     , ({parsed.i_objid}, {(uint)STypeInt.AMMO_TYPE_INT}, {(uint)parsed.i_prof._hookProfileTable._ammoType}) /* {Enum.GetName(typeof(STypeInt), STypeInt.AMMO_TYPE_INT)} */" + Environment.NewLine;
+                                    intsLine += $"     , ({parsed.i_objid}, {(uint)STypeInt.LOCATIONS_INT}, {(int)parsed.i_prof._hookProfileTable._validLocations}) /* {Enum.GetName(typeof(STypeInt), STypeInt.LOCATIONS_INT)} */" + Environment.NewLine;
+                                    intsLine += $"     , ({parsed.i_objid}, {(uint)STypeInt.AMMO_TYPE_INT}, {(int)parsed.i_prof._hookProfileTable._ammoType}) /* {Enum.GetName(typeof(STypeInt), STypeInt.AMMO_TYPE_INT)} */" + Environment.NewLine;
                                     boolsLine += $"     , ({parsed.i_objid}, {(uint)STypeBool.INSCRIBABLE_BOOL}, {parsed.i_prof._hookProfileTable.isInscribable}) /* {Enum.GetName(typeof(STypeBool), STypeBool.INSCRIBABLE_BOOL)} */" + Environment.NewLine;
                                     //boolsLine += $"     , ({parsed.i_objid}, {(uint)STypeBool.???}, {parsed.i_prof._hookProfileTable.isHealer})" + Environment.NewLine;
                                     //boolsLine += $"     , ({parsed.i_objid}, {(uint)STypeBool.???}, {parsed.i_prof._hookProfileTable.isLockpick})" + Environment.NewLine;
@@ -8324,7 +8324,7 @@ namespace aclogview
                             else
                                 line += $"NULL, ";
                             if ((parsed.physicsdesc.bitfield & (uint)PhysicsDesc.PhysicsDescInfo.ANIMFRAME_ID) != 0)
-                                intsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeInt.PLACEMENT_POSITION_INT}, {(uint)parsed.physicsdesc.animframe_id}) /* {Enum.GetName(typeof(STypeInt), STypeInt.PLACEMENT_POSITION_INT)} */" + Environment.NewLine;
+                                intsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeInt.PLACEMENT_POSITION_INT}, {(int)parsed.physicsdesc.animframe_id}) /* {Enum.GetName(typeof(STypeInt), STypeInt.PLACEMENT_POSITION_INT)} */" + Environment.NewLine;
                             if ((parsed.physicsdesc.bitfield & (uint)PhysicsDesc.PhysicsDescInfo.PETABLE) != 0)
                                 didsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeDID.PHYSICS_EFFECT_TABLE_DID}, {(uint)parsed.physicsdesc.phstable_id}) /* {Enum.GetName(typeof(STypeDID), STypeDID.PHYSICS_EFFECT_TABLE_DID)} */" + Environment.NewLine;
                             line += $"{parsed.physicsdesc.bitfield}";
@@ -8340,62 +8340,68 @@ namespace aclogview
                             writer.WriteLine(line);
 
                             strsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeString.NAME_STRING}, '{parsed.wdesc._name.m_buffer.Replace("'", "''")}') /* {Enum.GetName(typeof(STypeString), STypeString.NAME_STRING)} */" + Environment.NewLine;
-                            intsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeInt.ITEM_TYPE_INT}, {(uint)parsed.wdesc._type}) /* {Enum.GetName(typeof(STypeInt), STypeInt.ITEM_TYPE_INT)} */" + Environment.NewLine;
+                            intsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeInt.ITEM_TYPE_INT}, {(int)parsed.wdesc._type}) /* {Enum.GetName(typeof(STypeInt), STypeInt.ITEM_TYPE_INT)} */" + Environment.NewLine;
 
                             if (parsed.objdesc.subpalettes.Count > 0)
                                 //intsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeInt.PALETTE_TEMPLATE_INT}, {parsed.objdesc.paletteID})" + Environment.NewLine;
                                 didsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeDID.PALETTE_BASE_DID}, {(uint)parsed.objdesc.paletteID}) /* {Enum.GetName(typeof(STypeDID), STypeDID.PALETTE_BASE_DID)} */" + Environment.NewLine;
 
                             if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_AmmoType) != 0)
-                                intsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeInt.AMMO_TYPE_INT}, {(uint)parsed.wdesc._ammoType}) /* {Enum.GetName(typeof(STypeInt), STypeInt.AMMO_TYPE_INT)} */" + Environment.NewLine;
+                                intsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeInt.AMMO_TYPE_INT}, {(int)parsed.wdesc._ammoType}) /* {Enum.GetName(typeof(STypeInt), STypeInt.AMMO_TYPE_INT)} */" + Environment.NewLine;
                             if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_BlipColor) != 0)
-                                intsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeInt.RADARBLIP_COLOR_INT}, {parsed.wdesc._blipColor}) /* {Enum.GetName(typeof(STypeInt), STypeInt.RADARBLIP_COLOR_INT)} */" + Environment.NewLine;
+                                intsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeInt.RADARBLIP_COLOR_INT}, {(int)parsed.wdesc._blipColor}) /* {Enum.GetName(typeof(STypeInt), STypeInt.RADARBLIP_COLOR_INT)} */" + Environment.NewLine;
                             if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_Burden) != 0)
-                                intsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeInt.ENCUMB_VAL_INT}, {parsed.wdesc._burden}) /* {Enum.GetName(typeof(STypeInt), STypeInt.ENCUMB_VAL_INT)} */" + Environment.NewLine;
+                                intsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeInt.ENCUMB_VAL_INT}, {(int)parsed.wdesc._burden}) /* {Enum.GetName(typeof(STypeInt), STypeInt.ENCUMB_VAL_INT)} */" + Environment.NewLine;
                             if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_CombatUse) != 0)
-                                intsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeInt.COMBAT_USE_INT}, {parsed.wdesc._combatUse}) /* {Enum.GetName(typeof(STypeInt), STypeInt.COMBAT_USE_INT)} */" + Environment.NewLine;
+                                intsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeInt.COMBAT_USE_INT}, {(int)parsed.wdesc._combatUse}) /* {Enum.GetName(typeof(STypeInt), STypeInt.COMBAT_USE_INT)} */" + Environment.NewLine;
                             if ((parsed.wdesc.header2 & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader2.PWD2_Packed_CooldownDuration) != 0)
                                 floatsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeFloat.COOLDOWN_DURATION_FLOAT}, {parsed.wdesc._cooldown_duration}) /* {Enum.GetName(typeof(STypeFloat), STypeFloat.COOLDOWN_DURATION_FLOAT)} */" + Environment.NewLine;
                             if ((parsed.wdesc.header2 & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader2.PWD2_Packed_CooldownID) != 0)
-                                intsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeInt.SHARED_COOLDOWN_INT}, {parsed.wdesc._cooldown_id}) /* {Enum.GetName(typeof(STypeInt), STypeInt.SHARED_COOLDOWN_INT)} */" + Environment.NewLine;
+                                intsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeInt.SHARED_COOLDOWN_INT}, {(int)parsed.wdesc._cooldown_id}) /* {Enum.GetName(typeof(STypeInt), STypeInt.SHARED_COOLDOWN_INT)} */" + Environment.NewLine;
                             if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_UIEffects) != 0)
-                                intsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeInt.UI_EFFECTS_INT}, {parsed.wdesc._effects}) /* {Enum.GetName(typeof(STypeInt), STypeInt.UI_EFFECTS_INT)} */" + Environment.NewLine;
+                                intsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeInt.UI_EFFECTS_INT}, {(int)parsed.wdesc._effects}) /* {Enum.GetName(typeof(STypeInt), STypeInt.UI_EFFECTS_INT)} */" + Environment.NewLine;
                             if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_ContainersCapacity) != 0)
-                                intsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeInt.CONTAINERS_CAPACITY_INT}, {parsed.wdesc._containersCapacity}) /* {Enum.GetName(typeof(STypeInt), STypeInt.CONTAINERS_CAPACITY_INT)} */" + Environment.NewLine;
+                                if (parsed.wdesc._containersCapacity == 255)
+                                    intsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeInt.CONTAINERS_CAPACITY_INT}, {(int)-1}) /* {Enum.GetName(typeof(STypeInt), STypeInt.CONTAINERS_CAPACITY_INT)} */" + Environment.NewLine;
+                                else
+                                    intsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeInt.CONTAINERS_CAPACITY_INT}, {(int)parsed.wdesc._containersCapacity}) /* {Enum.GetName(typeof(STypeInt), STypeInt.CONTAINERS_CAPACITY_INT)} */" + Environment.NewLine;
                             if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_HookType) != 0)
-                                intsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeInt.HOOK_TYPE_INT}, {(uint)parsed.wdesc._hook_type}) /* {Enum.GetName(typeof(STypeInt), STypeInt.HOOK_TYPE_INT)} */" + Environment.NewLine;
+                                intsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeInt.HOOK_TYPE_INT}, {(int)parsed.wdesc._hook_type}) /* {Enum.GetName(typeof(STypeInt), STypeInt.HOOK_TYPE_INT)} */" + Environment.NewLine;
                             if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_HookItemTypes) != 0)
-                                intsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeInt.HOOK_ITEM_TYPE_INT}, {parsed.wdesc._hook_item_types}) /* {Enum.GetName(typeof(STypeInt), STypeInt.HOOK_ITEM_TYPE_INT)} */" + Environment.NewLine;
+                                intsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeInt.HOOK_ITEM_TYPE_INT}, {(int)parsed.wdesc._hook_item_types}) /* {Enum.GetName(typeof(STypeInt), STypeInt.HOOK_ITEM_TYPE_INT)} */" + Environment.NewLine;
                             if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_ItemsCapacity) != 0)
-                                intsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeInt.ITEMS_CAPACITY_INT}, {parsed.wdesc._itemsCapacity}) /* {Enum.GetName(typeof(STypeInt), STypeInt.ITEMS_CAPACITY_INT)} */" + Environment.NewLine;
+                                if (parsed.wdesc._itemsCapacity == 255)
+                                    intsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeInt.ITEMS_CAPACITY_INT}, {(int)-1}) /* {Enum.GetName(typeof(STypeInt), STypeInt.ITEMS_CAPACITY_INT)} */" + Environment.NewLine;
+                                else
+                                    intsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeInt.ITEMS_CAPACITY_INT}, {(int)parsed.wdesc._itemsCapacity}) /* {Enum.GetName(typeof(STypeInt), STypeInt.ITEMS_CAPACITY_INT)} */" + Environment.NewLine;
                             //if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_Location) != 0)
                             //    intsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeInt.CURRENT_WIELDED_LOCATION_INT}, {parsed.wdesc._location})" + Environment.NewLine;
                             if ((parsed.wdesc.header & unchecked((uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_MaterialType)) != 0)
-                                intsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeInt.MATERIAL_TYPE_INT}, {(uint)parsed.wdesc._material_type}) /* {Enum.GetName(typeof(STypeInt), STypeInt.MATERIAL_TYPE_INT)} */" + Environment.NewLine;
+                                intsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeInt.MATERIAL_TYPE_INT}, {(int)parsed.wdesc._material_type}) /* {Enum.GetName(typeof(STypeInt), STypeInt.MATERIAL_TYPE_INT)} */" + Environment.NewLine;
                             if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_MaxStackSize) != 0)
-                                intsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeInt.MAX_STACK_SIZE_INT}, {parsed.wdesc._maxStackSize}) /* {Enum.GetName(typeof(STypeInt), STypeInt.MAX_STACK_SIZE_INT)} */" + Environment.NewLine;
+                                intsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeInt.MAX_STACK_SIZE_INT}, {(int)parsed.wdesc._maxStackSize}) /* {Enum.GetName(typeof(STypeInt), STypeInt.MAX_STACK_SIZE_INT)} */" + Environment.NewLine;
                             if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_MaxStructure) != 0)
-                                intsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeInt.MAX_STRUCTURE_INT}, {parsed.wdesc._maxStructure}) /* {Enum.GetName(typeof(STypeInt), STypeInt.MAX_STRUCTURE_INT)} */" + Environment.NewLine;
+                                intsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeInt.MAX_STRUCTURE_INT}, {(int)parsed.wdesc._maxStructure}) /* {Enum.GetName(typeof(STypeInt), STypeInt.MAX_STRUCTURE_INT)} */" + Environment.NewLine;
                             if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_RadarEnum) != 0)
-                                intsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeInt.SHOWABLE_ON_RADAR_INT}, {(uint)parsed.wdesc._radar_enum}) /* {Enum.GetName(typeof(STypeInt), STypeInt.SHOWABLE_ON_RADAR_INT)} */" + Environment.NewLine;
+                                intsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeInt.SHOWABLE_ON_RADAR_INT}, {(int)parsed.wdesc._radar_enum}) /* {Enum.GetName(typeof(STypeInt), STypeInt.SHOWABLE_ON_RADAR_INT)} */" + Environment.NewLine;
                             //if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_StackSize) != 0)
                             //    intsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeInt.STACK_SIZE_INT}, {parsed.wdesc._stackSize})" + Environment.NewLine;
                             if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_StackSize) != 0)
-                                intsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeInt.STACK_SIZE_INT}, {parsed.wdesc._stackSize}) /* {Enum.GetName(typeof(STypeInt), STypeInt.STACK_SIZE_INT)} */" + Environment.NewLine;
+                                intsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeInt.STACK_SIZE_INT}, {(int)parsed.wdesc._stackSize}) /* {Enum.GetName(typeof(STypeInt), STypeInt.STACK_SIZE_INT)} */" + Environment.NewLine;
                             //if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_Structure) != 0)
                             //    intsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeInt.STRUCTURE_INT}, {parsed.wdesc._structure})" + Environment.NewLine;
                             if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_Structure) != 0)
-                                intsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeInt.STRUCTURE_INT}, {parsed.wdesc._maxStructure}) /* {Enum.GetName(typeof(STypeInt), STypeInt.STRUCTURE_INT)} */" + Environment.NewLine;
+                                intsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeInt.STRUCTURE_INT}, {(int)parsed.wdesc._maxStructure}) /* {Enum.GetName(typeof(STypeInt), STypeInt.STRUCTURE_INT)} */" + Environment.NewLine;
                             if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_TargetType) != 0)
-                                intsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeInt.TARGET_TYPE_INT}, {(uint)parsed.wdesc._targetType}) /* {Enum.GetName(typeof(STypeInt), STypeInt.TARGET_TYPE_INT)} */" + Environment.NewLine;
+                                intsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeInt.TARGET_TYPE_INT}, {(int)parsed.wdesc._targetType}) /* {Enum.GetName(typeof(STypeInt), STypeInt.TARGET_TYPE_INT)} */" + Environment.NewLine;
                             if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_Useability) != 0)
-                                intsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeInt.ITEM_USEABLE_INT}, {(uint)parsed.wdesc._useability}) /* {Enum.GetName(typeof(STypeInt), STypeInt.ITEM_USEABLE_INT)} */" + Environment.NewLine;
+                                intsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeInt.ITEM_USEABLE_INT}, {(int)parsed.wdesc._useability}) /* {Enum.GetName(typeof(STypeInt), STypeInt.ITEM_USEABLE_INT)} */" + Environment.NewLine;
                             if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_UseRadius) != 0)
                                 floatsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeFloat.USE_RADIUS_FLOAT}, {parsed.wdesc._useRadius}) /* {Enum.GetName(typeof(STypeFloat), STypeFloat.USE_RADIUS_FLOAT)} */" + Environment.NewLine;
                             if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_ValidLocations) != 0)
-                                intsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeInt.LOCATIONS_INT}, {parsed.wdesc._valid_locations}) /* {Enum.GetName(typeof(STypeInt), STypeInt.LOCATIONS_INT)} */" + Environment.NewLine;
+                                intsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeInt.LOCATIONS_INT}, {(int)parsed.wdesc._valid_locations}) /* {Enum.GetName(typeof(STypeInt), STypeInt.LOCATIONS_INT)} */" + Environment.NewLine;
                             if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_Value) != 0)
-                                intsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeInt.VALUE_INT}, {parsed.wdesc._value}) /* {Enum.GetName(typeof(STypeInt), STypeInt.VALUE_INT)} */" + Environment.NewLine;
+                                intsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeInt.VALUE_INT}, {(int)parsed.wdesc._value}) /* {Enum.GetName(typeof(STypeInt), STypeInt.VALUE_INT)} */" + Environment.NewLine;
                             //if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_ContainerID) != 0)
                             //{
                             //    line = $"{sqlCommand} INTO `ace_object_properties_int` (`aceObjectId`, `intPropertyId`, `propertyValue`)" + Environment.NewLine;
@@ -8448,7 +8454,7 @@ namespace aclogview
                             if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_PluralName) != 0)
                                 strsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeString.PLURAL_NAME_STRING}, '{parsed.wdesc._plural_name.m_buffer.Replace("'", "''")}') /* {Enum.GetName(typeof(STypeString), STypeString.PLURAL_NAME_STRING)} */" + Environment.NewLine;
                             if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_Priority) != 0)
-                                intsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeInt.CLOTHING_PRIORITY_INT}, {parsed.wdesc._priority}) /* {Enum.GetName(typeof(STypeInt), STypeInt.CLOTHING_PRIORITY_INT)} */" + Environment.NewLine;
+                                intsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeInt.CLOTHING_PRIORITY_INT}, {(int)parsed.wdesc._priority}) /* {Enum.GetName(typeof(STypeInt), STypeInt.CLOTHING_PRIORITY_INT)} */" + Environment.NewLine;
                             if ((parsed.physicsdesc.bitfield & (uint)PhysicsDesc.PhysicsDescInfo.DEFAULT_SCRIPT_INTENSITY) != 0)
                                 floatsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeFloat.PHYSICS_SCRIPT_INTENSITY_FLOAT}, {parsed.physicsdesc.default_script_intensity}) /* {Enum.GetName(typeof(STypeFloat), STypeFloat.PHYSICS_SCRIPT_INTENSITY_FLOAT)} */" + Environment.NewLine;
                             if ((parsed.physicsdesc.bitfield & (uint)PhysicsDesc.PhysicsDescInfo.ELASTICITY) != 0)
@@ -8463,7 +8469,7 @@ namespace aclogview
                                 //writer.WriteLine(line);
 
                                 //line = $"{sqlCommand} INTO `ace_object_properties_int` (`aceObjectId`, `intPropertyId`, `propertyValue`)" + Environment.NewLine;
-                                intsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeInt.PARENT_LOCATION_INT}, {parsed.physicsdesc.location_id}) /* {Enum.GetName(typeof(STypeInt), STypeInt.PARENT_LOCATION_INT)} */" + Environment.NewLine;
+                                intsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeInt.PARENT_LOCATION_INT}, {(int)parsed.physicsdesc.location_id}) /* {Enum.GetName(typeof(STypeInt), STypeInt.PARENT_LOCATION_INT)} */" + Environment.NewLine;
                                 //line = line.TrimEnd(Environment.NewLine.ToCharArray()) + ";" + Environment.NewLine;
                                 //writer.WriteLine(line);
                             }
