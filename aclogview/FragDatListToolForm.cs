@@ -573,6 +573,7 @@ namespace aclogview
 
                 List<uint> appraisalObjectIds = new List<uint>();
                 Dictionary<string, List<CM_Examine.SetAppraiseInfo>> appraisalObjects = new Dictionary<string, List<CM_Examine.SetAppraiseInfo>>();
+                Dictionary<uint, List<CM_Examine.SetAppraiseInfo>> weenieAppraisalObjects = new Dictionary<uint, List<CM_Examine.SetAppraiseInfo>>();
                 Dictionary<uint, string> appraisalObjectsCatagoryMap = new Dictionary<uint, string>();
                 Dictionary<uint, string> weenieObjectsCatagoryMap = new Dictionary<uint, string>();
                 Dictionary<uint, uint> appraisalObjectToWeenieId = new Dictionary<uint, uint>();
@@ -695,7 +696,8 @@ namespace aclogview
                                     CreateAppraisalObjectsList(parsed,
                                         objectIds, staticObjects,
                                         weenieIds, weenies,
-                                        appraisalObjects, appraisalObjectIds, appraisalObjectsCatagoryMap, appraisalObjectToWeenieId);
+                                        appraisalObjects, appraisalObjectIds, appraisalObjectsCatagoryMap, appraisalObjectToWeenieId,
+                                        weenieAppraisalObjects);
                                 }
 
                                 if (opCode == (uint)PacketOpcode.BOOK_DATA_RESPONSE_EVENT)
@@ -4219,7 +4221,11 @@ namespace aclogview
             }
         }
 
-        private void CreateAppraisalObjectsList(CM_Examine.SetAppraiseInfo parsed, List<uint> objectIds, Dictionary<string, List<CM_Physics.CreateObject>> staticObjects, List<uint> weenieIds, Dictionary<string, List<CM_Physics.CreateObject>> weenies, Dictionary<string, List<CM_Examine.SetAppraiseInfo>> appraisalObjects, List<uint> appraisalObjectIds, Dictionary<uint, string> appraisalObjectsCatagoryMap, Dictionary<uint, uint> appraisalObjectToWeenieId)
+        private void CreateAppraisalObjectsList(CM_Examine.SetAppraiseInfo parsed, List<uint> objectIds, Dictionary<string, List<CM_Physics.CreateObject>> staticObjects, 
+            List<uint> weenieIds, Dictionary<string, List<CM_Physics.CreateObject>> weenies, 
+            Dictionary<string, List<CM_Examine.SetAppraiseInfo>> appraisalObjects, List<uint> appraisalObjectIds, 
+            Dictionary<uint, string> appraisalObjectsCatagoryMap, Dictionary<uint, uint> appraisalObjectToWeenieId,
+            Dictionary<uint, List<CM_Examine.SetAppraiseInfo>> weenieAppraisalObjects)
         {
             try
             {
@@ -4255,34 +4261,79 @@ namespace aclogview
                 // de-dupe based on position and wcid
                 if (addIt) //&& !PositionRecorded(parsed, processedWeeniePositions[parsed.wdesc._wcid], parsed.physicsdesc.pos, margin))
                 {
+                    //if (weenieId > 0)
+                    //{
+                    //    if (!weenieAppraisalObjects.ContainsKey(weenieId))
+                    //        weenieAppraisalObjects.Add(weenieId, new List<CM_Examine.SetAppraiseInfo>());
+
+                    //    weenieAppraisalObjects[weenieId].Add(parsed);
+
+                    //    if (weenieId == 5890)
+                    //    {
+                    //        System.Diagnostics.Debug.WriteLine($"found a hoary mattekar - count {weenieAppraisalObjects[weenieId].Count}");
+                    //    }
+                    //}
+
                     if (!appraisalObjects.ContainsKey(fileToPutItIn))
                         appraisalObjects.Add(fileToPutItIn, new List<CM_Examine.SetAppraiseInfo>());
 
-                    if (appraisalObjectIds.Contains(parsed.i_objid))
-                    {
-                        int i = 0;
-                        for (int ListIndex = 0; ListIndex < appraisalObjects[fileToPutItIn].Count; ListIndex++)
-                        {
-                            if (appraisalObjects[fileToPutItIn][ListIndex].i_objid == parsed.i_objid)
-                            {
-                                i = ListIndex;
-                                break;
-                            }
-                        }
-                        if (appraisalObjects[fileToPutItIn][i].i_prof.success_flag == 0)
-                        {
-                            appraisalObjects[fileToPutItIn].RemoveAt(i);
-                            appraisalObjectIds.Remove(parsed.i_objid);
-                        }
-                        else
-                            return;
-                    }
+                    //if (appraisalObjectIds.Contains(parsed.i_objid))
+                    //{
+                    //    int i = 0;
+                    //    for (int ListIndex = 0; ListIndex < appraisalObjects[fileToPutItIn].Count; ListIndex++)
+                    //    {
+                    //        if (appraisalObjects[fileToPutItIn][ListIndex].i_objid == parsed.i_objid)
+                    //        {
+                    //            i = ListIndex;
+                    //            break;
+                    //        }
+                    //    }
+                    //    if (appraisalObjects[fileToPutItIn][i].i_prof.success_flag == 0)
+                    //    {
+                    //        appraisalObjects[fileToPutItIn].RemoveAt(i);
+                    //        appraisalObjectIds.Remove(parsed.i_objid);
+                    //    }
+                    //    else
+                    //        return;
+                    //}
 
-                    appraisalObjects[fileToPutItIn].Add(parsed);
-                    appraisalObjectIds.Add(parsed.i_objid);
+                    //appraisalObjects[fileToPutItIn].Add(parsed);
+                    //appraisalObjectIds.Add(parsed.i_objid);
 
-                    if (!appraisalObjectIds.Contains(weenieId) && weenieId > 0)
-                    {
+                    //if (!appraisalObjectIds.Contains(weenieId) && weenieId > 0)
+                    //{
+                    //    CM_Examine.SetAppraiseInfo parsedClone;
+
+                    //    parsedClone = new CM_Examine.SetAppraiseInfo();
+                    //    parsedClone.i_objid = weenieId;
+                    //    parsedClone.i_prof = parsed.i_prof;
+
+                    //    //parsedClone.i_objid = weenieId;
+                    //    if (appraisalObjectIds.Contains(parsedClone.i_objid))
+                    //    {
+                    //        int i = 0;
+                    //        for (int ListIndex = 0; ListIndex < appraisalObjects[fileToPutItIn].Count; ListIndex++)
+                    //        {
+                    //            if (appraisalObjects[fileToPutItIn][ListIndex].i_objid == parsedClone.i_objid)
+                    //            {
+                    //                i = ListIndex;
+                    //                break;
+                    //            }
+                    //        }
+                    //        if (appraisalObjects[fileToPutItIn][i].i_prof.success_flag == 0)
+                    //        {
+                    //            appraisalObjects[fileToPutItIn].RemoveAt(i);
+                    //            appraisalObjectIds.Remove(parsedClone.i_objid);
+                    //        }
+                    //        else
+                    //            return;
+                    //    }
+
+                    //    appraisalObjects[fileToPutItIn].Add(parsedClone);
+                    //    appraisalObjectIds.Add(parsedClone.i_objid);
+                    //}
+                    //else
+                    //{
                         CM_Examine.SetAppraiseInfo parsedClone;
 
                         parsedClone = new CM_Examine.SetAppraiseInfo();
@@ -4312,7 +4363,8 @@ namespace aclogview
 
                         appraisalObjects[fileToPutItIn].Add(parsedClone);
                         appraisalObjectIds.Add(parsedClone.i_objid);
-                    }
+                    //}
+
                     totalHits++;
                 }
             }
@@ -4731,6 +4783,9 @@ namespace aclogview
                         string keyFolder = Path.Combine(staticFolder, key);
 
                         string fullFile = Path.Combine(keyFolder, $"{parsed.i_objid}.sql");
+
+                        if (!File.Exists(fullFile))
+                            continue;
 
                         using (FileStream fs = new FileStream(fullFile, FileMode.Append))
                         {
@@ -6728,7 +6783,12 @@ namespace aclogview
                     if (!skip)
                         weeniesTypeTemplate.Add((uint)weenieType, parsed);
                 }
-                
+
+                if (!appraisalObjectsCatagoryMap.ContainsKey(parsed.object_id))
+                    appraisalObjectsCatagoryMap.Add(parsed.object_id, fileToPutItIn);
+                if (!appraisalObjectToWeenieId.ContainsKey(parsed.object_id))
+                    appraisalObjectToWeenieId.Add(parsed.object_id, parsed.wdesc._wcid);
+
                 // de-dupe based on position and wcid
                 if ((addIt && !PositionRecorded(parsed, processedWeeniePositions[parsed.wdesc._wcid], parsed.physicsdesc.pos, margin)) || (addIt && !dedupeWeenies))
                 // if (addIt) //&& !PositionRecorded(parsed, processedWeeniePositions[parsed.wdesc._wcid], parsed.physicsdesc.pos, margin))
