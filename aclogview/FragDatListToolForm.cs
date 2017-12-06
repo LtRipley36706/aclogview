@@ -332,6 +332,15 @@ namespace aclogview
                         aceWorldFrags.Add(new FragDatListFile.FragDatInfo(packetDirection, record.index, record.data));
                     }
 
+                    if (messageCode == (uint)PacketOpcode.Evt_Login__WorldInfo_ID)
+                    {
+                        Interlocked.Increment(ref totalHits);
+
+                        // vendorFrags.Add(new FragDatListFile.FragDatInfo(packetDirection, record.index, record.data));
+
+                        aceWorldFrags.Add(new FragDatListFile.FragDatInfo(packetDirection, record.index, record.data));
+                    }
+
                     if (messageCode == (uint)PacketOpcode.WEENIE_ORDERED_EVENT || messageCode == (uint)PacketOpcode.ORDERED_EVENT) 
                     {
                         uint opCode = 0;
@@ -421,6 +430,15 @@ namespace aclogview
                             Interlocked.Increment(ref totalHits);
 
                             slumlordFrags.Add(new FragDatListFile.FragDatInfo(packetDirection, record.index, record.data));
+
+                            aceWorldFrags.Add(new FragDatListFile.FragDatInfo(packetDirection, record.index, record.data));
+                        }
+
+                        if (opCode == (uint)PacketOpcode.Evt_Login__WorldInfo_ID)
+                        {
+                            Interlocked.Increment(ref totalHits);
+
+                            // vendorFrags.Add(new FragDatListFile.FragDatInfo(packetDirection, record.index, record.data));
 
                             aceWorldFrags.Add(new FragDatListFile.FragDatInfo(packetDirection, record.index, record.data));
                         }
@@ -577,6 +595,8 @@ namespace aclogview
                 Dictionary<uint, string> appraisalObjectsCatagoryMap = new Dictionary<uint, string>();
                 Dictionary<uint, string> weenieObjectsCatagoryMap = new Dictionary<uint, string>();
                 Dictionary<uint, uint> appraisalObjectToWeenieId = new Dictionary<uint, uint>();
+                Dictionary<uint, int> weenieAppraisalObjectsIdx = new Dictionary<uint, int>();
+                Dictionary<uint, uint> weenieAppraisalObjectsSuccess = new Dictionary<uint, uint>();
 
                 Dictionary<uint, uint> staticObjectsWeenieType = new Dictionary<uint, uint>();
                 Dictionary<uint, uint> weeniesWeenieType = new Dictionary<uint, uint>();
@@ -604,6 +624,15 @@ namespace aclogview
                 Dictionary<uint, List<uint>> chestObjectsContainedItems = new Dictionary<uint, List<uint>>();
                 Dictionary<uint, uint> chestObjectsInstances = new Dictionary<uint, uint>();
 
+                string currentWorld = "Unknown";
+                //Dictionary<string, List<uint>> worldObjectIds = new Dictionary<string, List<uint>>();
+                // Dictionary<string, Dictionary<uint, List<uint>>> worldWeenieObjectIds = new Dictionary<string, Dictionary<uint, List<uint>>>();
+                //worldObjectIds.Add(currentWorld, new List<uint>());
+                // worldWeenieObjectIds.Add(currentWorld, new Dictionary<uint, List<uint>>());
+                Dictionary<string, Dictionary<uint, uint>> worldIDQueue = new Dictionary<string, Dictionary<uint, uint>>();
+                Dictionary<uint, uint> idObjectsStatus = new Dictionary<uint, uint>();
+                Dictionary<uint, uint> weenieIdObjectsStatus = new Dictionary<uint, uint>();
+
                 while (true)
                 {
                     if (searchAborted || Disposing || IsDisposed)
@@ -630,9 +659,81 @@ namespace aclogview
 
                             var messageCode = fragDataReader.ReadUInt32();
 
+                            if (messageCode == (uint)PacketOpcode.Evt_Login__WorldInfo_ID)
+                            {
+                                var parsed = CM_Login.WorldInfo.read(fragDataReader);
+
+                                //if (currentWorld != parsed.strWorldName.m_buffer)
+                                //    worldIDQueue.Clear();
+
+                                currentWorld = parsed.strWorldName.m_buffer;
+
+                                if (!worldIDQueue.ContainsKey(currentWorld))
+                                    worldIDQueue.Add(currentWorld, new Dictionary<uint, uint>());
+
+                                //System.Diagnostics.Debug.WriteLine($"Switched currentWorld to {currentWorld}");
+                            }
+
                             if (messageCode == (uint)PacketOpcode.Evt_Physics__CreateObject_ID)
                             {
                                 var parsed = CM_Physics.CreateObject.read(fragDataReader);
+
+                                if (!worldIDQueue[currentWorld].ContainsKey(parsed.object_id))
+                                {
+                                    worldIDQueue[currentWorld].Add(parsed.object_id, parsed.wdesc._wcid);
+
+                                    //worldWeenieObjectIds[currentWorld][parsed.wdesc._wcid].Add(parsed.object_id);
+
+                                    //if (parsed.object_id == 3707680050)
+                                    //{
+                                    //    System.Diagnostics.Debug.WriteLine($"Found {parsed.wdesc._name.m_buffer} ({parsed.object_id}), wcid {parsed.wdesc._wcid}, in {currentWorld}");
+                                    //}
+
+                                    //System.Diagnostics.Debug.WriteLine($"Found {parsed.wdesc._name.m_buffer} ({parsed.object_id}), wcid {parsed.wdesc._wcid}, in {currentWorld}");
+
+                                    //if (parsed.wdesc._wcid == 42717)
+                                    //{
+                                    //    System.Diagnostics.Debug.WriteLine($"Found {parsed.wdesc._name.m_buffer} ({parsed.object_id}), wcid {parsed.wdesc._wcid}, in {currentWorld}, added as a new wcid and objectid");
+                                    //}
+
+                                    //if (parsed.wdesc._wcid == 975)
+                                    //{
+                                    //    System.Diagnostics.Debug.WriteLine($"Found {parsed.wdesc._name.m_buffer} ({parsed.object_id}), wcid {parsed.wdesc._wcid}, in {currentWorld}, added objectid and wcid to id queue");
+                                    //}
+                                }
+                                else
+                                {
+                                    if (worldIDQueue[currentWorld][parsed.object_id] != parsed.wdesc._wcid)
+                                    {
+                                        //worldWeenieObjectIds[currentWorld][parsed.wdesc._wcid].Add(parsed.object_id);
+                                        //if (parsed.wdesc._wcid == 975)
+                                        //{
+                                        //    System.Diagnostics.Debug.WriteLine($"Found {parsed.wdesc._name.m_buffer} ({parsed.object_id}), wcid {parsed.wdesc._wcid}, in {currentWorld}, Already ID queue for {worldIDQueue[currentWorld][parsed.object_id]}, updating wcid.");
+                                        //}
+                                        worldIDQueue[currentWorld][parsed.object_id] = parsed.wdesc._wcid;
+                                        //if (parsed.wdesc._wcid == 42717)
+                                        //{
+                                        //    System.Diagnostics.Debug.WriteLine($"Found {parsed.wdesc._name.m_buffer} ({parsed.object_id}), wcid {parsed.wdesc._wcid}, in {currentWorld}, added as new objectid");
+                                        //}
+                                    }
+                                    else
+                                    {
+                                        //if (parsed.wdesc._wcid == 42717)
+                                        //{
+                                        //    System.Diagnostics.Debug.WriteLine($"Found {parsed.wdesc._name.m_buffer} ({parsed.object_id}), wcid {parsed.wdesc._wcid}, in {currentWorld}, already indexed.");
+                                        //}
+
+                                        //if (parsed.wdesc._wcid == 975)
+                                        //{
+                                        //    System.Diagnostics.Debug.WriteLine($"Found {parsed.wdesc._name.m_buffer} ({parsed.object_id}), wcid {parsed.wdesc._wcid}, in {currentWorld}, already awaiting to be id'd.");
+                                        //}
+                                    }
+                                }
+
+                                //if (parsed.wdesc._wcid == 46601)
+                                //{
+                                //    System.Diagnostics.Debug.WriteLine($"Found {parsed.wdesc._name.m_buffer} ({parsed.object_id}), wcid {parsed.wdesc._wcid}, in {currentWorld}, what is this?");
+                                //}
 
                                 CreateStaticObjectsList(parsed,
                                     objectIds, staticObjects,
@@ -667,27 +768,27 @@ namespace aclogview
                                     opCode = fragDataReader.ReadUInt32();
                                 }
 
-                                if (opCode == (uint)PacketOpcode.Evt_Physics__CreateObject_ID)
-                                {
-                                    var parsed = CM_Physics.CreateObject.read(fragDataReader);
+                                //if (opCode == (uint)PacketOpcode.Evt_Physics__CreateObject_ID)
+                                //{
+                                //    var parsed = CM_Physics.CreateObject.read(fragDataReader);
 
-                                    CreateStaticObjectsList(parsed,
-                                        objectIds, staticObjects,
-                                        outputAsLandblocks, landblockInstances,
-                                        weenieIds, weenies,
-                                        processedWeeniePositions, dedupeWeenies,
-                                        weenieNames,
-                                        appraisalObjectsCatagoryMap, appraisalObjectToWeenieId,
-                                        weenieObjectsCatagoryMap,
-                                        weeniesWeenieType, staticObjectsWeenieType,
-                                        wieldedObjectsParentMap, wieldedObjects,
-                                        inventoryParents, inventoryObjects,
-                                        parentWieldsWeenies,
-                                        weeniesTypeTemplate,
-                                        exportEverything,
-                                        corpseObjectsDroppedItems, corpseObjectsInstances,
-                                        chestObjectsContainedItems, chestObjectsInstances);
-                                }
+                                //    CreateStaticObjectsList(parsed,
+                                //        objectIds, staticObjects,
+                                //        outputAsLandblocks, landblockInstances,
+                                //        weenieIds, weenies,
+                                //        processedWeeniePositions, dedupeWeenies,
+                                //        weenieNames,
+                                //        appraisalObjectsCatagoryMap, appraisalObjectToWeenieId,
+                                //        weenieObjectsCatagoryMap,
+                                //        weeniesWeenieType, staticObjectsWeenieType,
+                                //        wieldedObjectsParentMap, wieldedObjects,
+                                //        inventoryParents, inventoryObjects,
+                                //        parentWieldsWeenies,
+                                //        weeniesTypeTemplate,
+                                //        exportEverything,
+                                //        corpseObjectsDroppedItems, corpseObjectsInstances,
+                                //        chestObjectsContainedItems, chestObjectsInstances);
+                                //}
 
                                 if (opCode == (uint)PacketOpcode.APPRAISAL_INFO_EVENT)
                                 {
@@ -697,7 +798,10 @@ namespace aclogview
                                         objectIds, staticObjects,
                                         weenieIds, weenies,
                                         appraisalObjects, appraisalObjectIds, appraisalObjectsCatagoryMap, appraisalObjectToWeenieId,
-                                        weenieAppraisalObjects);
+                                        weenieAppraisalObjects,
+                                        weenieAppraisalObjectsIdx, weenieAppraisalObjectsSuccess,
+                                        weenieObjectsCatagoryMap,
+                                        currentWorld, worldIDQueue, idObjectsStatus, weenieIdObjectsStatus);
                                 }
 
                                 if (opCode == (uint)PacketOpcode.BOOK_DATA_RESPONSE_EVENT)
@@ -708,7 +812,9 @@ namespace aclogview
                                         objectIds, staticObjects,
                                         weenieIds, weenies,
                                         appraisalObjects, appraisalObjectIds, appraisalObjectsCatagoryMap, appraisalObjectToWeenieId,
-                                        bookObjectIds, bookObjects);
+                                        bookObjectIds, bookObjects,
+                                        weenieObjectsCatagoryMap,
+                                        currentWorld, worldIDQueue);
                                 }
 
                                 if (opCode == (uint)PacketOpcode.BOOK_PAGE_DATA_RESPONSE_EVENT)
@@ -719,7 +825,9 @@ namespace aclogview
                                         objectIds, staticObjects,
                                         weenieIds, weenies,
                                         appraisalObjects, appraisalObjectIds, appraisalObjectsCatagoryMap, appraisalObjectToWeenieId,
-                                        pageObjectIds, pageObjects);
+                                        pageObjectIds, pageObjects,
+                                        weenieObjectsCatagoryMap,
+                                        currentWorld, worldIDQueue);
                                 }
 
                                 if (opCode == (uint)PacketOpcode.VENDOR_INFO_EVENT)
@@ -732,7 +840,9 @@ namespace aclogview
                                         appraisalObjects, appraisalObjectIds, appraisalObjectsCatagoryMap, appraisalObjectToWeenieId,
                                         vendorObjectIds, vendorObjects, vendorSellsWeenies,
                                         weeniesFromVendors,
-                                        weeniesTypeTemplate);
+                                        weeniesTypeTemplate,
+                                        weenieObjectsCatagoryMap,
+                                        currentWorld, worldIDQueue);
                                 }
 
                                 if (opCode == (uint)PacketOpcode.Evt_House__Recv_HouseProfile_ID)
@@ -744,7 +854,9 @@ namespace aclogview
                                         weenieIds, weenies,
                                         appraisalObjects, appraisalObjectIds, appraisalObjectsCatagoryMap, appraisalObjectToWeenieId,
                                         slumlordObjectIds, slumlordObjects,
-                                        weeniesTypeTemplate);
+                                        weeniesTypeTemplate,
+                                        weenieObjectsCatagoryMap,
+                                        currentWorld, worldIDQueue);
                                 }
                             }
                         }
@@ -1726,37 +1838,68 @@ namespace aclogview
                     List<uint> weenieIds, Dictionary<string, List<CM_Physics.CreateObject>> weenies, Dictionary<string, List<CM_Examine.SetAppraiseInfo>> appraisalObjects,
                     List<uint> appraisalObjectIds, Dictionary<uint, string> appraisalObjectsCatagoryMap, Dictionary<uint, uint> appraisalObjectToWeenieId,
                     List<uint> slumlordObjectIds, Dictionary<string, Dictionary<uint, CM_House.HouseProfile>> slumlordObjects, 
-                    Dictionary<uint, CM_Physics.CreateObject> weeniesTypeTemplate)
+                    Dictionary<uint, CM_Physics.CreateObject> weeniesTypeTemplate,
+                    Dictionary<uint, string> weenieObjectsCatagoryMap,
+                    string currentWorld, Dictionary<string, Dictionary<uint, uint>> worldIDQueue)
         {
             try
             {
                 uint weenieId = 0;
-                bool foundInObjectIds = false;
-                bool foundInWeenieIds = false;
-                foundInObjectIds = objectIds.Contains(parsed.lord);
-                appraisalObjectToWeenieId.TryGetValue(parsed.lord, out weenieId);
-                foundInWeenieIds = weenieIds.Contains(weenieId);
+                //bool foundInObjectIds = false;
+                //bool foundInWeenieIds = false;
+                //foundInObjectIds = objectIds.Contains(parsed.lord);
+                //appraisalObjectToWeenieId.TryGetValue(parsed.lord, out weenieId);
+                //foundInWeenieIds = weenieIds.Contains(weenieId);
 
-                if (!foundInObjectIds && !(weenieId > 0))
-                    return;
+                //if (!foundInObjectIds && !(weenieId > 0))
+                //    return;
 
-                bool addIt = true;
+                bool addIt = false;
                 //bool addWeenie = false;
                 string fileToPutItIn = "HouseData";
 
 
-                appraisalObjectsCatagoryMap.TryGetValue(parsed.lord, out fileToPutItIn);
+                //appraisalObjectsCatagoryMap.TryGetValue(parsed.lord, out fileToPutItIn);
+
+                if (worldIDQueue[currentWorld].ContainsKey(parsed.lord))
+                {
+                    // var wcid = worldIDQueue[currentWorld][parsed.i_objid];
+                    //if (wcid == 42717)
+                    //{
+                    //    System.Diagnostics.Debug.WriteLine($"found {parsed.i_objid} of {weenieId} in {currentWorld} - {parsed.i_prof.header} : {parsed.i_prof.success_flag}");
+                    //    addIt = true;
+                    //}
+                    //if (wcid == weenieId)
+                    //    addIt = true;
+                    weenieId = worldIDQueue[currentWorld][parsed.lord];
+                    addIt = true;
+                    //if (weenieId == 25500)
+                    //{
+                    //    System.Diagnostics.Debug.WriteLine($"found {parsed.i_objid} of {weenieId} in {currentWorld} - {parsed.i_prof.header} : {parsed.i_prof.success_flag}");
+                    //    if (parsed.i_prof.success_flag == 1)
+                    //    {
+                    //        System.Diagnostics.Debug.WriteLine("Sucess");
+                    //    }
+                    //}
+                }
+                else
+                {
+                    //System.Diagnostics.Debug.WriteLine($"encountered {parsed.i_objid} which is not in {currentWorld} - {parsed.i_prof.header} : {parsed.i_prof.success_flag}");
+                    return;
+                }
+
+                weenieObjectsCatagoryMap.TryGetValue(weenieId, out fileToPutItIn);
 
                 if (fileToPutItIn == null)
                     fileToPutItIn = "0-HouseData";
 
-                if (!foundInObjectIds && weenieId > 0)
-                {
-                    if (!foundInWeenieIds)
-                        return;
+                //if (!foundInObjectIds && weenieId > 0)
+                //{
+                //    if (!foundInWeenieIds)
+                //        return;
 
-                    parsed.lord = weenieId;
-                }
+                //    parsed.lord = weenieId;
+                //}
 
                 if (slumlordObjectIds.Contains(weenieId))
                     return;
@@ -1835,37 +1978,90 @@ namespace aclogview
             List<uint> appraisalObjectIds, Dictionary<uint, string> appraisalObjectsCatagoryMap, Dictionary<uint, uint> appraisalObjectToWeenieId,
             List<uint> vendorObjectIds, Dictionary<string, Dictionary<uint, CM_Vendor.gmVendorUI>> vendorObjects, Dictionary<uint, List<uint>> vendorSellsWeenies,
             Dictionary<uint, CM_Physics.CreateObject> weeniesFromVendors,
-            Dictionary<uint, CM_Physics.CreateObject> weeniesTypeTemplate)
+            Dictionary<uint, CM_Physics.CreateObject> weeniesTypeTemplate,
+            Dictionary<uint, string> weenieObjectsCatagoryMap,
+            string currentWorld, Dictionary<string, Dictionary<uint, uint>> worldIDQueue)
         {
             try
             {
                 uint weenieId = 0;
-                bool foundInObjectIds = false;
-                bool foundInWeenieIds = false;
-                foundInObjectIds = objectIds.Contains(parsed.shopVendorID);
-                appraisalObjectToWeenieId.TryGetValue(parsed.shopVendorID, out weenieId);
-                foundInWeenieIds = weenieIds.Contains(weenieId);
+                //bool foundInObjectIds = false;
+                //bool foundInWeenieIds = false;
+                //foundInObjectIds = objectIds.Contains(parsed.shopVendorID);
+                //appraisalObjectToWeenieId.TryGetValue(parsed.shopVendorID, out weenieId);
+                //foundInWeenieIds = weenieIds.Contains(weenieId);
 
-                if (!foundInObjectIds && !(weenieId > 0))
-                    return;
+                //if (!foundInObjectIds && !(weenieId > 0))
+                //    return;
 
-                bool addIt = true;
+                bool addIt = false;
                 //bool addWeenie = false;
                 string fileToPutItIn = "VendorData";
 
+                //if (parsed.shopVendorID == 2037886997)
+                //{
+                //    System.Diagnostics.Debug.WriteLine($"found {parsed.shopVendorID} of {weenieId} in {currentWorld}");
+                //}
 
-                appraisalObjectsCatagoryMap.TryGetValue(parsed.shopVendorID, out fileToPutItIn);
+                //appraisalObjectsCatagoryMap.TryGetValue(parsed.shopVendorID, out fileToPutItIn);
+
+                if (worldIDQueue[currentWorld].ContainsKey(parsed.shopVendorID))
+                {
+                    // var wcid = worldIDQueue[currentWorld][parsed.i_objid];
+                    //if (wcid == 42717)
+                    //{
+                    //    System.Diagnostics.Debug.WriteLine($"found {parsed.i_objid} of {weenieId} in {currentWorld} - {parsed.i_prof.header} : {parsed.i_prof.success_flag}");
+                    //    addIt = true;
+                    //}
+                    //if (wcid == weenieId)
+                    //    addIt = true;
+                    weenieId = worldIDQueue[currentWorld][parsed.shopVendorID];
+                    addIt = true;
+                    //if (weenieId == 975)
+                    //{
+                    //    System.Diagnostics.Debug.WriteLine($"found {parsed.shopVendorID} of {weenieId} in {currentWorld}");
+                    //    //if (parsed.i_prof.success_flag == 1)
+                    //    //{
+                    //    //    System.Diagnostics.Debug.WriteLine("Sucess");
+                    //    //}
+                    //}
+                }
+                else
+                {
+                    //System.Diagnostics.Debug.WriteLine($"encountered {parsed.i_objid} which is not in {currentWorld} - {parsed.i_prof.header} : {parsed.i_prof.success_flag}");
+                    foreach (var world in worldIDQueue)
+                    {
+                        if (world.Value.ContainsKey(parsed.shopVendorID))
+                        {
+                            weenieId = world.Value[parsed.shopVendorID];
+                            addIt = true;
+                            //if (weenieId == 975)
+                            //{
+                            //    System.Diagnostics.Debug.WriteLine($"found {parsed.shopVendorID} of {weenieId} in {world.Key}, which is not in {currentWorld}");
+                            //    //if (parsed.i_prof.success_flag == 1)
+                            //    //{
+                            //    //    System.Diagnostics.Debug.WriteLine("Sucess");
+                            //    //}
+                            //}
+                            break;
+                        }
+                    }
+                    if (!addIt)
+                        return;
+                }
+
+                weenieObjectsCatagoryMap.TryGetValue(weenieId, out fileToPutItIn);
 
                 if (fileToPutItIn == null)
                     fileToPutItIn = "0-VendorData";
 
-                if (!foundInObjectIds && weenieId > 0)
-                {
-                    if (!foundInWeenieIds)
-                        return;
+                //if (!foundInObjectIds && weenieId > 0)
+                //{
+                //    if (!foundInWeenieIds)
+                //        return;
 
-                    parsed.shopVendorID = weenieId;
-                }
+                //    parsed.shopVendorID = weenieId;
+                //}
 
                 // de-dupe based on position and wcid
                 if (addIt) //&& !PositionRecorded(parsed, processedWeeniePositions[parsed.wdesc._wcid], parsed.physicsdesc.pos, margin))
@@ -1875,13 +2071,13 @@ namespace aclogview
                         vendorObjects.Add(fileToPutItIn, new Dictionary<uint, CM_Vendor.gmVendorUI>());
                     }
 
-                    if (vendorObjectIds.Contains(parsed.shopVendorID))
+                    if (vendorObjectIds.Contains(weenieId))
                     {
                         return;
                     }
 
-                    vendorObjects[fileToPutItIn].Add(parsed.shopVendorID, parsed);
-                    vendorObjectIds.Add(parsed.shopVendorID);
+                    //vendorObjects[fileToPutItIn].Add(parsed.shopVendorID, parsed);
+                    //vendorObjectIds.Add(parsed.shopVendorID);
 
                     foreach (var item in parsed.shopItemProfileList.list)
                     {
@@ -1907,8 +2103,8 @@ namespace aclogview
                         }
                     }
 
-                    if (!vendorObjectIds.Contains(weenieId) && weenieId > 0)
-                    {
+                    //if (!vendorObjectIds.Contains(weenieId) && weenieId > 0)
+                    //{
                         CM_Vendor.gmVendorUI parsedClone;
 
                         parsedClone = new CM_Vendor.gmVendorUI();
@@ -1924,7 +2120,7 @@ namespace aclogview
 
                         vendorObjects[fileToPutItIn].Add(parsedClone.shopVendorID, parsedClone);
                         vendorObjectIds.Add(parsedClone.shopVendorID);
-                    }
+                    //}
                     totalHits++;
                 }
             }
@@ -3343,37 +3539,68 @@ namespace aclogview
             List<uint> weenieIds, Dictionary<string, List<CM_Physics.CreateObject>> weenies, Dictionary<string, List<CM_Examine.SetAppraiseInfo>> appraisalObjects,
             List<uint> appraisalObjectIds, Dictionary<uint, string> appraisalObjectsCatagoryMap, Dictionary<uint, uint> appraisalObjectToWeenieId,
             //                           fileToPutItIn             bookid             pagedata
-            List<uint> bookObjectIds, Dictionary<string, Dictionary<uint, CM_Writing.PageDataList>> bookObjects)
+            List<uint> bookObjectIds, Dictionary<string, Dictionary<uint, CM_Writing.PageDataList>> bookObjects,
+            Dictionary<uint, string> weenieObjectsCatagoryMap,
+            string currentWorld, Dictionary<string, Dictionary<uint, uint>> worldIDQueue)
         {
             try
             {
                 uint weenieId = 0;
-                bool foundInObjectIds = false;
-                bool foundInWeenieIds = false;
-                foundInObjectIds = objectIds.Contains(parsed.i_bookID);
-                appraisalObjectToWeenieId.TryGetValue(parsed.i_bookID, out weenieId);
-                foundInWeenieIds = weenieIds.Contains(weenieId);
+                //bool foundInObjectIds = false;
+                //bool foundInWeenieIds = false;
+                //foundInObjectIds = objectIds.Contains(parsed.i_bookID);
+                //appraisalObjectToWeenieId.TryGetValue(parsed.i_bookID, out weenieId);
+                //foundInWeenieIds = weenieIds.Contains(weenieId);
 
-                if (!foundInObjectIds && !(weenieId > 0))
-                    return;
+                //if (!foundInObjectIds && !(weenieId > 0))
+                //    return;
 
-                bool addIt = true;
+                bool addIt = false;
                 //bool addWeenie = false;
                 string fileToPutItIn = "BookData";
 
 
-                appraisalObjectsCatagoryMap.TryGetValue(parsed.i_bookID, out fileToPutItIn);
+                //appraisalObjectsCatagoryMap.TryGetValue(parsed.i_bookID, out fileToPutItIn);
+
+                if (worldIDQueue[currentWorld].ContainsKey(parsed.i_bookID))
+                {
+                    // var wcid = worldIDQueue[currentWorld][parsed.i_objid];
+                    //if (wcid == 42717)
+                    //{
+                    //    System.Diagnostics.Debug.WriteLine($"found {parsed.i_objid} of {weenieId} in {currentWorld} - {parsed.i_prof.header} : {parsed.i_prof.success_flag}");
+                    //    addIt = true;
+                    //}
+                    //if (wcid == weenieId)
+                    //    addIt = true;
+                    weenieId = worldIDQueue[currentWorld][parsed.i_bookID];
+                    addIt = true;
+                    //if (weenieId == 25500)
+                    //{
+                    //    System.Diagnostics.Debug.WriteLine($"found {parsed.i_objid} of {weenieId} in {currentWorld} - {parsed.i_prof.header} : {parsed.i_prof.success_flag}");
+                    //    if (parsed.i_prof.success_flag == 1)
+                    //    {
+                    //        System.Diagnostics.Debug.WriteLine("Sucess");
+                    //    }
+                    //}
+                }
+                else
+                {
+                    //System.Diagnostics.Debug.WriteLine($"encountered {parsed.i_objid} which is not in {currentWorld} - {parsed.i_prof.header} : {parsed.i_prof.success_flag}");
+                    return;
+                }
+
+                weenieObjectsCatagoryMap.TryGetValue(weenieId, out fileToPutItIn);
 
                 if (fileToPutItIn == null)
                     fileToPutItIn = "0-BookData";
 
-                if (!foundInObjectIds && weenieId > 0)
-                {
-                    if (!foundInWeenieIds)
-                        return;
+                //if (!foundInObjectIds && weenieId > 0)
+                //{
+                //    if (!foundInWeenieIds)
+                //        return;
 
-                    parsed.i_bookID = weenieId;
-                }
+                //    parsed.i_bookID = weenieId;
+                //}
 
                 // de-dupe based on position and wcid
                 if (addIt) //&& !PositionRecorded(parsed, processedWeeniePositions[parsed.wdesc._wcid], parsed.physicsdesc.pos, margin))
@@ -3383,18 +3610,18 @@ namespace aclogview
                         bookObjects.Add(fileToPutItIn, new Dictionary<uint, CM_Writing.PageDataList>());
                     }
                     
-                    if (bookObjectIds.Contains(parsed.i_bookID))
+                    if (bookObjectIds.Contains(weenieId))
                     {
                         return;
                     }
 
-                    bookObjects[fileToPutItIn].Add(parsed.i_bookID, parsed);
-                    bookObjectIds.Add(parsed.i_bookID);
+                    //bookObjects[fileToPutItIn].Add(parsed.i_bookID, parsed);
+                    //bookObjectIds.Add(parsed.i_bookID);
 
-                    if (bookObjectIds.Contains(weenieId) && weenieId > 0)
-                    {
-                        if (!bookObjects[fileToPutItIn].Keys.Contains(parsed.i_bookID))
-                        {
+                    //if (bookObjectIds.Contains(weenieId) && weenieId > 0)
+                    //{
+                    //    if (!bookObjects[fileToPutItIn].Keys.Contains(parsed.i_bookID))
+                    //    {
                             CM_Writing.PageDataList parsedClone;
 
                             parsedClone = new CM_Writing.PageDataList();
@@ -3403,37 +3630,38 @@ namespace aclogview
                             parsedClone.authorId = parsed.authorId;
                             parsedClone.authorName = parsed.authorName;
                             parsedClone.inscription = parsed.inscription;
+                            parsedClone.maxNumCharsPerPage = parsed.maxNumCharsPerPage;
                             parsedClone.i_maxNumPages = parsed.i_maxNumPages;
                             parsedClone.numPages = parsed.numPages;
                             parsedClone.pageData = parsed.pageData;
 
                             bookObjects[fileToPutItIn].Add(parsedClone.i_bookID, parsedClone);
                             bookObjectIds.Add(parsedClone.i_bookID);
-                        }
-                    }
+                    //    }
+                    //}
 
-                    if (!bookObjectIds.Contains(weenieId) && weenieId > 0)
-                    {
-                        CM_Writing.PageDataList parsedClone;
+                    //if (!bookObjectIds.Contains(weenieId) && weenieId > 0)
+                    //{
+                    //    CM_Writing.PageDataList parsedClone;
 
-                        parsedClone = new CM_Writing.PageDataList();
-                        parsedClone.i_bookID = weenieId;
+                    //    parsedClone = new CM_Writing.PageDataList();
+                    //    parsedClone.i_bookID = weenieId;
 
-                        parsedClone.authorId = parsed.authorId;
-                        parsedClone.authorName = parsed.authorName;
-                        parsedClone.inscription = parsed.inscription;
-                        parsedClone.i_maxNumPages = parsed.i_maxNumPages;
-                        parsedClone.numPages = parsed.numPages;
-                        parsedClone.pageData = parsed.pageData;
+                    //    parsedClone.authorId = parsed.authorId;
+                    //    parsedClone.authorName = parsed.authorName;
+                    //    parsedClone.inscription = parsed.inscription;
+                    //    parsedClone.i_maxNumPages = parsed.i_maxNumPages;
+                    //    parsedClone.numPages = parsed.numPages;
+                    //    parsedClone.pageData = parsed.pageData;
 
-                        if (!bookObjects.ContainsKey(fileToPutItIn))
-                        {
-                            bookObjects.Add(fileToPutItIn, new Dictionary<uint, CM_Writing.PageDataList>());
-                        }
+                    //    if (!bookObjects.ContainsKey(fileToPutItIn))
+                    //    {
+                    //        bookObjects.Add(fileToPutItIn, new Dictionary<uint, CM_Writing.PageDataList>());
+                    //    }
 
-                        bookObjects[fileToPutItIn].Add(parsedClone.i_bookID, parsedClone);
-                        bookObjectIds.Add(parsedClone.i_bookID);
-                    }
+                    //    bookObjects[fileToPutItIn].Add(parsedClone.i_bookID, parsedClone);
+                    //    bookObjectIds.Add(parsedClone.i_bookID);
+                    //}
                     totalHits++;
                 }
             }
@@ -3883,37 +4111,68 @@ namespace aclogview
             List<uint> weenieIds, Dictionary<string, List<CM_Physics.CreateObject>> weenies, Dictionary<string, List<CM_Examine.SetAppraiseInfo>> appraisalObjects, 
             List<uint> appraisalObjectIds, Dictionary<uint, string> appraisalObjectsCatagoryMap, Dictionary<uint, uint> appraisalObjectToWeenieId,
             //                                   fileToPutItIn      bookid           pageid         pagedata
-            List<uint> bookObjectIds, Dictionary<string, Dictionary<uint, Dictionary<uint, CM_Writing.PageData>>> pageObjects)
+            List<uint> bookObjectIds, Dictionary<string, Dictionary<uint, Dictionary<uint, CM_Writing.PageData>>> pageObjects,
+            Dictionary<uint, string> weenieObjectsCatagoryMap,
+            string currentWorld, Dictionary<string, Dictionary<uint, uint>> worldIDQueue)
         {
             try
             {
                 uint weenieId = 0;
-                bool foundInObjectIds = false;
-                bool foundInWeenieIds = false;
-                foundInObjectIds = objectIds.Contains(parsed.bookID);
-                appraisalObjectToWeenieId.TryGetValue(parsed.bookID, out weenieId);
-                foundInWeenieIds = weenieIds.Contains(weenieId);
+                //bool foundInObjectIds = false;
+                //bool foundInWeenieIds = false;
+                //foundInObjectIds = objectIds.Contains(parsed.bookID);
+                //appraisalObjectToWeenieId.TryGetValue(parsed.bookID, out weenieId);
+                //foundInWeenieIds = weenieIds.Contains(weenieId);
 
-                if (!foundInObjectIds && !(weenieId > 0))
-                    return;
+                //if (!foundInObjectIds && !(weenieId > 0))
+                //    return;
 
-                bool addIt = true;
+                bool addIt = false;
                 //bool addWeenie = false;
                 string fileToPutItIn = "PageData";
 
 
-                appraisalObjectsCatagoryMap.TryGetValue(parsed.bookID, out fileToPutItIn);
+                //appraisalObjectsCatagoryMap.TryGetValue(parsed.bookID, out fileToPutItIn);
+
+                if (worldIDQueue[currentWorld].ContainsKey(parsed.bookID))
+                {
+                    // var wcid = worldIDQueue[currentWorld][parsed.i_objid];
+                    //if (wcid == 42717)
+                    //{
+                    //    System.Diagnostics.Debug.WriteLine($"found {parsed.i_objid} of {weenieId} in {currentWorld} - {parsed.i_prof.header} : {parsed.i_prof.success_flag}");
+                    //    addIt = true;
+                    //}
+                    //if (wcid == weenieId)
+                    //    addIt = true;
+                    weenieId = worldIDQueue[currentWorld][parsed.bookID];
+                    addIt = true;
+                    //if (weenieId == 25500)
+                    //{
+                    //    System.Diagnostics.Debug.WriteLine($"found {parsed.i_objid} of {weenieId} in {currentWorld} - {parsed.i_prof.header} : {parsed.i_prof.success_flag}");
+                    //    if (parsed.i_prof.success_flag == 1)
+                    //    {
+                    //        System.Diagnostics.Debug.WriteLine("Sucess");
+                    //    }
+                    //}
+                }
+                else
+                {
+                    //System.Diagnostics.Debug.WriteLine($"encountered {parsed.i_objid} which is not in {currentWorld} - {parsed.i_prof.header} : {parsed.i_prof.success_flag}");
+                    return;
+                }
+
+                weenieObjectsCatagoryMap.TryGetValue(weenieId, out fileToPutItIn);
 
                 if (fileToPutItIn == null)
                     fileToPutItIn = "0-PageData";
 
-                if (!foundInObjectIds && weenieId > 0)
-                {
-                    if (!foundInWeenieIds)
-                        return;
+                //if (!foundInObjectIds && weenieId > 0)
+                //{
+                //    if (!foundInWeenieIds)
+                //        return;
 
-                    parsed.bookID = weenieId;
-                }
+                //    parsed.bookID = weenieId;
+                //}
 
                 // de-dupe based on position and wcid
                 if (addIt) //&& !PositionRecorded(parsed, processedWeeniePositions[parsed.wdesc._wcid], parsed.physicsdesc.pos, margin))
@@ -3923,24 +4182,24 @@ namespace aclogview
                         pageObjects.Add(fileToPutItIn, new Dictionary<uint, Dictionary<uint, CM_Writing.PageData>>());
                     }
 
-                    if (!pageObjects[fileToPutItIn].ContainsKey(parsed.bookID))
+                    if (!pageObjects[fileToPutItIn].ContainsKey(weenieId))
                     {
-                        pageObjects[fileToPutItIn].Add(parsed.bookID, new Dictionary<uint, CM_Writing.PageData>());
+                        pageObjects[fileToPutItIn].Add(weenieId, new Dictionary<uint, CM_Writing.PageData>());
                     }
 
-                    if (bookObjectIds.Contains(parsed.bookID))
+                    if (bookObjectIds.Contains(weenieId))
                     {
-                        if (pageObjects[fileToPutItIn][parsed.bookID].ContainsKey(parsed.page))
+                        if (pageObjects[fileToPutItIn][weenieId].ContainsKey(parsed.page))
                             return;
                     }
 
-                    pageObjects[fileToPutItIn][parsed.bookID].Add(parsed.page, parsed);
-                    bookObjectIds.Add(parsed.bookID);
+                    //pageObjects[fileToPutItIn][parsed.bookID].Add(parsed.page, parsed);
+                    //bookObjectIds.Add(parsed.bookID);
 
-                    if (bookObjectIds.Contains(weenieId) && weenieId > 0)
-                    {
-                        if (!pageObjects[fileToPutItIn][weenieId].Keys.Contains(parsed.page))
-                        {
+                    //if (bookObjectIds.Contains(weenieId) && weenieId > 0)
+                    //{
+                    //    if (!pageObjects[fileToPutItIn][weenieId].Keys.Contains(parsed.page))
+                    //    {
                             CM_Writing.PageData parsedClone;
 
                             parsedClone = new CM_Writing.PageData();
@@ -3957,38 +4216,38 @@ namespace aclogview
 
                             pageObjects[fileToPutItIn][parsedClone.bookID].Add(parsedClone.page, parsedClone);
                             bookObjectIds.Add(parsedClone.bookID);
-                        }
-                    }
+                    //    }
+                    //}
 
-                    if (!bookObjectIds.Contains(weenieId) && weenieId > 0)
-                    {
-                        CM_Writing.PageData parsedClone;
+                    //if (!bookObjectIds.Contains(weenieId) && weenieId > 0)
+                    //{
+                    //    CM_Writing.PageData parsedClone;
 
-                        parsedClone = new CM_Writing.PageData();
-                        parsedClone.bookID = weenieId;
+                    //    parsedClone = new CM_Writing.PageData();
+                    //    parsedClone.bookID = weenieId;
 
-                        parsedClone.authorAccount = parsed.authorAccount;
-                        parsedClone.authorID = parsed.authorID;
-                        parsedClone.authorName = parsed.authorName;
-                        parsedClone.flags = parsed.flags;
-                        parsedClone.ignoreAuthor = parsed.ignoreAuthor;
-                        parsedClone.page = parsed.page;
-                        parsedClone.pageText = parsed.pageText;
-                        parsedClone.textIncluded = parsed.textIncluded;
+                    //    parsedClone.authorAccount = parsed.authorAccount;
+                    //    parsedClone.authorID = parsed.authorID;
+                    //    parsedClone.authorName = parsed.authorName;
+                    //    parsedClone.flags = parsed.flags;
+                    //    parsedClone.ignoreAuthor = parsed.ignoreAuthor;
+                    //    parsedClone.page = parsed.page;
+                    //    parsedClone.pageText = parsed.pageText;
+                    //    parsedClone.textIncluded = parsed.textIncluded;
 
-                        if (!pageObjects.ContainsKey(fileToPutItIn))
-                        {
-                            pageObjects.Add(fileToPutItIn, new Dictionary<uint, Dictionary<uint, CM_Writing.PageData>>());
-                        }
+                    //    if (!pageObjects.ContainsKey(fileToPutItIn))
+                    //    {
+                    //        pageObjects.Add(fileToPutItIn, new Dictionary<uint, Dictionary<uint, CM_Writing.PageData>>());
+                    //    }
 
-                        if (!pageObjects[fileToPutItIn].ContainsKey(parsedClone.bookID))
-                        {
-                            pageObjects[fileToPutItIn].Add(parsedClone.bookID, new Dictionary<uint, CM_Writing.PageData>());
-                        }
+                    //    if (!pageObjects[fileToPutItIn].ContainsKey(parsedClone.bookID))
+                    //    {
+                    //        pageObjects[fileToPutItIn].Add(parsedClone.bookID, new Dictionary<uint, CM_Writing.PageData>());
+                    //    }
 
-                        pageObjects[fileToPutItIn][parsedClone.bookID].Add(parsedClone.page, parsedClone);
-                        bookObjectIds.Add(parsedClone.bookID);
-                    }
+                    //    pageObjects[fileToPutItIn][parsedClone.bookID].Add(parsedClone.page, parsedClone);
+                    //    bookObjectIds.Add(parsedClone.bookID);
+                    //}
                     totalHits++;
                 }
             }
@@ -4225,38 +4484,109 @@ namespace aclogview
             List<uint> weenieIds, Dictionary<string, List<CM_Physics.CreateObject>> weenies, 
             Dictionary<string, List<CM_Examine.SetAppraiseInfo>> appraisalObjects, List<uint> appraisalObjectIds, 
             Dictionary<uint, string> appraisalObjectsCatagoryMap, Dictionary<uint, uint> appraisalObjectToWeenieId,
-            Dictionary<uint, List<CM_Examine.SetAppraiseInfo>> weenieAppraisalObjects)
+            Dictionary<uint, List<CM_Examine.SetAppraiseInfo>> weenieAppraisalObjects,
+            Dictionary<uint, int> weenieAppraisalObjectsIdx, Dictionary<uint, uint> weenieAppraisalObjectsSuccess,
+            Dictionary<uint, string> weenieObjectsCatagoryMap,
+            string currentWorld, Dictionary<string, Dictionary<uint, uint>> worldIDQueue, Dictionary<uint, uint> idObjectsStatus, Dictionary<uint, uint> weenieIdObjectsStatus)
         {
             try
             {
                 uint weenieId = 0;
-                bool foundInObjectIds = false;
-                bool foundInWeenieIds = false;
-                foundInObjectIds = objectIds.Contains(parsed.i_objid);
-                appraisalObjectToWeenieId.TryGetValue(parsed.i_objid, out weenieId);
-                foundInWeenieIds = weenieIds.Contains(weenieId);
+                //bool foundInObjectIds = false;
+                //bool foundInWeenieIds = false;
+                //foundInObjectIds = objectIds.Contains(parsed.i_objid);
+                //appraisalObjectToWeenieId.TryGetValue(parsed.i_objid, out weenieId);
+                //foundInWeenieIds = weenieIds.Contains(weenieId);
 
-                if (!foundInObjectIds && !(weenieId > 0))
-                    return;
+                //if (!foundInObjectIds && !(weenieId > 0))
+                //    return;
 
-                bool addIt = true;
+                bool addIt = false;
                 //bool addWeenie = false;
                 string fileToPutItIn = "AssessmentData";
                 //string weeniefileToPutItIn = "OtherWeenies";
                 //float margin = 0.02f;
 
-                appraisalObjectsCatagoryMap.TryGetValue(parsed.i_objid, out fileToPutItIn);
+                //appraisalObjectsCatagoryMap.TryGetValue(parsed.i_objid, out fileToPutItIn);
+                //weenieObjectsCatagoryMap.TryGetValue(weenieId, out fileToPutItIn);
+
+                //if (fileToPutItIn == null)
+                //    fileToPutItIn = "0-AssessmentData";
+
+                //if (!foundInObjectIds && weenieId > 0)
+                //{
+                //    if (!foundInWeenieIds)
+                //        return;
+
+                //    // parsed.i_objid = weenieId;
+                //}
+
+                //if (worldWeenieObjectIds[currentWorld].ContainsKey(42717))
+                //{
+                //    var list = worldWeenieObjectIds[currentWorld][42717];                    
+                //    if (worldWeenieObjectIds[currentWorld][42717].Contains(parsed.i_objid))
+                //    {
+                //        System.Diagnostics.Debug.WriteLine($"found {parsed.i_objid} of {weenieId} in {currentWorld} - {parsed.i_prof.header} : {parsed.i_prof.success_flag}");
+                //    }
+                //}
+
+                if (worldIDQueue[currentWorld].ContainsKey(parsed.i_objid))
+                {
+                    // var wcid = worldIDQueue[currentWorld][parsed.i_objid];
+                    //if (wcid == 42717)
+                    //{
+                    //    System.Diagnostics.Debug.WriteLine($"found {parsed.i_objid} of {weenieId} in {currentWorld} - {parsed.i_prof.header} : {parsed.i_prof.success_flag}");
+                    //    addIt = true;
+                    //}
+                    //if (wcid == weenieId)
+                    //    addIt = true;
+                    weenieId = worldIDQueue[currentWorld][parsed.i_objid];
+                    addIt = true;
+                    //if (weenieId == 25500)
+                    //{
+                    //    System.Diagnostics.Debug.WriteLine($"found {parsed.i_objid} of {weenieId} in {currentWorld} - {parsed.i_prof.header} : {parsed.i_prof.success_flag}");
+                    //    if (parsed.i_prof.success_flag == 1)
+                    //    {
+                    //        System.Diagnostics.Debug.WriteLine("Sucess");
+                    //    }
+                    //}
+                }
+                else
+                {
+                    //System.Diagnostics.Debug.WriteLine($"encountered {parsed.i_objid} which is not in {currentWorld} - {parsed.i_prof.header} : {parsed.i_prof.success_flag}");
+                    return;
+                }
+
+                weenieObjectsCatagoryMap.TryGetValue(weenieId, out fileToPutItIn);
 
                 if (fileToPutItIn == null)
                     fileToPutItIn = "0-AssessmentData";
 
-                if (!foundInObjectIds && weenieId > 0)
+                switch (fileToPutItIn)
                 {
-                    if (!foundInWeenieIds)
+                    case "ProjectileSpellObjects":
                         return;
-
-                    // parsed.i_objid = weenieId;
+                    case "Players":
+                        //if (!foundInObjectIds)
+                            //return;
+                        break;
+                    default:
+                        // Do nothing?
+                        break;
                 }
+
+                //if (fileToPutItIn== "MeleeWeapons")
+                //{
+                //    System.Diagnostics.Debug.WriteLine($"found {parsed.i_objid} of {weenieId} in {currentWorld} - {parsed.i_prof.header} : {parsed.i_prof.success_flag}");
+                //    if (weenieId == 25500)
+                //    {
+                //        System.Diagnostics.Debug.WriteLine($"found {parsed.i_objid} of {weenieId} in {currentWorld} - {parsed.i_prof.header} : {parsed.i_prof.success_flag}");
+                //        if (parsed.i_prof.success_flag == 1)
+                //        {
+                //            System.Diagnostics.Debug.WriteLine($"Success flag found..  {parsed.i_prof.header} >= {appraisalObjects[fileToPutItIn][weenieAppraisalObjectsIdx[weenieId]].i_prof.header} = {parsed.i_prof.header >= appraisalObjects[fileToPutItIn][weenieAppraisalObjectsIdx[weenieId]].i_prof.header}");
+                //        }
+                //    }
+                //}
 
                 // de-dupe based on position and wcid
                 if (addIt) //&& !PositionRecorded(parsed, processedWeeniePositions[parsed.wdesc._wcid], parsed.physicsdesc.pos, margin))
@@ -4268,11 +4598,46 @@ namespace aclogview
 
                     //    weenieAppraisalObjects[weenieId].Add(parsed);
 
-                    //    if (weenieId == 5890)
+                    //    //if (weenieId == 23360)
+                    //    //{
+                    //    if (fileToPutItIn == "Armor")
                     //    {
-                    //        System.Diagnostics.Debug.WriteLine($"found a hoary mattekar - count {weenieAppraisalObjects[weenieId].Count}");
+                    //        System.Diagnostics.Debug.WriteLine($"found a {weenieId} - count {weenieAppraisalObjects[weenieId].Count} - {parsed.i_prof.header} : {parsed.i_prof.success_flag}");
                     //    }
                     //}
+
+                    //if (weenieId == 5890)
+                    //{
+                    //    System.Diagnostics.Debug.WriteLine($"found {parsed.i_objid} of {weenieId} in {currentWorld} - {parsed.i_prof.header} : {parsed.i_prof.success_flag}");
+                    //}
+
+                    ////if (!worldWeenieObjectIds[currentWorld].ContainsKey(weenieId))
+                    ////    return;
+
+                    //////if (currentWorld == "Verdantine")
+                    //////    return;
+
+                    ////if (worldWeenieObjectIds[currentWorld][weenieId].Contains(parsed.i_objid))
+                    ////{
+                    ////    //if (fileToPutItIn == "Armor")
+                    ////    //{
+                    ////    //    System.Diagnostics.Debug.WriteLine($"found a match for {parsed.i_objid} of {weenieId} in {currentWorld} - {parsed.i_prof.header} : {parsed.i_prof.success_flag}");
+                    ////    //}
+                    ////    if (weenieId == 42717)
+                    ////    {
+                    ////        if (!weenieAppraisalObjects.ContainsKey(weenieId))
+                    ////            weenieAppraisalObjects.Add(weenieId, new List<CM_Examine.SetAppraiseInfo>());
+
+                    ////        weenieAppraisalObjects[weenieId].Add(parsed);
+
+                    ////        // System.Diagnostics.Debug.WriteLine($"found a {weenieId} - count {weenieAppraisalObjects[weenieId].Count} - {parsed.i_prof.header} : {parsed.i_prof.success_flag}");
+                    ////        System.Diagnostics.Debug.WriteLine($"found a match for {parsed.i_objid} of {weenieId} in {currentWorld} - {parsed.i_prof.header} : {parsed.i_prof.success_flag} - count {weenieAppraisalObjects[weenieId].Count}");
+                    ////    }
+                    ////}
+                    ////else
+                    ////{
+                    ////    return;
+                    ////}
 
                     if (!appraisalObjects.ContainsKey(fileToPutItIn))
                         appraisalObjects.Add(fileToPutItIn, new List<CM_Examine.SetAppraiseInfo>());
@@ -4334,35 +4699,63 @@ namespace aclogview
                     //}
                     //else
                     //{
-                        CM_Examine.SetAppraiseInfo parsedClone;
+                    CM_Examine.SetAppraiseInfo parsedClone;
 
-                        parsedClone = new CM_Examine.SetAppraiseInfo();
-                        parsedClone.i_objid = weenieId;
-                        parsedClone.i_prof = parsed.i_prof;
+                    parsedClone = new CM_Examine.SetAppraiseInfo();
+                    parsedClone.i_objid = weenieId;
+                    parsedClone.i_prof = parsed.i_prof;
 
-                        //parsedClone.i_objid = weenieId;
-                        if (appraisalObjectIds.Contains(parsedClone.i_objid))
+                    //parsedClone.i_objid = weenieId;
+                    if (appraisalObjectIds.Contains(parsedClone.i_objid))
+                    {
+                        //int i = 0;
+                        //for (int ListIndex = 0; ListIndex < appraisalObjects[fileToPutItIn].Count; ListIndex++)
+                        //{
+                        //    if (appraisalObjects[fileToPutItIn][ListIndex].i_objid == parsedClone.i_objid)
+                        //    {
+                        //        i = ListIndex;
+                        //        break;
+                        //    }
+                        //}
+                        //if (appraisalObjects[fileToPutItIn][i].i_prof.success_flag == 0)
+                        //{
+                        //    appraisalObjects[fileToPutItIn].RemoveAt(i);
+                        //    appraisalObjectIds.Remove(parsedClone.i_objid);
+                        //}
+                        //else
+                        //    return;
+
+                        if (weenieAppraisalObjectsSuccess[parsedClone.i_objid] == 0 && parsedClone.i_prof.success_flag == 1 
+                            && parsedClone.i_prof.header >= appraisalObjects[fileToPutItIn][weenieAppraisalObjectsIdx[parsedClone.i_objid]].i_prof.header)
                         {
-                            int i = 0;
-                            for (int ListIndex = 0; ListIndex < appraisalObjects[fileToPutItIn].Count; ListIndex++)
+                            if (weenieAppraisalObjectsIdx[parsedClone.i_objid] > appraisalObjects[fileToPutItIn].Count)
                             {
-                                if (appraisalObjects[fileToPutItIn][ListIndex].i_objid == parsedClone.i_objid)
-                                {
-                                    i = ListIndex;
-                                    break;
-                                }
-                            }
-                            if (appraisalObjects[fileToPutItIn][i].i_prof.success_flag == 0)
-                            {
-                                appraisalObjects[fileToPutItIn].RemoveAt(i);
-                                appraisalObjectIds.Remove(parsedClone.i_objid);
-                            }
-                            else
+                                // System.Diagnostics.Debug.WriteLine($"bad category match. {weenieAppraisalObjectsIdx[parsedClone.i_objid]}");
                                 return;
+                            }
+                            appraisalObjects[fileToPutItIn].RemoveAt(weenieAppraisalObjectsIdx[parsedClone.i_objid]);
+                            // appraisalObjectIds.Remove(parsedClone.i_objid);
+                            // weenieAppraisalObjectsIdx.Remove(parsedClone.i_objid);
+                            weenieAppraisalObjectsSuccess.Remove(parsedClone.i_objid);
                         }
+                        else
+                            return;
+                    }
 
+                    if (!appraisalObjectIds.Contains(parsedClone.i_objid))
+                    {
                         appraisalObjects[fileToPutItIn].Add(parsedClone);
                         appraisalObjectIds.Add(parsedClone.i_objid);
+                        weenieAppraisalObjectsIdx.Add(parsedClone.i_objid, appraisalObjects[fileToPutItIn].IndexOf(parsedClone));
+                        weenieAppraisalObjectsSuccess.Add(parsedClone.i_objid, parsedClone.i_prof.success_flag);
+                    }
+                    else
+                    {
+                        appraisalObjects[fileToPutItIn].Insert(weenieAppraisalObjectsIdx[parsedClone.i_objid], parsedClone);
+                        // appraisalObjectIds.Add(parsedClone.i_objid);
+                        // weenieAppraisalObjectsIdx.Add(parsedClone.i_objid, appraisalObjects[fileToPutItIn].IndexOf(parsedClone));
+                        weenieAppraisalObjectsSuccess.Add(parsedClone.i_objid, parsedClone.i_prof.success_flag);
+                    }
                     //}
 
                     totalHits++;
@@ -5699,7 +6092,7 @@ namespace aclogview
                         weenieType = WeenieType.Switch_WeenieType;
                         addIt = true;
                     }
-                    else if (parsed.wdesc._name.m_buffer.Contains("Lever")
+                    else if (parsed.wdesc._name.m_buffer.Contains("Lever") && !parsed.wdesc._name.m_buffer.Contains("Broken")
                         || parsed.wdesc._name.m_buffer.Contains("Candle") && !parsed.wdesc._name.m_buffer.Contains("Floating") && !parsed.wdesc._name.m_buffer.Contains("Bronze")
                         || parsed.wdesc._name.m_buffer.Contains("Torch") && parsed.wdesc._wcid != 293
                         || parsed.wdesc._name.m_buffer.Contains("Plant") && !parsed.wdesc._name.m_buffer.Contains("Fertilized")
@@ -6784,10 +7177,10 @@ namespace aclogview
                         weeniesTypeTemplate.Add((uint)weenieType, parsed);
                 }
 
-                if (!appraisalObjectsCatagoryMap.ContainsKey(parsed.object_id))
-                    appraisalObjectsCatagoryMap.Add(parsed.object_id, fileToPutItIn);
-                if (!appraisalObjectToWeenieId.ContainsKey(parsed.object_id))
-                    appraisalObjectToWeenieId.Add(parsed.object_id, parsed.wdesc._wcid);
+                //if (!appraisalObjectsCatagoryMap.ContainsKey(parsed.object_id))
+                //    appraisalObjectsCatagoryMap.Add(parsed.object_id, fileToPutItIn);
+                //if (!appraisalObjectToWeenieId.ContainsKey(parsed.object_id))
+                //    appraisalObjectToWeenieId.Add(parsed.object_id, parsed.wdesc._wcid);
 
                 // de-dupe based on position and wcid
                 if ((addIt && !PositionRecorded(parsed, processedWeeniePositions[parsed.wdesc._wcid], parsed.physicsdesc.pos, margin)) || (addIt && !dedupeWeenies))
@@ -7183,6 +7576,11 @@ namespace aclogview
 
             if (!Directory.Exists(staticFolder))
                 Directory.CreateDirectory(staticFolder);
+            else
+            {
+                Directory.Delete(staticFolder, true);
+                Directory.CreateDirectory(staticFolder);
+            }
 
             //Dictionary<string, int> fileCount = new Dictionary<string, int>();
 
@@ -8287,6 +8685,11 @@ namespace aclogview
 
             if (!Directory.Exists(templateFolder))
                 Directory.CreateDirectory(templateFolder);
+            else
+            {
+                Directory.Delete(templateFolder, true);
+                Directory.CreateDirectory(templateFolder);
+            }
 
             foreach (string key in weenies.Keys)
             {
