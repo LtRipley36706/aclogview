@@ -4492,9 +4492,10 @@ namespace aclogview
             try
             {
                 uint weenieId = 0;
-                //bool foundInObjectIds = false;
+                bool foundInObjectIds = false;
                 //bool foundInWeenieIds = false;
                 //foundInObjectIds = objectIds.Contains(parsed.i_objid);
+                foundInObjectIds = appraisalObjectToWeenieId.ContainsKey(parsed.i_objid);
                 //appraisalObjectToWeenieId.TryGetValue(parsed.i_objid, out weenieId);
                 //foundInWeenieIds = weenieIds.Contains(weenieId);
 
@@ -4567,8 +4568,8 @@ namespace aclogview
                     case "ProjectileSpellObjects":
                         return;
                     case "Players":
-                        //if (!foundInObjectIds)
-                            //return;
+                        if (!foundInObjectIds)
+                            return;
                         break;
                     default:
                         // Do nothing?
@@ -7328,6 +7329,8 @@ namespace aclogview
 
                         if (!weenieNames.ContainsKey(parsed.wdesc._wcid))
                             weenieNames.Add(parsed.wdesc._wcid, parsed.wdesc._name.m_buffer);
+
+                        //objectIds.Add(parsed.object_id);
 
                         totalHits++;
                     }
