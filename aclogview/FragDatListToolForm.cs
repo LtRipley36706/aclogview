@@ -6103,6 +6103,50 @@ namespace aclogview
                         weenieType = WeenieType.Switch_WeenieType;
                         addIt = true;
                     }
+                    else if (parsed.wdesc._name.m_buffer.Contains("Essence") && parsed.wdesc._maxStructure == 50)
+                    {
+                        fileToPutItIn = "PetDevices";
+                        weenieType = WeenieType.PetDevice_WeenieType;
+                        addWeenie = true;
+                    }
+                    else if (parsed.wdesc._name.m_buffer.Contains("Mag-Ma!")
+                        || parsed.wdesc._name.m_buffer == "Acid"
+                        || parsed.wdesc._name.m_buffer.Contains("Vent")
+                        || parsed.wdesc._name.m_buffer.Contains("Steam")
+                        || parsed.wdesc._name.m_buffer.Contains("Electric Floor")
+                        || parsed.wdesc._name.m_buffer.Contains("Refreshing")
+                        || parsed.wdesc._name.m_buffer == "Sewer"
+                        //|| parsed.wdesc._name.m_buffer.Contains("Ice") && !parsed.wdesc._name.m_buffer.Contains("Box")
+                        //|| parsed.wdesc._name.m_buffer.Contains("Firespurt")
+                        || parsed.wdesc._name.m_buffer.Contains("Flames")
+                        || parsed.wdesc._name.m_buffer.Contains("Plume")
+                        || parsed.wdesc._name.m_buffer.Contains("The Black Breath")
+                        //|| parsed.wdesc._name.m_buffer.Contains("Bonfire")
+                        || parsed.wdesc._name.m_buffer.Contains("Geyser")
+                        || parsed.wdesc._name.m_buffer.Contains("Magma")
+                        || parsed.wdesc._wcid == 14805
+                        //|| parsed.wdesc._name.m_buffer.Contains("Pool") && !parsed.wdesc._name.m_buffer.Contains("of")
+                        )
+                    {
+                        fileToPutItIn = "HotSpots";
+                        weenieType = WeenieType.HotSpot_WeenieType;
+                        addIt = true;
+                    }
+                    else if (parsed.wdesc._name.m_buffer.Contains("Firespurt")
+                        || parsed.wdesc._name.m_buffer.Contains("Bonfire")
+                        || parsed.wdesc._name.m_buffer.Contains("Pool") && !parsed.wdesc._name.m_buffer.Contains("of")
+                        )
+                    {
+                        fileToPutItIn = "HotSpots";
+                        weenieType = WeenieType.HotSpot_WeenieType;
+                        addWeenie = true;
+                    }
+                    else if (parsed.wdesc._name.m_buffer.Contains("Campfire"))
+                    {
+                        fileToPutItIn = "LightSourceObjects";
+                        weenieType = WeenieType.LightSource_WeenieType;
+                        addWeenie = true;
+                    }
                     else if (parsed.object_id < 0x80000000)
                     {
                         fileToPutItIn = "MiscStaticsObjects";
@@ -6981,6 +7025,12 @@ namespace aclogview
                     weenieType = WeenieType.LightSource_WeenieType;
                     addWeenie = true;
                 }
+                else if (parsed.wdesc._name.m_buffer.Contains("Other"))
+                {
+                    fileToPutItIn = "VendorServices";
+                    weenieType = WeenieType.Generic_WeenieType;
+                    addWeenie = true;
+                }
                 else
                 {
                     fileToPutItIn = "OtherObjects";
@@ -6989,6 +7039,13 @@ namespace aclogview
                 }
 
                 // }
+
+                if (parsed.object_id < 0x80000000 && parsed.wdesc._wcid > 1 
+                    && fileToPutItIn != "CreaturesOlthoiPlayers" && fileToPutItIn != "ContainersCorpses" && fileToPutItIn != "Admins" && fileToPutItIn != "MeleeWeapons") 
+                {
+                    addIt = true;
+                    addWeenie = false;
+                }
 
                 if (parsed.wdesc._wcid == 21)
                 {
