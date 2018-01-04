@@ -8847,7 +8847,7 @@ namespace aclogview
                             else
                                 line += $"NULL, ";
                             if ((parsed.physicsdesc.bitfield & (uint)PhysicsDesc.PhysicsDescInfo.ANIMFRAME_ID) != 0)
-                                intsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeInt.PLACEMENT_INT}, {(int)parsed.physicsdesc.animframe_id}) /* {Enum.GetName(typeof(STypeInt), STypeInt.PLACEMENT_POSITION_INT)} */" + Environment.NewLine;
+                                intsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeInt.PLACEMENT_INT}, {(int)parsed.physicsdesc.animframe_id}) /* {Enum.GetName(typeof(STypeInt), STypeInt.PLACEMENT_INT)} */" + Environment.NewLine;
                             if ((parsed.physicsdesc.bitfield & (uint)PhysicsDesc.PhysicsDescInfo.PETABLE) != 0)
                                 didsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeDID.PHYSICS_EFFECT_TABLE_DID}, {(uint)parsed.physicsdesc.phstable_id}) /* {Enum.GetName(typeof(STypeDID), STypeDID.PHYSICS_EFFECT_TABLE_DID)} */" + Environment.NewLine;
                             line += $"{parsed.physicsdesc.bitfield}";
