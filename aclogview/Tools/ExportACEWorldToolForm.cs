@@ -3939,6 +3939,7 @@ namespace aclogview
 
                     parsedClone = new CM_Writing.BookPageDataResponse();
                     parsedClone.bookID = weenieId;
+                    parsedClone.pageData = new CM_Writing.PageData();
 
                     parsedClone.pageData.authorAccount = parsed.pageData.authorAccount;
                     parsedClone.pageData.authorID = parsed.pageData.authorID;
@@ -5008,8 +5009,8 @@ namespace aclogview
                                 {
                                     foreach (var stat in parsed.i_prof._spellsTable.list)
                                     {
-                                        if (Enum.IsDefined(typeof(SpellID), stat))
-                                            spellsLine += $"     , ({parsed.i_objid}, {(uint)stat}) /* {Enum.GetName(typeof(SpellID), stat)} */" + Environment.NewLine;
+                                        if (Enum.IsDefined(typeof(SpellID), (int)stat))
+                                            spellsLine += $"     , ({parsed.i_objid}, {(uint)stat}) /* {Enum.GetName(typeof(SpellID), (int)stat)} */" + Environment.NewLine;
                                     }
                                 }
 
