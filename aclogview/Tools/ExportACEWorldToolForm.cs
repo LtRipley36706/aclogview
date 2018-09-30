@@ -4599,7 +4599,7 @@ namespace aclogview
                                 {
                                     intsLine += $"     , ({parsed.i_objid}, {(uint)STypeInt.LOCATIONS_INT}, {(uint)parsed.i_prof._hookProfileTable._validLocations})" + Environment.NewLine;
                                     intsLine += $"     , ({parsed.i_objid}, {(uint)STypeInt.AMMO_TYPE_INT}, {(uint)parsed.i_prof._hookProfileTable._ammoType})" + Environment.NewLine;
-                                    boolsLine += $"     , ({parsed.i_objid}, {(uint)STypeBool.INSCRIBABLE_BOOL}, {parsed.i_prof._hookProfileTable.isInscribable})" + Environment.NewLine;
+                                    //boolsLine += $"     , ({parsed.i_objid}, {(uint)STypeBool.INSCRIBABLE_BOOL}, {parsed.i_prof._hookProfileTable.isInscribable})" + Environment.NewLine;
                                     //boolsLine += $"     , ({parsed.i_objid}, {(uint)STypeBool.???}, {parsed.i_prof._hookProfileTable.isHealer})" + Environment.NewLine;
                                     //boolsLine += $"     , ({parsed.i_objid}, {(uint)STypeBool.???}, {parsed.i_prof._hookProfileTable.isLockpick})" + Environment.NewLine;
                                 }
@@ -4908,7 +4908,7 @@ namespace aclogview
                                 {
                                     intsLine += $"     , ({parsed.i_objid}, {(uint)STypeInt.LOCATIONS_INT}, {(int)parsed.i_prof._hookProfileTable._validLocations}) /* {Enum.GetName(typeof(STypeInt), STypeInt.LOCATIONS_INT)} */" + Environment.NewLine;
                                     intsLine += $"     , ({parsed.i_objid}, {(uint)STypeInt.AMMO_TYPE_INT}, {(int)parsed.i_prof._hookProfileTable._ammoType}) /* {Enum.GetName(typeof(STypeInt), STypeInt.AMMO_TYPE_INT)} */" + Environment.NewLine;
-                                    boolsLine += $"     , ({parsed.i_objid}, {(uint)STypeBool.INSCRIBABLE_BOOL}, {parsed.i_prof._hookProfileTable.isInscribable}) /* {Enum.GetName(typeof(STypeBool), STypeBool.INSCRIBABLE_BOOL)} */" + Environment.NewLine;
+                                    //boolsLine += $"     , ({parsed.i_objid}, {(uint)STypeBool.INSCRIBABLE_BOOL}, {parsed.i_prof._hookProfileTable.isInscribable}) /* {Enum.GetName(typeof(STypeBool), STypeBool.INSCRIBABLE_BOOL)} */" + Environment.NewLine;
                                     //boolsLine += $"     , ({parsed.i_objid}, {(uint)STypeBool.???}, {parsed.i_prof._hookProfileTable.isHealer})" + Environment.NewLine;
                                     //boolsLine += $"     , ({parsed.i_objid}, {(uint)STypeBool.???}, {parsed.i_prof._hookProfileTable.isLockpick})" + Environment.NewLine;
                                 }
@@ -5166,7 +5166,7 @@ namespace aclogview
                                 {
                                     intsLine += $"     , ({parsed.i_objid}, {(uint)STypeInt.LOCATIONS_INT}, {(uint)parsed.i_prof._hookProfileTable._validLocations})" + Environment.NewLine;
                                     intsLine += $"     , ({parsed.i_objid}, {(uint)STypeInt.AMMO_TYPE_INT}, {(uint)parsed.i_prof._hookProfileTable._ammoType})" + Environment.NewLine;
-                                    boolsLine += $"     , ({parsed.i_objid}, {(uint)STypeBool.INSCRIBABLE_BOOL}, {parsed.i_prof._hookProfileTable.isInscribable})" + Environment.NewLine;
+                                    //boolsLine += $"     , ({parsed.i_objid}, {(uint)STypeBool.INSCRIBABLE_BOOL}, {parsed.i_prof._hookProfileTable.isInscribable})" + Environment.NewLine;
                                     //boolsLine += $"     , ({parsed.i_objid}, {(uint)STypeBool.???}, {parsed.i_prof._hookProfileTable.isHealer})" + Environment.NewLine;
                                     //boolsLine += $"     , ({parsed.i_objid}, {(uint)STypeBool.???}, {parsed.i_prof._hookProfileTable.isLockpick})" + Environment.NewLine;
                                 }
