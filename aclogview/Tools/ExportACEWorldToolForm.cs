@@ -204,150 +204,41 @@ namespace aclogview
 
                     var messageCode = fragDataReader.ReadUInt32();
 
-                    if (messageCode == (uint)PacketOpcode.Evt_Physics__CreateObject_ID)
-                    {
-                        Interlocked.Increment(ref totalHits);
-
-                        aceWorldFrags.Add(new FragDatListFile.FragDatInfo(packetDirection, record.index, record.data));
-                    }
-
-                    if (messageCode == (uint)PacketOpcode.APPRAISAL_INFO_EVENT)
-                    {
-                        Interlocked.Increment(ref totalHits);
-
-                        aceWorldFrags.Add(new FragDatListFile.FragDatInfo(packetDirection, record.index, record.data));
-                    }
-
-                    if (messageCode == (uint)PacketOpcode.BOOK_DATA_RESPONSE_EVENT)
-                    {
-                        Interlocked.Increment(ref totalHits);
-
-                        aceWorldFrags.Add(new FragDatListFile.FragDatInfo(packetDirection, record.index, record.data));
-                    }
-
-                    if (messageCode == (uint)PacketOpcode.BOOK_PAGE_DATA_RESPONSE_EVENT)
-                    {
-                        Interlocked.Increment(ref totalHits);
-
-                        aceWorldFrags.Add(new FragDatListFile.FragDatInfo(packetDirection, record.index, record.data));
-                    }
-
-                    if (messageCode == (uint)PacketOpcode.Evt_Writing__BookData_ID)
-                    {
-                        Interlocked.Increment(ref totalHits);
-
-                        aceWorldFrags.Add(new FragDatListFile.FragDatInfo(packetDirection, record.index, record.data));
-                    }
-
-                    if (messageCode == (uint)PacketOpcode.Evt_Writing__BookPageData_ID)
-                    {
-                        Interlocked.Increment(ref totalHits);
-
-                        aceWorldFrags.Add(new FragDatListFile.FragDatInfo(packetDirection, record.index, record.data));
-                    }
-
-                    if (messageCode == (uint)PacketOpcode.VENDOR_INFO_EVENT)
-                    {
-                        Interlocked.Increment(ref totalHits);
-
-                        aceWorldFrags.Add(new FragDatListFile.FragDatInfo(packetDirection, record.index, record.data));
-                    }
-
-                    if (messageCode == (uint)PacketOpcode.Evt_House__Recv_HouseProfile_ID
-                        || messageCode == (uint)PacketOpcode.Evt_House__Recv_HouseData_ID
-                        )
-                    {
-                        Interlocked.Increment(ref totalHits);
-
-                        aceWorldFrags.Add(new FragDatListFile.FragDatInfo(packetDirection, record.index, record.data));
-                    }
-
-                    if (messageCode == (uint)PacketOpcode.Evt_Login__WorldInfo_ID)
-                    {
-                        Interlocked.Increment(ref totalHits);
-
-                        aceWorldFrags.Add(new FragDatListFile.FragDatInfo(packetDirection, record.index, record.data));
-                    }
+                    uint opCode = 0;
 
                     if (messageCode == (uint)PacketOpcode.WEENIE_ORDERED_EVENT || messageCode == (uint)PacketOpcode.ORDERED_EVENT)
                     {
-                        uint opCode = 0;
-
                         if (messageCode == (uint)PacketOpcode.WEENIE_ORDERED_EVENT)
                         {
                             WOrderHdr orderHeader = WOrderHdr.read(fragDataReader);
                             opCode = fragDataReader.ReadUInt32();
                         }
-                        if (messageCode == (uint)PacketOpcode.ORDERED_EVENT)
+                        else if (messageCode == (uint)PacketOpcode.ORDERED_EVENT)
                         {
                             OrderHdr orderHeader = OrderHdr.read(fragDataReader);
                             opCode = fragDataReader.ReadUInt32();
                         }
-
-                        if (opCode == (uint)PacketOpcode.Evt_Physics__CreateObject_ID)
+                        else
                         {
-                            Interlocked.Increment(ref totalHits);
-
-                            aceWorldFrags.Add(new FragDatListFile.FragDatInfo(packetDirection, record.index, record.data));
+                            opCode = messageCode;
                         }
+                    }
 
-                        if (opCode == (uint)PacketOpcode.APPRAISAL_INFO_EVENT)
-                        {
-                            Interlocked.Increment(ref totalHits);
+                    if (opCode == (uint)PacketOpcode.Evt_Physics__CreateObject_ID
+                        || opCode == (uint)PacketOpcode.APPRAISAL_INFO_EVENT
+                        || opCode == (uint)PacketOpcode.BOOK_DATA_RESPONSE_EVENT
+                        || opCode == (uint)PacketOpcode.BOOK_PAGE_DATA_RESPONSE_EVENT
+                        || opCode == (uint)PacketOpcode.Evt_Writing__BookData_ID
+                        || opCode == (uint)PacketOpcode.Evt_Writing__BookPageData_ID
+                        || opCode == (uint)PacketOpcode.VENDOR_INFO_EVENT
+                        || opCode == (uint)PacketOpcode.Evt_House__Recv_HouseProfile_ID
+                        || opCode == (uint)PacketOpcode.Evt_House__Recv_HouseData_ID
+                        || opCode == (uint)PacketOpcode.Evt_Login__WorldInfo_ID
+                        )
+                    {
+                        Interlocked.Increment(ref totalHits);
 
-                            aceWorldFrags.Add(new FragDatListFile.FragDatInfo(packetDirection, record.index, record.data));
-                        }
-
-                        if (opCode == (uint)PacketOpcode.BOOK_DATA_RESPONSE_EVENT)
-                        {
-                            Interlocked.Increment(ref totalHits);
-
-                            aceWorldFrags.Add(new FragDatListFile.FragDatInfo(packetDirection, record.index, record.data));
-                        }
-
-                        if (opCode == (uint)PacketOpcode.BOOK_PAGE_DATA_RESPONSE_EVENT)
-                        {
-                            Interlocked.Increment(ref totalHits);
-
-                            aceWorldFrags.Add(new FragDatListFile.FragDatInfo(packetDirection, record.index, record.data));
-                        }
-
-                        if (opCode == (uint)PacketOpcode.Evt_Writing__BookData_ID)
-                        {
-                            Interlocked.Increment(ref totalHits);
-
-                            aceWorldFrags.Add(new FragDatListFile.FragDatInfo(packetDirection, record.index, record.data));
-                        }
-
-                        if (opCode == (uint)PacketOpcode.Evt_Writing__BookPageData_ID)
-                        {
-                            Interlocked.Increment(ref totalHits);
-
-                            aceWorldFrags.Add(new FragDatListFile.FragDatInfo(packetDirection, record.index, record.data));
-                        }
-
-                        if (opCode == (uint)PacketOpcode.VENDOR_INFO_EVENT)
-                        {
-                            Interlocked.Increment(ref totalHits);
-
-                            aceWorldFrags.Add(new FragDatListFile.FragDatInfo(packetDirection, record.index, record.data));
-                        }
-
-                        if (opCode == (uint)PacketOpcode.Evt_House__Recv_HouseProfile_ID
-                            || opCode == (uint)PacketOpcode.Evt_House__Recv_HouseData_ID
-                            )
-                        {
-                            Interlocked.Increment(ref totalHits);
-
-                            aceWorldFrags.Add(new FragDatListFile.FragDatInfo(packetDirection, record.index, record.data));
-                        }
-
-                        if (opCode == (uint)PacketOpcode.Evt_Login__WorldInfo_ID)
-                        {
-                            Interlocked.Increment(ref totalHits);
-
-                            aceWorldFrags.Add(new FragDatListFile.FragDatInfo(packetDirection, record.index, record.data));
-                        }
+                        aceWorldFrags.Add(new FragDatListFile.FragDatInfo(packetDirection, record.index, record.data));
                     }
                 }
                 catch
