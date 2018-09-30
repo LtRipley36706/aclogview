@@ -379,7 +379,7 @@ namespace aclogview
                 List<uint> bookObjectIds = new List<uint>();
                 Dictionary<string, Dictionary<uint, CM_Writing.BookDataResponse>> bookObjects = new Dictionary<string, Dictionary<uint, CM_Writing.BookDataResponse>>();
                 List<uint> pageObjectIds = new List<uint>();
-                Dictionary<string, Dictionary<uint, Dictionary<uint, CM_Writing.PageData>>> pageObjects = new Dictionary<string, Dictionary<uint, Dictionary<uint, CM_Writing.PageData>>>();
+                Dictionary<string, Dictionary<uint, Dictionary<uint, CM_Writing.BookPageDataResponse>>> pageObjects = new Dictionary<string, Dictionary<uint, Dictionary<uint, CM_Writing.BookPageDataResponse>>>();
 
                 List<uint> vendorObjectIds = new List<uint>();
                 Dictionary<string, Dictionary<uint, CM_Vendor.gmVendorUI>> vendorObjects = new Dictionary<string, Dictionary<uint, CM_Vendor.gmVendorUI>>();
@@ -587,7 +587,7 @@ namespace aclogview
 
                                 if (opCode == (uint)PacketOpcode.BOOK_PAGE_DATA_RESPONSE_EVENT)
                                 {
-                                    var parsed = CM_Writing.PageData.read(fragDataReader);
+                                    var parsed = CM_Writing.BookPageDataResponse.read(fragDataReader);
 
                                     CreatePageObjectsList(parsed,
                                         objectIds, staticObjects,
@@ -3719,11 +3719,11 @@ namespace aclogview
             }
         }
 
-        private void CreatePageObjectsList(CM_Writing.PageData parsed, List<uint> objectIds, Dictionary<string, List<CM_Physics.CreateObject>> staticObjects,
+        private void CreatePageObjectsList(CM_Writing.BookPageDataResponse parsed, List<uint> objectIds, Dictionary<string, List<CM_Physics.CreateObject>> staticObjects,
             List<uint> weenieIds, Dictionary<string, List<CM_Physics.CreateObject>> weenies, Dictionary<string, List<CM_Examine.SetAppraiseInfo>> appraisalObjects,
             List<uint> appraisalObjectIds, Dictionary<uint, string> appraisalObjectsCatagoryMap, Dictionary<uint, uint> appraisalObjectToWeenieId,
             //                                   fileToPutItIn      bookid           pageid         pagedata
-            List<uint> bookObjectIds, Dictionary<string, Dictionary<uint, Dictionary<uint, CM_Writing.PageData>>> pageObjects,
+            List<uint> bookObjectIds, Dictionary<string, Dictionary<uint, Dictionary<uint, CM_Writing.BookPageDataResponse>>> pageObjects,
             Dictionary<uint, string> weenieObjectsCatagoryMap,
             string currentWorld, Dictionary<string, Dictionary<uint, uint>> worldIDQueue)
         {
@@ -3791,12 +3791,12 @@ namespace aclogview
                 {
                     if (!pageObjects.ContainsKey(fileToPutItIn))
                     {
-                        pageObjects.Add(fileToPutItIn, new Dictionary<uint, Dictionary<uint, CM_Writing.PageData>>());
+                        pageObjects.Add(fileToPutItIn, new Dictionary<uint, Dictionary<uint, CM_Writing.BookPageDataResponse>>());
                     }
 
                     if (!pageObjects[fileToPutItIn].ContainsKey(weenieId))
                     {
-                        pageObjects[fileToPutItIn].Add(weenieId, new Dictionary<uint, CM_Writing.PageData>());
+                        pageObjects[fileToPutItIn].Add(weenieId, new Dictionary<uint, CM_Writing.BookPageDataResponse>());
                     }
 
                     if (bookObjectIds.Contains(weenieId))
@@ -3812,19 +3812,19 @@ namespace aclogview
                     //{
                     //    if (!pageObjects[fileToPutItIn][weenieId].Keys.Contains(parsed.page))
                     //    {
-                    CM_Writing.PageData parsedClone;
+                    CM_Writing.BookPageDataResponse parsedClone;
 
-                    parsedClone = new CM_Writing.PageData();
+                    parsedClone = new CM_Writing.BookPageDataResponse();
                     parsedClone.bookID = weenieId;
 
-                    parsedClone.authorAccount = parsed.authorAccount;
-                    parsedClone.authorID = parsed.authorID;
-                    parsedClone.authorName = parsed.authorName;
-                    parsedClone.flags = parsed.flags;
-                    parsedClone.ignoreAuthor = parsed.ignoreAuthor;
+                    parsedClone.pageData.authorAccount = parsed.pageData.authorAccount;
+                    parsedClone.pageData.authorID = parsed.pageData.authorID;
+                    parsedClone.pageData.authorName = parsed.pageData.authorName;
+                    parsedClone.pageData.flags = parsed.pageData.flags;
+                    parsedClone.pageData.ignoreAuthor = parsed.pageData.ignoreAuthor;
                     parsedClone.page = parsed.page;
-                    parsedClone.pageText = parsed.pageText;
-                    parsedClone.textIncluded = parsed.textIncluded;
+                    parsedClone.pageData.pageText = parsed.pageData.pageText;
+                    parsedClone.pageData.textIncluded = parsed.pageData.textIncluded;
 
                     pageObjects[fileToPutItIn][parsedClone.bookID].Add(parsedClone.page, parsedClone);
                     bookObjectIds.Add(parsedClone.bookID);
@@ -3869,7 +3869,7 @@ namespace aclogview
             }
         }
 
-        private void WritePageObjectData(Dictionary<string, Dictionary<uint, Dictionary<uint, CM_Writing.PageData>>> pageObjects, string outputFolder)
+        private void WritePageObjectData(Dictionary<string, Dictionary<uint, Dictionary<uint, CM_Writing.BookPageDataResponse>>> pageObjects, string outputFolder)
         {
             string staticFolder = Path.Combine(outputFolder, "9-pagedata");
 
@@ -3919,7 +3919,7 @@ namespace aclogview
                                 {
                                     string pagesLine = "";
 
-                                    pagesLine += $"     , ({page.bookID}, {page.page}, '{page.authorName.m_buffer?.Replace("'", "''")}', '{page.authorAccount.m_buffer?.Replace("'", "''")}', {page.authorID}, {page.ignoreAuthor}, '{page.pageText.m_buffer?.Replace("'", "''")}')" + Environment.NewLine;
+                                    pagesLine += $"     , ({page.bookID}, {page.page}, '{page.pageData.authorName.m_buffer?.Replace("'", "''")}', '{page.pageData.authorAccount.m_buffer?.Replace("'", "''")}', {page.pageData.authorID}, {page.pageData.ignoreAuthor}, '{page.pageData.pageText.m_buffer?.Replace("'", "''")}')" + Environment.NewLine;
 
                                     if (pagesLine != "")
                                     {
@@ -3940,7 +3940,7 @@ namespace aclogview
             }
         }
 
-        private void WriteAppendedWeeniePageObjectData(Dictionary<string, Dictionary<uint, Dictionary<uint, CM_Writing.PageData>>> pageObjects, string outputFolder)
+        private void WriteAppendedWeeniePageObjectData(Dictionary<string, Dictionary<uint, Dictionary<uint, CM_Writing.BookPageDataResponse>>> pageObjects, string outputFolder)
         {
             string staticFolder = Path.Combine(outputFolder, "1-weenies");
 
@@ -3997,10 +3997,10 @@ namespace aclogview
 
                                     string pagesLine = "";
 
-                                    if (page.authorAccount.m_buffer == "Password is cheese" || page.authorAccount.m_buffer == "beer good")
-                                        page.authorAccount.m_buffer = "prewritten";
+                                    if (page.pageData.authorAccount.m_buffer == "Password is cheese" || page.pageData.authorAccount.m_buffer == "beer good")
+                                        page.pageData.authorAccount.m_buffer = "prewritten";
 
-                                    pagesLine += $"     , ({page.bookID}, {page.page}, '{page.authorName.m_buffer?.Replace("'", "''")}', '{page.authorAccount.m_buffer?.Replace("'", "''")}', {page.authorID}, {page.ignoreAuthor}, '{page.pageText.m_buffer?.Replace("'", "''")}')" + Environment.NewLine;
+                                    pagesLine += $"     , ({page.bookID}, {page.page}, '{page.pageData.authorName.m_buffer?.Replace("'", "''")}', '{page.pageData.authorAccount.m_buffer?.Replace("'", "''")}', {page.pageData.authorID}, {page.pageData.ignoreAuthor}, '{page.pageData.pageText.m_buffer?.Replace("'", "''")}')" + Environment.NewLine;
 
                                     if (pagesLine != "")
                                     {
@@ -4021,7 +4021,7 @@ namespace aclogview
             }
         }
 
-        private void WriteWeeniePageObjectData(Dictionary<string, Dictionary<uint, Dictionary<uint, CM_Writing.PageData>>> pageObjects, string outputFolder)
+        private void WriteWeeniePageObjectData(Dictionary<string, Dictionary<uint, Dictionary<uint, CM_Writing.BookPageDataResponse>>> pageObjects, string outputFolder)
         {
             string staticFolder = Path.Combine(outputFolder, "4-weeniepagedata");
 
@@ -4071,7 +4071,7 @@ namespace aclogview
                                 {
                                     string pagesLine = "";
 
-                                    pagesLine += $"     , ({page.bookID}, {page.page}, '{page.authorName.m_buffer?.Replace("'", "''")}', '{page.authorAccount.m_buffer?.Replace("'", "''")}', {page.authorID}, {page.ignoreAuthor}, '{page.pageText.m_buffer?.Replace("'", "''")}')" + Environment.NewLine;
+                                    pagesLine += $"     , ({page.bookID}, {page.page}, '{page.pageData.authorName.m_buffer?.Replace("'", "''")}', '{page.pageData.authorAccount.m_buffer?.Replace("'", "''")}', {page.pageData.authorID}, {page.pageData.ignoreAuthor}, '{page.pageData.pageText.m_buffer?.Replace("'", "''")}')" + Environment.NewLine;
 
                                     if (pagesLine != "")
                                     {
