@@ -377,7 +377,7 @@ namespace aclogview
                 Dictionary<uint, uint> weeniesWeenieType = new Dictionary<uint, uint>();
 
                 List<uint> bookObjectIds = new List<uint>();
-                Dictionary<string, Dictionary<uint, CM_Writing.PageDataList>> bookObjects = new Dictionary<string, Dictionary<uint, CM_Writing.PageDataList>>();
+                Dictionary<string, Dictionary<uint, CM_Writing.BookDataResponse>> bookObjects = new Dictionary<string, Dictionary<uint, CM_Writing.BookDataResponse>>();
                 List<uint> pageObjectIds = new List<uint>();
                 Dictionary<string, Dictionary<uint, Dictionary<uint, CM_Writing.PageData>>> pageObjects = new Dictionary<string, Dictionary<uint, Dictionary<uint, CM_Writing.PageData>>>();
 
@@ -574,7 +574,7 @@ namespace aclogview
 
                                 if (opCode == (uint)PacketOpcode.BOOK_DATA_RESPONSE_EVENT)
                                 {
-                                    var parsed = CM_Writing.PageDataList.read(fragDataReader);
+                                    var parsed = CM_Writing.BookDataResponse.read(fragDataReader);
 
                                     CreateBookObjectsList(parsed,
                                         objectIds, staticObjects,
@@ -3147,11 +3147,11 @@ namespace aclogview
             }
         }
 
-        private void CreateBookObjectsList(CM_Writing.PageDataList parsed, List<uint> objectIds, Dictionary<string, List<CM_Physics.CreateObject>> staticObjects,
+        private void CreateBookObjectsList(CM_Writing.BookDataResponse parsed, List<uint> objectIds, Dictionary<string, List<CM_Physics.CreateObject>> staticObjects,
             List<uint> weenieIds, Dictionary<string, List<CM_Physics.CreateObject>> weenies, Dictionary<string, List<CM_Examine.SetAppraiseInfo>> appraisalObjects,
             List<uint> appraisalObjectIds, Dictionary<uint, string> appraisalObjectsCatagoryMap, Dictionary<uint, uint> appraisalObjectToWeenieId,
             //                           fileToPutItIn             bookid             pagedata
-            List<uint> bookObjectIds, Dictionary<string, Dictionary<uint, CM_Writing.PageDataList>> bookObjects,
+            List<uint> bookObjectIds, Dictionary<string, Dictionary<uint, CM_Writing.BookDataResponse>> bookObjects,
             Dictionary<uint, string> weenieObjectsCatagoryMap,
             string currentWorld, Dictionary<string, Dictionary<uint, uint>> worldIDQueue)
         {
@@ -3219,7 +3219,7 @@ namespace aclogview
                 {
                     if (!bookObjects.ContainsKey(fileToPutItIn))
                     {
-                        bookObjects.Add(fileToPutItIn, new Dictionary<uint, CM_Writing.PageDataList>());
+                        bookObjects.Add(fileToPutItIn, new Dictionary<uint, CM_Writing.BookDataResponse>());
                     }
 
                     if (bookObjectIds.Contains(weenieId))
@@ -3234,9 +3234,9 @@ namespace aclogview
                     //{
                     //    if (!bookObjects[fileToPutItIn].Keys.Contains(parsed.i_bookID))
                     //    {
-                    CM_Writing.PageDataList parsedClone;
+                    CM_Writing.BookDataResponse parsedClone;
 
-                    parsedClone = new CM_Writing.PageDataList();
+                    parsedClone = new CM_Writing.BookDataResponse();
                     parsedClone.i_bookID = weenieId;
 
                     parsedClone.authorId = parsed.authorId;
@@ -3283,7 +3283,7 @@ namespace aclogview
             }
         }
 
-        private void WriteBookObjectData(Dictionary<string, Dictionary<uint, CM_Writing.PageDataList>> bookObjects, string outputFolder)
+        private void WriteBookObjectData(Dictionary<string, Dictionary<uint, CM_Writing.BookDataResponse>> bookObjects, string outputFolder)
         {
             string staticFolder = Path.Combine(outputFolder, "8-bookdata");
 
@@ -3393,7 +3393,7 @@ namespace aclogview
                                 }
 
                                 int pageNum = 0;
-                                foreach (var page in book.pageData)
+                                foreach (var page in book.pageData.list)
                                 {
                                     if (page.textIncluded == 1)
                                     {
@@ -3423,7 +3423,7 @@ namespace aclogview
             }
         }
 
-        private void WriteAppendedWeenieBookObjectData(Dictionary<string, Dictionary<uint, CM_Writing.PageDataList>> bookObjects, string outputFolder)
+        private void WriteAppendedWeenieBookObjectData(Dictionary<string, Dictionary<uint, CM_Writing.BookDataResponse>> bookObjects, string outputFolder)
         {
             string staticFolder = Path.Combine(outputFolder, "1-weenies");
 
@@ -3543,7 +3543,7 @@ namespace aclogview
                                 }
 
                                 int pageNum = 0;
-                                foreach (var page in book.pageData)
+                                foreach (var page in book.pageData.list)
                                 {
                                     if (page.textIncluded == 1)
                                     {
@@ -3576,7 +3576,7 @@ namespace aclogview
             }
         }
 
-        private void WriteWeenieBookObjectData(Dictionary<string, Dictionary<uint, CM_Writing.PageDataList>> bookObjects, string outputFolder)
+        private void WriteWeenieBookObjectData(Dictionary<string, Dictionary<uint, CM_Writing.BookDataResponse>> bookObjects, string outputFolder)
         {
             string staticFolder = Path.Combine(outputFolder, "3-weeniebookdata");
 
@@ -3689,7 +3689,7 @@ namespace aclogview
                                 }
 
                                 int pageNum = 0;
-                                foreach (var page in book.pageData)
+                                foreach (var page in book.pageData.list)
                                 {
                                     if (page.textIncluded == 1)
                                     {
