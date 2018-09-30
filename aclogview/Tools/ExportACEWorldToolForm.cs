@@ -627,7 +627,6 @@ namespace aclogview
                                         currentWorld, worldIDQueue);
                                 }
                             }
-
                         }
                         catch (EndOfStreamException) // This can happen when a frag is incomplete and we try to parse it
                         {
@@ -635,6 +634,130 @@ namespace aclogview
                         }
                     }
                 }
+
+                if ((outputAsLandblocks && useLandblockTable) || outputWeenieFiles)
+                {
+                    GenerateMissingWeeniesFromVendors(objectIds, staticObjects,
+                                        outputAsLandblocks, landblockInstances,
+                                        weenieIds, weenies,
+                                        processedWeeniePositions, weenieNames,
+                                        appraisalObjectsCatagoryMap, appraisalObjectToWeenieId,
+                                        weenieObjectsCatagoryMap,
+                                        weeniesWeenieType, staticObjectsWeenieType,
+                                        wieldedObjectsParentMap, wieldedObjects,
+                                        inventoryParents, inventoryObjects,
+                                        parentWieldsWeenies,
+                                        weeniesTypeTemplate, weeniesFromVendors,
+                                        corpseObjectsDroppedItems, corpseObjectsInstances,
+                                        chestObjectsContainedItems, chestObjectsInstances);
+                }
+
+                if (outputWeenieFiles)
+                {
+                    // WriteWeenieData(weenies, txtOutputFolder.Text, weeniesWeenieType);
+                    WriteWeenieFiles(weenies, txtOutputFolder.Text, weeniesWeenieType);
+                    // WriteWeenieAppraisalObjectData(appraisalObjects, txtOutputFolder.Text);
+                    WriteAppendedWeenieAppraisalObjectData(appraisalObjects, txtOutputFolder.Text);
+                    // WriteWeenieBookObjectData(bookObjects, txtOutputFolder.Text);
+
+                    WriteAppendedCalculatedBurdenValueToWeenies(weenies, txtOutputFolder.Text, weeniesWeenieType);
+
+                    WriteAppendedWeenieBookObjectData(bookObjects, txtOutputFolder.Text);
+                    // WriteWeeniePageObjectData(pageObjects, txtOutputFolder.Text);
+                    WriteAppendedWeeniePageObjectData(pageObjects, txtOutputFolder.Text);
+                    // WriteWeenieVendorObjectData(vendorObjects, txtOutputFolder.Text);
+                    WriteAppendedWeenieVendorObjectData(vendorObjects, txtOutputFolder.Text, weenieNames);
+                    // WriteVendorInventory(vendorSellsWeenies, weenieIds, txtOutputFolder.Text);
+                    WriteAppendedVendorInventory(vendorSellsWeenies, weenieIds, weenieObjectsCatagoryMap, txtOutputFolder.Text, weenieNames);
+                    // WriteParentInventory(parentWieldsWeenies, weenieIds, txtOutputFolder.Text);
+                    WriteAppendedParentInventory(parentWieldsWeenies, weenieIds, weenieObjectsCatagoryMap, txtOutputFolder.Text, weenieNames);
+
+                    WriteAppendedSlumlordInventory(slumlordObjects, weenieIds, weenieObjectsCatagoryMap, txtOutputFolder.Text);
+
+                    WriteAppendedCorpseInventory(corpseObjectsDroppedItems, weenieIds, weenieObjectsCatagoryMap, txtOutputFolder.Text, weenieNames);
+
+                    WriteAppendedChestInventory(chestObjectsContainedItems, weenieIds, weenieObjectsCatagoryMap, txtOutputFolder.Text, weenieNames);
+
+                    if (outputAsLandblocks)
+                    {
+                        if (useLandblockTable && !exportEverything)
+                        {
+                            WriteLandblockTable(landblockInstances, objectIds, txtOutputFolder.Text, staticObjectsWeenieType, weenieNames);
+
+                            // WriteParentInventory(parentWieldsWeenies, weenieIds, txtOutputFolder.Text);
+
+                            // WriteVendorInventory(vendorSellsWeenies, weenieIds, txtOutputFolder.Text);
+                        }
+                        //else
+                        //{
+                        //    WriteLandblockData(landblockInstances, objectIds, txtOutputFolder.Text, staticObjectsWeenieType, generateNewGuids);
+
+                        //    if (!generateNewGuids)
+                        //    {
+                        //        WriteAppraisalObjectData(appraisalObjects, txtOutputFolder.Text);
+
+                        //        WriteBookObjectData(bookObjects, txtOutputFolder.Text);
+
+                        //        WritePageObjectData(pageObjects, txtOutputFolder.Text);
+
+                        //        WriteVendorObjectData(vendorObjects, txtOutputFolder.Text);
+                        //    }
+                    }
+                }
+                else
+                {
+                    WriteWeenieData(weenies, txtOutputFolder.Text, weeniesWeenieType);
+
+                    WriteWeenieAppraisalObjectData(appraisalObjects, txtOutputFolder.Text);
+
+                    WriteWeenieBookObjectData(bookObjects, txtOutputFolder.Text);
+
+                    WriteWeeniePageObjectData(pageObjects, txtOutputFolder.Text);
+
+                    WriteWeenieVendorObjectData(vendorObjects, txtOutputFolder.Text);
+
+                    if (outputAsLandblocks)
+                    {
+                        if (useLandblockTable && !exportEverything)
+                        {
+                            WriteLandblockTable(landblockInstances, objectIds, txtOutputFolder.Text, staticObjectsWeenieType, weenieNames);
+
+                            WriteParentInventory(parentWieldsWeenies, weenieIds, txtOutputFolder.Text);
+
+                            WriteVendorInventory(vendorSellsWeenies, weenieIds, txtOutputFolder.Text);
+                        }
+                        else
+                        {
+                            WriteLandblockData(landblockInstances, objectIds, txtOutputFolder.Text, staticObjectsWeenieType, generateNewGuids);
+
+                            if (!generateNewGuids)
+                            {
+                                WriteAppraisalObjectData(appraisalObjects, txtOutputFolder.Text);
+
+                                WriteBookObjectData(bookObjects, txtOutputFolder.Text);
+
+                                WritePageObjectData(pageObjects, txtOutputFolder.Text);
+
+                                WriteVendorObjectData(vendorObjects, txtOutputFolder.Text);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        WriteStaticObjectData(staticObjects, objectIds, txtOutputFolder.Text, staticObjectsWeenieType);
+
+                        WriteAppraisalObjectData(appraisalObjects, txtOutputFolder.Text);
+
+                        //// WriteGeneratorObjectData(staticObjects, objectIds, txtOutputFolder.Text);
+
+                        WriteBookObjectData(bookObjects, txtOutputFolder.Text);
+
+                        WritePageObjectData(pageObjects, txtOutputFolder.Text);
+
+                        WriteVendorObjectData(vendorObjects, txtOutputFolder.Text);
+                    }
+                }
+                MessageBox.Show($"Export completed at {DateTime.Now.ToString()} and took {(DateTime.Now - start).TotalMinutes} minutes.");
             }
             finally
             {
