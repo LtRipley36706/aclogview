@@ -1823,6 +1823,12 @@ namespace aclogview
                 objectsContextMenu.Show(location);
             }
         }
+
+        private void mnuItem_ExportACEWorldTool_Click(object sender, EventArgs e)
+        {
+            var form = new ExportACEWorldToolForm();
+            form.Show(this);
+        }
     }
 }
 

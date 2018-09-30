@@ -120,6 +120,8 @@ namespace aclogview {
             this.queueMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.iterationMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.serverPortMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.menuItem5 = new System.Windows.Forms.MenuItem();
+            this.mnuItem_ExportACEWorldTool = new System.Windows.Forms.MenuItem();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer_Main)).BeginInit();
             this.splitContainer_Main.Panel1.SuspendLayout();
             this.splitContainer_Main.Panel2.SuspendLayout();
@@ -630,6 +632,8 @@ namespace aclogview {
             this.menuItem_ToolBad,
             this.menuItem_ToolHeatmap,
             this.mnuItem_ToolFragDatListTool,
+            this.menuItem5,
+            this.mnuItem_ExportACEWorldTool,
             this.menuItem4,
             this.menuItem_Options});
             this.menuItem1.Text = "Tools";
@@ -677,12 +681,12 @@ namespace aclogview {
             // 
             // menuItem4
             // 
-            this.menuItem4.Index = 7;
+            this.menuItem4.Index = 9;
             this.menuItem4.Text = "-";
             // 
             // menuItem_Options
             // 
-            this.menuItem_Options.Index = 8;
+            this.menuItem_Options.Index = 10;
             this.menuItem_Options.Text = "Options";
             this.menuItem_Options.Click += new System.EventHandler(this.menuItem_Options_Click);
             // 
@@ -984,6 +988,17 @@ namespace aclogview {
             this.serverPortMenuItem.Size = new System.Drawing.Size(131, 22);
             this.serverPortMenuItem.Text = "Server Port";
             // 
+            // menuItem5
+            // 
+            this.menuItem5.Index = 7;
+            this.menuItem5.Text = "-";
+            // 
+            // mnuItem_ExportACEWorldTool
+            // 
+            this.mnuItem_ExportACEWorldTool.Index = 8;
+            this.mnuItem_ExportACEWorldTool.Text = "Export to ACE World";
+            this.mnuItem_ExportACEWorldTool.Click += new System.EventHandler(this.mnuItem_ExportACEWorldTool_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -1136,6 +1151,8 @@ namespace aclogview {
         private System.Windows.Forms.ToolStripMenuItem queueMenuItem;
         private System.Windows.Forms.ToolStripMenuItem iterationMenuItem;
         private System.Windows.Forms.ToolStripMenuItem serverPortMenuItem;
+        private System.Windows.Forms.MenuItem menuItem5;
+        private System.Windows.Forms.MenuItem mnuItem_ExportACEWorldTool;
     }
 }
 

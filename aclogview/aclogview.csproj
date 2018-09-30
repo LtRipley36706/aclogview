@@ -72,6 +72,12 @@
     <Compile Include="GotoLine.Designer.cs">
       <DependentUpon>GotoLine.cs</DependentUpon>
     </Compile>
+    <Compile Include="Tools\ExportACEWorldToolForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Tools\ExportACEWorldToolForm.Designer.cs">
+      <DependentUpon>ExportACEWorldToolForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="Tools\OptionsForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -185,6 +191,9 @@
     <Compile Include="Utility.cs" />
     <EmbeddedResource Include="GotoLine.resx">
       <DependentUpon>GotoLine.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Tools\ExportACEWorldToolForm.resx">
+      <DependentUpon>ExportACEWorldToolForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Tools\OptionsForm.resx">
       <DependentUpon>OptionsForm.cs</DependentUpon>
