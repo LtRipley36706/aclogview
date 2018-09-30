@@ -160,6 +160,11 @@ namespace aclogview
         // ********************************************************************
         private readonly FragDatListFile allFragDatFile = new FragDatListFile();
         private readonly FragDatListFile createObjectFragDatFile = new FragDatListFile();
+        private readonly FragDatListFile appraisalInfoFragDatFile = new FragDatListFile();
+        private readonly FragDatListFile bookFragDatFile = new FragDatListFile();
+        private readonly FragDatListFile vendorFragDatFile = new FragDatListFile();
+        private readonly FragDatListFile slumlordFragDatFile = new FragDatListFile();
+        private readonly FragDatListFile aceWorldFragDatFile = new FragDatListFile();
 
         private void DoBuild()
         {
@@ -168,6 +173,11 @@ namespace aclogview
             // ********************************************************************
             allFragDatFile.CreateFile(Path.Combine(txtOutputFolder.Text, "All.frags"), chkCompressOutput.Checked ? FragDatListFile.CompressionType.DeflateStream : FragDatListFile.CompressionType.None);
             createObjectFragDatFile.CreateFile(Path.Combine(txtOutputFolder.Text, "CreateObject.frags"), chkCompressOutput.Checked ? FragDatListFile.CompressionType.DeflateStream : FragDatListFile.CompressionType.None);
+            appraisalInfoFragDatFile.CreateFile(Path.Combine(txtOutputFolder.Text, "AppraisalInfo.frags"), chkCompressOutput.Checked ? FragDatListFile.CompressionType.DeflateStream : FragDatListFile.CompressionType.None);
+            bookFragDatFile.CreateFile(Path.Combine(txtOutputFolder.Text, "Book.frags"), chkCompressOutput.Checked ? FragDatListFile.CompressionType.DeflateStream : FragDatListFile.CompressionType.None);
+            vendorFragDatFile.CreateFile(Path.Combine(txtOutputFolder.Text, "Vendor.frags"), chkCompressOutput.Checked ? FragDatListFile.CompressionType.DeflateStream : FragDatListFile.CompressionType.None);
+            slumlordFragDatFile.CreateFile(Path.Combine(txtOutputFolder.Text, "SlumLord.frags"), chkCompressOutput.Checked ? FragDatListFile.CompressionType.DeflateStream : FragDatListFile.CompressionType.None);
+            aceWorldFragDatFile.CreateFile(Path.Combine(txtOutputFolder.Text, "ACE-World.frags"), chkCompressOutput.Checked ? FragDatListFile.CompressionType.DeflateStream : FragDatListFile.CompressionType.None);
 
             // Do not parallel this search
             foreach (var currentFile in filesToProcess)
@@ -190,6 +200,11 @@ namespace aclogview
             // ********************************************************************
             allFragDatFile.CloseFile();
             createObjectFragDatFile.CloseFile();
+            appraisalInfoFragDatFile.CloseFile();
+            bookFragDatFile.CloseFile();
+            vendorFragDatFile.CloseFile();
+            slumlordFragDatFile.CloseFile();
+            aceWorldFragDatFile.CloseFile();
         }
 
         private void ProcessFileForBuild(string fileName)
@@ -197,11 +212,17 @@ namespace aclogview
             // NOTE: If you want to get fully constructed/merged messages instead of fragments:
             // Pass true below and use record.data as the full message, instead of individual record.frags
             var isPcapng = false;
-            var records = PCapReader.LoadPcap(fileName, false, ref searchAborted, ref isPcapng);
+            //var records = PCapReader.LoadPcap(fileName, false, ref searchAborted, ref isPcapng);
+            var records = PCapReader.LoadPcap(fileName, true, ref searchAborted, ref isPcapng);
 
             // Temperorary objects
             var allFrags = new List<FragDatListFile.FragDatInfo>();
             var createObjectFrags = new List<FragDatListFile.FragDatInfo>();
+            var appraisalInfoFrags = new List<FragDatListFile.FragDatInfo>();
+            var bookFrags = new List<FragDatListFile.FragDatInfo>();
+            var vendorFrags = new List<FragDatListFile.FragDatInfo>();
+            var slumlordFrags = new List<FragDatListFile.FragDatInfo>();
+            var aceWorldFrags = new List<FragDatListFile.FragDatInfo>();
 
             foreach (var record in records)
             {
@@ -211,38 +232,233 @@ namespace aclogview
                 // ********************************************************************
                 // ************************ Custom Search Code ************************ 
                 // ********************************************************************
-                foreach (BlobFrag frag in record.frags)
+                //foreach (BlobFrag frag in record.frags)
+                //{
+                try
                 {
-                    try
+                    //if (frag.dat_.Length <= 4)
+                    //    continue;
+
+                    Interlocked.Increment(ref fragmentsProcessed);
+
+                    FragDatListFile.PacketDirection packetDirection = (record.isSend ? FragDatListFile.PacketDirection.ClientToServer : FragDatListFile.PacketDirection.ServerToClient);
+
+                    // Write to emperorary object
+                    //allFrags.Add(new FragDatListFile.FragDatInfo(packetDirection, record.index, frag.dat_));
+                    allFrags.Add(new FragDatListFile.FragDatInfo(packetDirection, record.index, record.data));
+
+                    //BinaryReader fragDataReader = new BinaryReader(new MemoryStream(frag.dat_));
+                    //var messageCode = fragDataReader.ReadUInt32();
+                    //int messageCode = BitConverter.ToInt32(frag.dat_, 0);
+
+                    BinaryReader fragDataReader = new BinaryReader(new MemoryStream(record.data));
+
+                    var messageCode = fragDataReader.ReadUInt32();
+
+                    // Write to emperorary object
+                    //if (messageCode == 0xF745) // Create Object
+                    //{
+                    //    Interlocked.Increment(ref totalHits);
+
+                    //    createObjectFrags.Add(new FragDatListFile.FragDatInfo(packetDirection, record.index, frag.dat_));
+                    //}
+
+                    if (messageCode == (uint)PacketOpcode.Evt_Physics__CreateObject_ID)
                     {
-                        if (frag.dat_.Length <= 4)
-                            continue;
+                        Interlocked.Increment(ref totalHits);
 
-                        Interlocked.Increment(ref fragmentsProcessed);
+                        //createObjectFrags.Add(new FragDatListFile.FragDatInfo(packetDirection, record.index, frag.dat_));
+                        createObjectFrags.Add(new FragDatListFile.FragDatInfo(packetDirection, record.index, record.data));
 
-                        FragDatListFile.PacketDirection packetDirection = (record.isSend ? FragDatListFile.PacketDirection.ClientToServer : FragDatListFile.PacketDirection.ServerToClient);
-
-                        // Write to emperorary object
-                        allFrags.Add(new FragDatListFile.FragDatInfo(packetDirection, record.index, frag.dat_));
-
-						//BinaryReader fragDataReader = new BinaryReader(new MemoryStream(frag.dat_));
-						//var messageCode = fragDataReader.ReadUInt32();
-						int messageCode = BitConverter.ToInt32(frag.dat_, 0);
-
-						// Write to emperorary object
-						if (messageCode == 0xF745) // Create Object
-						{
-							Interlocked.Increment(ref totalHits);
-
-							createObjectFrags.Add(new FragDatListFile.FragDatInfo(packetDirection, record.index, frag.dat_));
-						}
+                        //createObjectPlusAppraisalInfoFrags.Add(new FragDatListFile.FragDatInfo(packetDirection, record.index, frag.dat_));
+                        aceWorldFrags.Add(new FragDatListFile.FragDatInfo(packetDirection, record.index, record.data));
                     }
-                    catch
+
+                    if (messageCode == (uint)PacketOpcode.APPRAISAL_INFO_EVENT)
                     {
-                        // Do something with the exception maybe
-                        Interlocked.Increment(ref totalExceptions);
+                        Interlocked.Increment(ref totalHits);
+
+                        //appraisalInfoFrags.Add(new FragDatListFile.FragDatInfo(packetDirection, record.index, frag.dat_));
+                        appraisalInfoFrags.Add(new FragDatListFile.FragDatInfo(packetDirection, record.index, record.data));
+
+                        //createObjectPlusAppraisalInfoFrags.Add(new FragDatListFile.FragDatInfo(packetDirection, record.index, frag.dat_));
+                        aceWorldFrags.Add(new FragDatListFile.FragDatInfo(packetDirection, record.index, record.data));
+                    }
+
+                    if (messageCode == (uint)PacketOpcode.BOOK_DATA_RESPONSE_EVENT)
+                    {
+                        Interlocked.Increment(ref totalHits);
+
+                        bookFrags.Add(new FragDatListFile.FragDatInfo(packetDirection, record.index, record.data));
+
+                        aceWorldFrags.Add(new FragDatListFile.FragDatInfo(packetDirection, record.index, record.data));
+                    }
+
+                    if (messageCode == (uint)PacketOpcode.BOOK_PAGE_DATA_RESPONSE_EVENT)
+                    {
+                        Interlocked.Increment(ref totalHits);
+
+                        bookFrags.Add(new FragDatListFile.FragDatInfo(packetDirection, record.index, record.data));
+
+                        aceWorldFrags.Add(new FragDatListFile.FragDatInfo(packetDirection, record.index, record.data));
+                    }
+
+                    if (messageCode == (uint)PacketOpcode.Evt_Writing__BookData_ID)
+                    {
+                        Interlocked.Increment(ref totalHits);
+
+                        bookFrags.Add(new FragDatListFile.FragDatInfo(packetDirection, record.index, record.data));
+
+                        aceWorldFrags.Add(new FragDatListFile.FragDatInfo(packetDirection, record.index, record.data));
+                    }
+
+                    if (messageCode == (uint)PacketOpcode.Evt_Writing__BookPageData_ID)
+                    {
+                        Interlocked.Increment(ref totalHits);
+
+                        bookFrags.Add(new FragDatListFile.FragDatInfo(packetDirection, record.index, record.data));
+
+                        aceWorldFrags.Add(new FragDatListFile.FragDatInfo(packetDirection, record.index, record.data));
+                    }
+
+                    if (messageCode == (uint)PacketOpcode.VENDOR_INFO_EVENT)
+                    {
+                        Interlocked.Increment(ref totalHits);
+
+                        vendorFrags.Add(new FragDatListFile.FragDatInfo(packetDirection, record.index, record.data));
+
+                        aceWorldFrags.Add(new FragDatListFile.FragDatInfo(packetDirection, record.index, record.data));
+                    }
+
+                    if (messageCode == (uint)PacketOpcode.Evt_House__Recv_HouseProfile_ID
+                        || messageCode == (uint)PacketOpcode.Evt_House__Recv_HouseData_ID
+                        )
+                    {
+                        Interlocked.Increment(ref totalHits);
+
+                        slumlordFrags.Add(new FragDatListFile.FragDatInfo(packetDirection, record.index, record.data));
+
+                        aceWorldFrags.Add(new FragDatListFile.FragDatInfo(packetDirection, record.index, record.data));
+                    }
+
+                    if (messageCode == (uint)PacketOpcode.Evt_Login__WorldInfo_ID)
+                    {
+                        Interlocked.Increment(ref totalHits);
+
+                        // vendorFrags.Add(new FragDatListFile.FragDatInfo(packetDirection, record.index, record.data));
+
+                        aceWorldFrags.Add(new FragDatListFile.FragDatInfo(packetDirection, record.index, record.data));
+                    }
+
+                    if (messageCode == (uint)PacketOpcode.WEENIE_ORDERED_EVENT || messageCode == (uint)PacketOpcode.ORDERED_EVENT)
+                    {
+                        uint opCode = 0;
+
+                        if (messageCode == (uint)PacketOpcode.WEENIE_ORDERED_EVENT)
+                        {
+                            WOrderHdr orderHeader = WOrderHdr.read(fragDataReader);
+                            opCode = fragDataReader.ReadUInt32();
+                        }
+                        if (messageCode == (uint)PacketOpcode.ORDERED_EVENT)
+                        {
+                            OrderHdr orderHeader = OrderHdr.read(fragDataReader);
+                            opCode = fragDataReader.ReadUInt32();
+                        }
+
+                        if (opCode == (uint)PacketOpcode.Evt_Physics__CreateObject_ID)
+                        {
+                            Interlocked.Increment(ref totalHits);
+
+                            //createObjectFrags.Add(new FragDatListFile.FragDatInfo(packetDirection, record.index, frag.dat_));
+                            createObjectFrags.Add(new FragDatListFile.FragDatInfo(packetDirection, record.index, record.data));
+
+                            //createObjectPlusAppraisalInfoFrags.Add(new FragDatListFile.FragDatInfo(packetDirection, record.index, frag.dat_));
+                            aceWorldFrags.Add(new FragDatListFile.FragDatInfo(packetDirection, record.index, record.data));
+                        }
+
+                        if (opCode == (uint)PacketOpcode.APPRAISAL_INFO_EVENT)
+                        {
+                            Interlocked.Increment(ref totalHits);
+
+                            //appraisalInfoFrags.Add(new FragDatListFile.FragDatInfo(packetDirection, record.index, frag.dat_));
+                            appraisalInfoFrags.Add(new FragDatListFile.FragDatInfo(packetDirection, record.index, record.data));
+
+                            //createObjectPlusAppraisalInfoFrags.Add(new FragDatListFile.FragDatInfo(packetDirection, record.index, frag.dat_));
+                            aceWorldFrags.Add(new FragDatListFile.FragDatInfo(packetDirection, record.index, record.data));
+                        }
+
+                        if (opCode == (uint)PacketOpcode.BOOK_DATA_RESPONSE_EVENT)
+                        {
+                            Interlocked.Increment(ref totalHits);
+
+                            bookFrags.Add(new FragDatListFile.FragDatInfo(packetDirection, record.index, record.data));
+
+                            aceWorldFrags.Add(new FragDatListFile.FragDatInfo(packetDirection, record.index, record.data));
+                        }
+
+                        if (opCode == (uint)PacketOpcode.BOOK_PAGE_DATA_RESPONSE_EVENT)
+                        {
+                            Interlocked.Increment(ref totalHits);
+
+                            bookFrags.Add(new FragDatListFile.FragDatInfo(packetDirection, record.index, record.data));
+
+                            aceWorldFrags.Add(new FragDatListFile.FragDatInfo(packetDirection, record.index, record.data));
+                        }
+
+                        if (opCode == (uint)PacketOpcode.Evt_Writing__BookData_ID)
+                        {
+                            Interlocked.Increment(ref totalHits);
+
+                            bookFrags.Add(new FragDatListFile.FragDatInfo(packetDirection, record.index, record.data));
+
+                            aceWorldFrags.Add(new FragDatListFile.FragDatInfo(packetDirection, record.index, record.data));
+                        }
+
+                        if (opCode == (uint)PacketOpcode.Evt_Writing__BookPageData_ID)
+                        {
+                            Interlocked.Increment(ref totalHits);
+
+                            bookFrags.Add(new FragDatListFile.FragDatInfo(packetDirection, record.index, record.data));
+
+                            aceWorldFrags.Add(new FragDatListFile.FragDatInfo(packetDirection, record.index, record.data));
+                        }
+
+                        if (opCode == (uint)PacketOpcode.VENDOR_INFO_EVENT)
+                        {
+                            Interlocked.Increment(ref totalHits);
+
+                            vendorFrags.Add(new FragDatListFile.FragDatInfo(packetDirection, record.index, record.data));
+
+                            aceWorldFrags.Add(new FragDatListFile.FragDatInfo(packetDirection, record.index, record.data));
+                        }
+
+                        if (opCode == (uint)PacketOpcode.Evt_House__Recv_HouseProfile_ID
+                            || opCode == (uint)PacketOpcode.Evt_House__Recv_HouseData_ID
+                            )
+                        {
+                            Interlocked.Increment(ref totalHits);
+
+                            slumlordFrags.Add(new FragDatListFile.FragDatInfo(packetDirection, record.index, record.data));
+
+                            aceWorldFrags.Add(new FragDatListFile.FragDatInfo(packetDirection, record.index, record.data));
+                        }
+
+                        if (opCode == (uint)PacketOpcode.Evt_Login__WorldInfo_ID)
+                        {
+                            Interlocked.Increment(ref totalHits);
+
+                            // vendorFrags.Add(new FragDatListFile.FragDatInfo(packetDirection, record.index, record.data));
+
+                            aceWorldFrags.Add(new FragDatListFile.FragDatInfo(packetDirection, record.index, record.data));
+                        }
                     }
                 }
+                catch
+                {
+                    // Do something with the exception maybe
+                    Interlocked.Increment(ref totalExceptions);
+                }
+                //}
             }
 
             string outputFileName = (chkIncludeFullPathAndFileName.Checked ? fileName : (Path.GetFileName(fileName)));
@@ -252,6 +468,11 @@ namespace aclogview
             // ********************************************************************
             allFragDatFile.Write(new KeyValuePair<string, IList<FragDatListFile.FragDatInfo>>(outputFileName, allFrags));
             createObjectFragDatFile.Write(new KeyValuePair<string, IList<FragDatListFile.FragDatInfo>>(outputFileName, createObjectFrags));
+            appraisalInfoFragDatFile.Write(new KeyValuePair<string, IList<FragDatListFile.FragDatInfo>>(outputFileName, appraisalInfoFrags));
+            bookFragDatFile.Write(new KeyValuePair<string, IList<FragDatListFile.FragDatInfo>>(outputFileName, bookFrags));
+            vendorFragDatFile.Write(new KeyValuePair<string, IList<FragDatListFile.FragDatInfo>>(outputFileName, vendorFrags));
+            slumlordFragDatFile.Write(new KeyValuePair<string, IList<FragDatListFile.FragDatInfo>>(outputFileName, slumlordFrags));
+            aceWorldFragDatFile.Write(new KeyValuePair<string, IList<FragDatListFile.FragDatInfo>>(outputFileName, aceWorldFrags));
 
             Interlocked.Increment(ref filesProcessed);
         }
