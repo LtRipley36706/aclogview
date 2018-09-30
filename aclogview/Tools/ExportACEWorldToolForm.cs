@@ -693,7 +693,7 @@ namespace aclogview
                     //if (File.Exists(filename))
                     //    File.Delete(filename);
 
-                    if (!((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_StackSize) != 0))
+                    if (!((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_StackSize) != 0))
                     {
                         continue;
                     }
@@ -714,21 +714,21 @@ namespace aclogview
 
                             calcValue = parsed.wdesc._value / parsed.wdesc._stackSize;
 
-                            if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_Burden) != 0)
+                            if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_Burden) != 0)
                                 intsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeInt.ENCUMB_VAL_INT}, {(int)calcBurden}) /* {Enum.GetName(typeof(STypeInt), STypeInt.ENCUMB_VAL_INT)} */" + Environment.NewLine;
-                            if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_MaxStackSize) != 0)
+                            if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_MaxStackSize) != 0)
                                 intsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeInt.MAX_STACK_SIZE_INT}, {(int)parsed.wdesc._maxStackSize}) /* {Enum.GetName(typeof(STypeInt), STypeInt.MAX_STACK_SIZE_INT)} */" + Environment.NewLine;
-                            //if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_MaxStructure) != 0)
+                            //if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_MaxStructure) != 0)
                             //    intsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeInt.MAX_STRUCTURE_INT}, {parsed.wdesc._maxStructure}) /* {Enum.GetName(typeof(STypeInt), STypeInt.MAX_STRUCTURE_INT)} */" + Environment.NewLine;
-                            //if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_StackSize) != 0)
+                            //if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_StackSize) != 0)
                             //    intsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeInt.STACK_SIZE_INT}, {parsed.wdesc._stackSize})" + Environment.NewLine;
-                            if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_StackSize) != 0)
+                            if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_StackSize) != 0)
                                 intsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeInt.STACK_SIZE_INT}, {(int)stackSize}) /* {Enum.GetName(typeof(STypeInt), STypeInt.STACK_SIZE_INT)} */" + Environment.NewLine;
-                            //if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_Structure) != 0)
+                            //if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_Structure) != 0)
                             //    intsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeInt.STRUCTURE_INT}, {parsed.wdesc._structure})" + Environment.NewLine;
-                            //if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_Structure) != 0)
+                            //if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_Structure) != 0)
                             //    intsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeInt.STRUCTURE_INT}, {parsed.wdesc._maxStructure}) /* {Enum.GetName(typeof(STypeInt), STypeInt.STRUCTURE_INT)} */" + Environment.NewLine;
-                            if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_Value) != 0)
+                            if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_Value) != 0)
                                 intsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeInt.VALUE_INT}, {(int)calcValue}) /* {Enum.GetName(typeof(STypeInt), STypeInt.VALUE_INT)} */" + Environment.NewLine;
 
                             if (strsLine != "")
@@ -7457,7 +7457,7 @@ namespace aclogview
 
                                     line += $"{parsed.wdesc._wcid}, {parsed.wdesc.header}, "; //+
 
-                                    if ((parsed.wdesc._bitfield & (uint)PublicWeenieDesc.BitfieldIndex.BF_INCLUDES_SECOND_HEADER) != 0)
+                                    if ((parsed.wdesc._bitfield & (uint)CM_Physics.PublicWeenieDesc.BitfieldIndex.BF_INCLUDES_SECOND_HEADER) != 0)
                                         line += $"{parsed.wdesc.header2}, "; //+
                                     else
                                         line += $"NULL, "; //+
@@ -7470,9 +7470,9 @@ namespace aclogview
                                         guid = parsed.object_id.ToString();
 
                                     didsLine += $"     , ({guid}, {(uint)STypeDID.ICON_DID}, {(uint)parsed.wdesc._iconID})" + Environment.NewLine;
-                                    if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_IconOverlay) != 0)
+                                    if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_IconOverlay) != 0)
                                         didsLine += $"     , ({guid}, {(uint)STypeDID.ICON_OVERLAY_DID}, {(uint)parsed.wdesc._iconOverlayID})" + Environment.NewLine;
-                                    if ((parsed.wdesc.header2 & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader2.PWD2_Packed_IconUnderlay) != 0)
+                                    if ((parsed.wdesc.header2 & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader2.PWD2_Packed_IconUnderlay) != 0)
                                         didsLine += $"     , ({guid}, {(uint)STypeDID.ICON_UNDERLAY_DID}, {(uint)parsed.wdesc._iconUnderlayID})" + Environment.NewLine;
 
                                     if ((parsed.physicsdesc.bitfield & (uint)PhysicsDesc.PhysicsDescInfo.CSetup) != 0)
@@ -7490,9 +7490,9 @@ namespace aclogview
                                     if ((parsed.physicsdesc.bitfield & (uint)PhysicsDesc.PhysicsDescInfo.PETABLE) != 0)
                                         didsLine += $"     , ({guid}, {(uint)STypeDID.PHYSICS_EFFECT_TABLE_DID}, {(uint)parsed.physicsdesc.phstable_id})" + Environment.NewLine;
                                     line += $"{parsed.physicsdesc.bitfield}";
-                                    if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_SpellID) != 0)
+                                    if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_SpellID) != 0)
                                         didsLine += $"     , ({guid}, {(uint)STypeDID.SPELL_DID}, {(uint)parsed.wdesc._spellID})" + Environment.NewLine;
-                                    if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_PScript) != 0)
+                                    if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_PScript) != 0)
                                         didsLine += $"     , ({guid}, {(uint)STypeDID.PHYSICS_SCRIPT_DID}, {(uint)parsed.wdesc._pscript})" + Environment.NewLine;
                                     if ((parsed.physicsdesc.bitfield & (uint)PhysicsDesc.PhysicsDescInfo.DEFAULT_SCRIPT) != 0)
                                         didsLine += $"     , ({guid}, {(uint)STypeDID.USE_USER_ANIMATION_DID}, {(uint)parsed.physicsdesc.default_script})" + Environment.NewLine;
@@ -7509,55 +7509,55 @@ namespace aclogview
                                         //intsLine += $"     , ({parsed.object_id}, {(uint)STypeInt.PALETTE_TEMPLATE_INT}, {parsed.objdesc.paletteID})" + Environment.NewLine;
                                         didsLine += $"     , ({guid}, {(uint)STypeDID.PALETTE_BASE_DID}, {(uint)parsed.objdesc.paletteID})" + Environment.NewLine;
 
-                                    if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_AmmoType) != 0)
+                                    if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_AmmoType) != 0)
                                         intsLine += $"     , ({guid}, {(uint)STypeInt.AMMO_TYPE_INT}, {(uint)parsed.wdesc._ammoType})" + Environment.NewLine;
-                                    if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_BlipColor) != 0)
+                                    if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_BlipColor) != 0)
                                         intsLine += $"     , ({guid}, {(uint)STypeInt.RADARBLIP_COLOR_INT}, {parsed.wdesc._blipColor})" + Environment.NewLine;
-                                    if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_Burden) != 0)
+                                    if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_Burden) != 0)
                                         intsLine += $"     , ({guid}, {(uint)STypeInt.ENCUMB_VAL_INT}, {parsed.wdesc._burden})" + Environment.NewLine;
-                                    if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_CombatUse) != 0)
+                                    if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_CombatUse) != 0)
                                         intsLine += $"     , ({guid}, {(uint)STypeInt.COMBAT_USE_INT}, {parsed.wdesc._combatUse})" + Environment.NewLine;
-                                    if ((parsed.wdesc.header2 & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader2.PWD2_Packed_CooldownDuration) != 0)
+                                    if ((parsed.wdesc.header2 & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader2.PWD2_Packed_CooldownDuration) != 0)
                                         floatsLine += $"     , ({guid}, {(uint)STypeFloat.COOLDOWN_DURATION_FLOAT}, {parsed.wdesc._cooldown_duration})" + Environment.NewLine;
-                                    if ((parsed.wdesc.header2 & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader2.PWD2_Packed_CooldownID) != 0)
+                                    if ((parsed.wdesc.header2 & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader2.PWD2_Packed_CooldownID) != 0)
                                         intsLine += $"     , ({guid}, {(uint)STypeInt.SHARED_COOLDOWN_INT}, {parsed.wdesc._cooldown_id})" + Environment.NewLine;
-                                    if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_UIEffects) != 0)
+                                    if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_UIEffects) != 0)
                                         intsLine += $"     , ({guid}, {(uint)STypeInt.UI_EFFECTS_INT}, {parsed.wdesc._effects})" + Environment.NewLine;
-                                    if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_ContainersCapacity) != 0)
+                                    if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_ContainersCapacity) != 0)
                                         intsLine += $"     , ({guid}, {(uint)STypeInt.CONTAINERS_CAPACITY_INT}, {parsed.wdesc._containersCapacity})" + Environment.NewLine;
-                                    if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_HookType) != 0)
+                                    if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_HookType) != 0)
                                         intsLine += $"     , ({guid}, {(uint)STypeInt.HOOK_TYPE_INT}, {(uint)parsed.wdesc._hook_type})" + Environment.NewLine;
-                                    if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_HookItemTypes) != 0)
+                                    if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_HookItemTypes) != 0)
                                         intsLine += $"     , ({guid}, {(uint)STypeInt.HOOK_ITEM_TYPE_INT}, {parsed.wdesc._hook_item_types})" + Environment.NewLine;
-                                    if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_ItemsCapacity) != 0)
+                                    if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_ItemsCapacity) != 0)
                                         intsLine += $"     , ({guid}, {(uint)STypeInt.ITEMS_CAPACITY_INT}, {parsed.wdesc._itemsCapacity})" + Environment.NewLine;
-                                    if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_Location) != 0)
+                                    if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_Location) != 0)
                                         intsLine += $"     , ({guid}, {(uint)STypeInt.CURRENT_WIELDED_LOCATION_INT}, {parsed.wdesc._location})" + Environment.NewLine;
-                                    if ((parsed.wdesc.header & unchecked((uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_MaterialType)) != 0)
+                                    if ((parsed.wdesc.header & unchecked((uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_MaterialType)) != 0)
                                         intsLine += $"     , ({guid}, {(uint)STypeInt.MATERIAL_TYPE_INT}, {(uint)parsed.wdesc._material_type})" + Environment.NewLine;
-                                    if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_MaxStackSize) != 0)
+                                    if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_MaxStackSize) != 0)
                                         intsLine += $"     , ({guid}, {(uint)STypeInt.MAX_STACK_SIZE_INT}, {parsed.wdesc._maxStackSize})" + Environment.NewLine;
-                                    if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_MaxStructure) != 0)
+                                    if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_MaxStructure) != 0)
                                         intsLine += $"     , ({guid}, {(uint)STypeInt.MAX_STRUCTURE_INT}, {parsed.wdesc._maxStructure})" + Environment.NewLine;
-                                    if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_RadarEnum) != 0)
+                                    if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_RadarEnum) != 0)
                                         intsLine += $"     , ({guid}, {(uint)STypeInt.SHOWABLE_ON_RADAR_INT}, {(uint)parsed.wdesc._radar_enum})" + Environment.NewLine;
-                                    if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_StackSize) != 0)
+                                    if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_StackSize) != 0)
                                         intsLine += $"     , ({guid}, {(uint)STypeInt.STACK_SIZE_INT}, {parsed.wdesc._stackSize})" + Environment.NewLine;
-                                    if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_Structure) != 0)
+                                    if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_Structure) != 0)
                                         intsLine += $"     , ({guid}, {(uint)STypeInt.STRUCTURE_INT}, {parsed.wdesc._structure})" + Environment.NewLine;
-                                    if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_TargetType) != 0)
+                                    if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_TargetType) != 0)
                                         intsLine += $"     , ({guid}, {(uint)STypeInt.TARGET_TYPE_INT}, {(uint)parsed.wdesc._targetType})" + Environment.NewLine;
-                                    if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_Useability) != 0)
+                                    if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_Useability) != 0)
                                         intsLine += $"     , ({guid}, {(uint)STypeInt.ITEM_USEABLE_INT}, {(uint)parsed.wdesc._useability})" + Environment.NewLine;
-                                    if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_UseRadius) != 0)
+                                    if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_UseRadius) != 0)
                                         floatsLine += $"     , ({guid}, {(uint)STypeFloat.USE_RADIUS_FLOAT}, {parsed.wdesc._useRadius})" + Environment.NewLine;
-                                    if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_ValidLocations) != 0)
+                                    if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_ValidLocations) != 0)
                                         intsLine += $"     , ({guid}, {(uint)STypeInt.LOCATIONS_INT}, {parsed.wdesc._valid_locations})" + Environment.NewLine;
-                                    if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_Value) != 0)
+                                    if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_Value) != 0)
                                         intsLine += $"     , ({guid}, {(uint)STypeInt.VALUE_INT}, {parsed.wdesc._value})" + Environment.NewLine;
-                                    //if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_ContainerID) != 0)
+                                    //if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_ContainerID) != 0)
 
-                                    if (((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_ContainerID) != 0) && objectIds.Contains(parsed.wdesc._containerID))
+                                    if (((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_ContainerID) != 0) && objectIds.Contains(parsed.wdesc._containerID))
                                         if (!generateNewGuids)
                                             iidsLine += $"     , ({guid}, {(uint)STypeIID.CONTAINER_IID}, {(uint)parsed.wdesc._containerID})" + Environment.NewLine;
 
@@ -7567,58 +7567,58 @@ namespace aclogview
                                     //    line = line.TrimEnd(Environment.NewLine.ToCharArray()) + ";" + Environment.NewLine;
                                     //    writer.WriteLine(line);
                                     //}
-                                    //if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_WielderID) != 0)
+                                    //if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_WielderID) != 0)
                                     //{
                                     //    line = $"{sqlCommand} INTO `ace_object_properties_int` (`aceObjectId`, `intPropertyId`, `propertyValue`)" + Environment.NewLine;
                                     //    line += $"VALUES ({parsed.object_id}, {(uint)STypeInt.???}, {parsed.wdesc._wielderID})" + Environment.NewLine;
                                     //    line = line.TrimEnd(Environment.NewLine.ToCharArray()) + ";" + Environment.NewLine;
                                     //    writer.WriteLine(line);
                                     //}
-                                    //if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_WielderID) != 0)
+                                    //if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_WielderID) != 0)
                                     //    intsLine += $"     , ({parsed.object_id}, {(uint)STypeIID.WIELDER_IID}, {parsed.wdesc._wielderID})" + Environment.NewLine;
 
-                                    if (((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_WielderID) != 0) && objectIds.Contains(parsed.wdesc._wielderID))
+                                    if (((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_WielderID) != 0) && objectIds.Contains(parsed.wdesc._wielderID))
                                         if (!generateNewGuids)
                                             iidsLine += $"     , ({guid}, {(uint)STypeIID.WIELDER_IID}, {(uint)parsed.wdesc._wielderID})" + Environment.NewLine;
 
-                                    //if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_HouseOwner) != 0)
+                                    //if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_HouseOwner) != 0)
                                     //{
                                     //    line = $"{sqlCommand} INTO `ace_object_properties_int` (`aceObjectId`, `intPropertyId`, `propertyValue`)" + Environment.NewLine;
                                     //    line += $"VALUES ({parsed.object_id}, {(uint)STypeInt.???}, {parsed.wdesc._house_owner_iid})" + Environment.NewLine;
                                     //    line = line.TrimEnd(Environment.NewLine.ToCharArray()) + ";" + Environment.NewLine;
                                     //    writer.WriteLine(line);
                                     //}
-                                    //if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_HouseRestrictions) != 0)
+                                    //if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_HouseRestrictions) != 0)
                                     //{
                                     //    line = $"{sqlCommand} INTO `ace_object_properties_int` (`aceObjectId`, `intPropertyId`, `propertyValue`)" + Environment.NewLine;
                                     //    line += $"VALUES ({parsed.object_id}, {(uint)STypeInt.???}, {parsed.wdesc.???})" + Environment.NewLine;
                                     //    line = line.TrimEnd(Environment.NewLine.ToCharArray()) + ";" + Environment.NewLine;
                                     //    writer.WriteLine(line);
                                     //}
-                                    //if ((parsed.wdesc.header2 & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader2.PWD2_Packed_PetOwner) != 0)
+                                    //if ((parsed.wdesc.header2 & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader2.PWD2_Packed_PetOwner) != 0)
                                     //{
                                     //    line = $"{sqlCommand} INTO `ace_object_properties_int` (`aceObjectId`, `intPropertyId`, `propertyValue`)" + Environment.NewLine;
                                     //    line += $"VALUES ({parsed.object_id}, {(uint)STypeInt.???}, {parsed.wdesc._pet_owner})" + Environment.NewLine;
                                     //    line = line.TrimEnd(Environment.NewLine.ToCharArray()) + ";" + Environment.NewLine;
                                     //    writer.WriteLine(line);
                                     //}
-                                    //if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_Monarch) != 0)
+                                    //if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_Monarch) != 0)
                                     //{
                                     //    line = $"{sqlCommand} INTO `ace_object_properties_int` (`aceObjectId`, `intPropertyId`, `propertyValue`)" + Environment.NewLine;
                                     //    line += $"VALUES ({parsed.object_id}, {(uint)STypeInt.???}, {parsed.wdesc._monarch})" + Environment.NewLine;
                                     //    line = line.TrimEnd(Environment.NewLine.ToCharArray()) + ";" + Environment.NewLine;
                                     //    writer.WriteLine(line);
                                     //}
-                                    //if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_Workmanship) != 0)
+                                    //if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_Workmanship) != 0)
                                     //{
                                     //    line = $"{sqlCommand} INTO `ace_object_properties_int` (`aceObjectId`, `intPropertyId`, `propertyValue`)" + Environment.NewLine;
                                     //    line += $"VALUES ({parsed.object_id}, {(uint)STypeInt.ITEM_WORKMANSHIP_INT}, {parsed.wdesc._workmanship})" + Environment.NewLine;
                                     //    line = line.TrimEnd(Environment.NewLine.ToCharArray()) + ";" + Environment.NewLine;
                                     //    writer.WriteLine(line);
                                     //}
-                                    if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_PluralName) != 0)
+                                    if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_PluralName) != 0)
                                         strsLine += $"     , ({guid}, {(uint)STypeString.PLURAL_NAME_STRING}, '{parsed.wdesc._plural_name.m_buffer.Replace("'", "''")}')" + Environment.NewLine;
-                                    if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_Priority) != 0)
+                                    if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_Priority) != 0)
                                         intsLine += $"     , ({guid}, {(uint)STypeInt.CLOTHING_PRIORITY_INT}, {parsed.wdesc._priority})" + Environment.NewLine;
                                     if ((parsed.physicsdesc.bitfield & (uint)PhysicsDesc.PhysicsDescInfo.DEFAULT_SCRIPT_INTENSITY) != 0)
                                         floatsLine += $"     , ({guid}, {(uint)STypeFloat.PHYSICS_SCRIPT_INTENSITY_FLOAT}, {parsed.physicsdesc.default_script_intensity})" + Environment.NewLine;
@@ -7684,31 +7684,31 @@ namespace aclogview
                                     //    writer.WriteLine(line);
                                     //}
 
-                                    if (((uint)parsed.wdesc._bitfield & (uint)PublicWeenieDesc.BitfieldIndex.BF_ATTACKABLE) != 0)
+                                    if (((uint)parsed.wdesc._bitfield & (uint)CM_Physics.PublicWeenieDesc.BitfieldIndex.BF_ATTACKABLE) != 0)
                                         boolsLine += $"     , ({guid}, {(uint)STypeBool.ATTACKABLE_BOOL}, {true})" + Environment.NewLine;
-                                    if (((uint)parsed.wdesc._bitfield & (uint)PublicWeenieDesc.BitfieldIndex.BF_HIDDEN_ADMIN) != 0)
+                                    if (((uint)parsed.wdesc._bitfield & (uint)CM_Physics.PublicWeenieDesc.BitfieldIndex.BF_HIDDEN_ADMIN) != 0)
                                         boolsLine += $"     , ({guid}, {(uint)STypeBool.HIDDEN_ADMIN_BOOL}, {true})" + Environment.NewLine;
-                                    if (((uint)parsed.wdesc._bitfield & (uint)PublicWeenieDesc.BitfieldIndex.BF_IMMUNE_CELL_RESTRICTIONS) != 0)
+                                    if (((uint)parsed.wdesc._bitfield & (uint)CM_Physics.PublicWeenieDesc.BitfieldIndex.BF_IMMUNE_CELL_RESTRICTIONS) != 0)
                                         boolsLine += $"     , ({guid}, {(uint)STypeBool.IGNORE_HOUSE_BARRIERS_BOOL}, {true})" + Environment.NewLine;
-                                    if (((uint)parsed.wdesc._bitfield & (uint)PublicWeenieDesc.BitfieldIndex.BF_INSCRIBABLE) != 0)
+                                    if (((uint)parsed.wdesc._bitfield & (uint)CM_Physics.PublicWeenieDesc.BitfieldIndex.BF_INSCRIBABLE) != 0)
                                         boolsLine += $"     , ({guid}, {(uint)STypeBool.INSCRIBABLE_BOOL}, {true})" + Environment.NewLine;
-                                    //if (((uint)parsed.wdesc._bitfield & (uint)PublicWeenieDesc.BitfieldIndex.BF_PLAYER_KILLER) != 0)
+                                    //if (((uint)parsed.wdesc._bitfield & (uint)CM_Physics.PublicWeenieDesc.BitfieldIndex.BF_PLAYER_KILLER) != 0)
                                     //    boolsLine += $"     , ({parsed.object_id}, {(uint)STypeBool.PK_KILLER_BOOL}, {true})" + Environment.NewLine;
-                                    if (((uint)parsed.wdesc._bitfield & (uint)PublicWeenieDesc.BitfieldIndex.BF_REQUIRES_PACKSLOT) != 0)
+                                    if (((uint)parsed.wdesc._bitfield & (uint)CM_Physics.PublicWeenieDesc.BitfieldIndex.BF_REQUIRES_PACKSLOT) != 0)
                                         boolsLine += $"     , ({guid}, {(uint)STypeBool.REQUIRES_BACKPACK_SLOT_BOOL}, {true})" + Environment.NewLine;
-                                    if (((uint)parsed.wdesc._bitfield & (uint)PublicWeenieDesc.BitfieldIndex.BF_RETAINED) != 0)
+                                    if (((uint)parsed.wdesc._bitfield & (uint)CM_Physics.PublicWeenieDesc.BitfieldIndex.BF_RETAINED) != 0)
                                         boolsLine += $"     , ({guid}, {(uint)STypeBool.RETAINED_BOOL}, {true})" + Environment.NewLine;
-                                    if (((uint)parsed.wdesc._bitfield & (uint)PublicWeenieDesc.BitfieldIndex.BF_STUCK) != 0)
+                                    if (((uint)parsed.wdesc._bitfield & (uint)CM_Physics.PublicWeenieDesc.BitfieldIndex.BF_STUCK) != 0)
                                         boolsLine += $"     , ({guid}, {(uint)STypeBool.STUCK_BOOL}, {true})" + Environment.NewLine;
-                                    if (((uint)parsed.wdesc._bitfield & (uint)PublicWeenieDesc.BitfieldIndex.BF_UI_HIDDEN) != 0)
+                                    if (((uint)parsed.wdesc._bitfield & (uint)CM_Physics.PublicWeenieDesc.BitfieldIndex.BF_UI_HIDDEN) != 0)
                                         boolsLine += $"     , ({guid}, {(uint)STypeBool.UI_HIDDEN_BOOL}, {true})" + Environment.NewLine;
-                                    //if (((uint)parsed.wdesc._bitfield & (uint)PublicWeenieDesc.BitfieldIndex.BF_VENDOR) != 0)
+                                    //if (((uint)parsed.wdesc._bitfield & (uint)CM_Physics.PublicWeenieDesc.BitfieldIndex.BF_VENDOR) != 0)
                                     //    boolsLine += $"     , ({parsed.object_id}, {(uint)STypeBool.VENDOR_SERVICE_BOOL}, {true})" + Environment.NewLine;
-                                    if (((uint)parsed.wdesc._bitfield & (uint)PublicWeenieDesc.BitfieldIndex.BF_WIELD_LEFT) != 0)
+                                    if (((uint)parsed.wdesc._bitfield & (uint)CM_Physics.PublicWeenieDesc.BitfieldIndex.BF_WIELD_LEFT) != 0)
                                         boolsLine += $"     , ({guid}, {(uint)STypeBool.AUTOWIELD_LEFT_BOOL}, {true})" + Environment.NewLine;
-                                    if (((uint)parsed.wdesc._bitfield & (uint)PublicWeenieDesc.BitfieldIndex.BF_WIELD_ON_USE) != 0)
+                                    if (((uint)parsed.wdesc._bitfield & (uint)CM_Physics.PublicWeenieDesc.BitfieldIndex.BF_WIELD_ON_USE) != 0)
                                         boolsLine += $"     , ({guid}, {(uint)STypeBool.WIELD_ON_USE_BOOL}, {true})" + Environment.NewLine;
-                                    //if (((uint)parsed.wdesc._bitfield & (uint)PublicWeenieDesc.BitfieldIndex.BF_ADMIN) != 0)
+                                    //if (((uint)parsed.wdesc._bitfield & (uint)CM_Physics.PublicWeenieDesc.BitfieldIndex.BF_ADMIN) != 0)
                                     //    boolsLine += $"     , ({parsed.object_id}, {(uint)STypeBool.IS_ADMIN_BOOL}, {true})" + Environment.NewLine;
 
                                     if (staticObjectsWeenieType.ContainsKey(parsed.object_id))
@@ -7968,9 +7968,9 @@ namespace aclogview
                                 $"{parsed.object_id}, {parsed.wdesc._bitfield}, " +
                                 $"{parsed.wdesc._wcid}, {parsed.wdesc.header}, "; //+
                                 didsLine += $"     , ({parsed.object_id}, {(uint)STypeDID.ICON_DID}, {(uint)parsed.wdesc._iconID})" + Environment.NewLine;
-                                if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_IconOverlay) != 0)
+                                if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_IconOverlay) != 0)
                                     didsLine += $"     , ({parsed.object_id}, {(uint)STypeDID.ICON_OVERLAY_DID}, {(uint)parsed.wdesc._iconOverlayID})" + Environment.NewLine;
-                                if ((parsed.wdesc.header2 & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader2.PWD2_Packed_IconUnderlay) != 0)
+                                if ((parsed.wdesc.header2 & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader2.PWD2_Packed_IconUnderlay) != 0)
                                     didsLine += $"     , ({parsed.object_id}, {(uint)STypeDID.ICON_UNDERLAY_DID}, {(uint)parsed.wdesc._iconUnderlayID})" + Environment.NewLine;
 
                                 if ((parsed.physicsdesc.bitfield & (uint)PhysicsDesc.PhysicsDescInfo.CSetup) != 0)
@@ -7988,9 +7988,9 @@ namespace aclogview
                                 if ((parsed.physicsdesc.bitfield & (uint)PhysicsDesc.PhysicsDescInfo.PETABLE) != 0)
                                     didsLine += $"     , ({parsed.object_id}, {(uint)STypeDID.PHYSICS_EFFECT_TABLE_DID}, {(uint)parsed.physicsdesc.phstable_id})" + Environment.NewLine;
                                 line += $"{parsed.physicsdesc.bitfield}";
-                                if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_SpellID) != 0)
+                                if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_SpellID) != 0)
                                     didsLine += $"     , ({parsed.object_id}, {(uint)STypeDID.SPELL_DID}, {(uint)parsed.wdesc._spellID})" + Environment.NewLine;
-                                if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_PScript) != 0)
+                                if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_PScript) != 0)
                                     didsLine += $"     , ({parsed.object_id}, {(uint)STypeDID.PHYSICS_SCRIPT_DID}, {(uint)parsed.wdesc._pscript})" + Environment.NewLine;
                                 if ((parsed.physicsdesc.bitfield & (uint)PhysicsDesc.PhysicsDescInfo.DEFAULT_SCRIPT) != 0)
                                     didsLine += $"     , ({parsed.object_id}, {(uint)STypeDID.USE_USER_ANIMATION_DID}, {(uint)parsed.physicsdesc.default_script})" + Environment.NewLine;
@@ -8020,54 +8020,54 @@ namespace aclogview
                                     //intsLine += $"     , ({parsed.object_id}, {(uint)STypeInt.PALETTE_TEMPLATE_INT}, {parsed.objdesc.paletteID})" + Environment.NewLine;
                                     didsLine += $"     , ({parsed.object_id}, {(uint)STypeDID.PALETTE_BASE_DID}, {(uint)parsed.objdesc.paletteID})" + Environment.NewLine;
 
-                                if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_AmmoType) != 0)
+                                if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_AmmoType) != 0)
                                     intsLine += $"     , ({parsed.object_id}, {(uint)STypeInt.AMMO_TYPE_INT}, {(uint)parsed.wdesc._ammoType})" + Environment.NewLine;
-                                if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_BlipColor) != 0)
+                                if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_BlipColor) != 0)
                                     intsLine += $"     , ({parsed.object_id}, {(uint)STypeInt.RADARBLIP_COLOR_INT}, {parsed.wdesc._blipColor})" + Environment.NewLine;
-                                if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_Burden) != 0)
+                                if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_Burden) != 0)
                                     intsLine += $"     , ({parsed.object_id}, {(uint)STypeInt.ENCUMB_VAL_INT}, {parsed.wdesc._burden})" + Environment.NewLine;
-                                if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_CombatUse) != 0)
+                                if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_CombatUse) != 0)
                                     intsLine += $"     , ({parsed.object_id}, {(uint)STypeInt.COMBAT_USE_INT}, {parsed.wdesc._combatUse})" + Environment.NewLine;
-                                if ((parsed.wdesc.header2 & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader2.PWD2_Packed_CooldownDuration) != 0)
+                                if ((parsed.wdesc.header2 & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader2.PWD2_Packed_CooldownDuration) != 0)
                                     floatsLine += $"     , ({parsed.object_id}, {(uint)STypeFloat.COOLDOWN_DURATION_FLOAT}, {parsed.wdesc._cooldown_duration})" + Environment.NewLine;
-                                if ((parsed.wdesc.header2 & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader2.PWD2_Packed_CooldownID) != 0)
+                                if ((parsed.wdesc.header2 & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader2.PWD2_Packed_CooldownID) != 0)
                                     intsLine += $"     , ({parsed.object_id}, {(uint)STypeInt.SHARED_COOLDOWN_INT}, {parsed.wdesc._cooldown_id})" + Environment.NewLine;
-                                if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_UIEffects) != 0)
+                                if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_UIEffects) != 0)
                                     intsLine += $"     , ({parsed.object_id}, {(uint)STypeInt.UI_EFFECTS_INT}, {parsed.wdesc._effects})" + Environment.NewLine;
-                                if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_ContainersCapacity) != 0)
+                                if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_ContainersCapacity) != 0)
                                     intsLine += $"     , ({parsed.object_id}, {(uint)STypeInt.CONTAINERS_CAPACITY_INT}, {parsed.wdesc._containersCapacity})" + Environment.NewLine;
-                                if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_HookType) != 0)
+                                if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_HookType) != 0)
                                     intsLine += $"     , ({parsed.object_id}, {(uint)STypeInt.HOOK_TYPE_INT}, {(uint)parsed.wdesc._hook_type})" + Environment.NewLine;
-                                if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_HookItemTypes) != 0)
+                                if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_HookItemTypes) != 0)
                                     intsLine += $"     , ({parsed.object_id}, {(uint)STypeInt.HOOK_ITEM_TYPE_INT}, {parsed.wdesc._hook_item_types})" + Environment.NewLine;
-                                if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_ItemsCapacity) != 0)
+                                if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_ItemsCapacity) != 0)
                                     intsLine += $"     , ({parsed.object_id}, {(uint)STypeInt.ITEMS_CAPACITY_INT}, {parsed.wdesc._itemsCapacity})" + Environment.NewLine;
-                                if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_Location) != 0)
+                                if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_Location) != 0)
                                     intsLine += $"     , ({parsed.object_id}, {(uint)STypeInt.CURRENT_WIELDED_LOCATION_INT}, {parsed.wdesc._location})" + Environment.NewLine;
-                                if ((parsed.wdesc.header & unchecked((uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_MaterialType)) != 0)
+                                if ((parsed.wdesc.header & unchecked((uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_MaterialType)) != 0)
                                     intsLine += $"     , ({parsed.object_id}, {(uint)STypeInt.MATERIAL_TYPE_INT}, {(uint)parsed.wdesc._material_type})" + Environment.NewLine;
-                                if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_MaxStackSize) != 0)
+                                if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_MaxStackSize) != 0)
                                     intsLine += $"     , ({parsed.object_id}, {(uint)STypeInt.MAX_STACK_SIZE_INT}, {parsed.wdesc._maxStackSize})" + Environment.NewLine;
-                                if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_MaxStructure) != 0)
+                                if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_MaxStructure) != 0)
                                     intsLine += $"     , ({parsed.object_id}, {(uint)STypeInt.MAX_STRUCTURE_INT}, {parsed.wdesc._maxStructure})" + Environment.NewLine;
-                                if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_RadarEnum) != 0)
+                                if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_RadarEnum) != 0)
                                     intsLine += $"     , ({parsed.object_id}, {(uint)STypeInt.SHOWABLE_ON_RADAR_INT}, {(uint)parsed.wdesc._radar_enum})" + Environment.NewLine;
-                                if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_StackSize) != 0)
+                                if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_StackSize) != 0)
                                     intsLine += $"     , ({parsed.object_id}, {(uint)STypeInt.STACK_SIZE_INT}, {parsed.wdesc._stackSize})" + Environment.NewLine;
-                                if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_Structure) != 0)
+                                if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_Structure) != 0)
                                     intsLine += $"     , ({parsed.object_id}, {(uint)STypeInt.STRUCTURE_INT}, {parsed.wdesc._structure})" + Environment.NewLine;
-                                if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_TargetType) != 0)
+                                if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_TargetType) != 0)
                                     intsLine += $"     , ({parsed.object_id}, {(uint)STypeInt.TARGET_TYPE_INT}, {(uint)parsed.wdesc._targetType})" + Environment.NewLine;
-                                if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_Useability) != 0)
+                                if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_Useability) != 0)
                                     intsLine += $"     , ({parsed.object_id}, {(uint)STypeInt.ITEM_USEABLE_INT}, {(uint)parsed.wdesc._useability})" + Environment.NewLine;
-                                if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_UseRadius) != 0)
+                                if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_UseRadius) != 0)
                                     floatsLine += $"     , ({parsed.object_id}, {(uint)STypeFloat.USE_RADIUS_FLOAT}, {parsed.wdesc._useRadius})" + Environment.NewLine;
-                                if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_ValidLocations) != 0)
+                                if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_ValidLocations) != 0)
                                     intsLine += $"     , ({parsed.object_id}, {(uint)STypeInt.LOCATIONS_INT}, {parsed.wdesc._valid_locations})" + Environment.NewLine;
-                                if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_Value) != 0)
+                                if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_Value) != 0)
                                     intsLine += $"     , ({parsed.object_id}, {(uint)STypeInt.VALUE_INT}, {parsed.wdesc._value})" + Environment.NewLine;
-                                //if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_ContainerID) != 0)
-                                if (((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_ContainerID) != 0) && objectIds.Contains(parsed.wdesc._containerID))
+                                //if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_ContainerID) != 0)
+                                if (((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_ContainerID) != 0) && objectIds.Contains(parsed.wdesc._containerID))
                                     iidsLine += $"     , ({parsed.object_id}, {(uint)STypeIID.CONTAINER_IID}, {(uint)parsed.wdesc._containerID})" + Environment.NewLine;
                                 //{
                                 //    line = $"{sqlCommand} INTO `ace_object_properties_int` (`aceObjectId`, `intPropertyId`, `propertyValue`)" + Environment.NewLine;
@@ -8075,55 +8075,55 @@ namespace aclogview
                                 //    line = line.TrimEnd(Environment.NewLine.ToCharArray()) + ";" + Environment.NewLine;
                                 //    writer.WriteLine(line);
                                 //}
-                                //if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_WielderID) != 0)
+                                //if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_WielderID) != 0)
                                 //{
                                 //    line = $"{sqlCommand} INTO `ace_object_properties_int` (`aceObjectId`, `intPropertyId`, `propertyValue`)" + Environment.NewLine;
                                 //    line += $"VALUES ({parsed.object_id}, {(uint)STypeInt.???}, {parsed.wdesc._wielderID})" + Environment.NewLine;
                                 //    line = line.TrimEnd(Environment.NewLine.ToCharArray()) + ";" + Environment.NewLine;
                                 //    writer.WriteLine(line);
                                 //}
-                                //if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_WielderID) != 0)
+                                //if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_WielderID) != 0)
                                 //    intsLine += $"     , ({parsed.object_id}, {(uint)STypeIID.WIELDER_IID}, {parsed.wdesc._wielderID})" + Environment.NewLine;
-                                if (((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_WielderID) != 0) && objectIds.Contains(parsed.wdesc._wielderID))
+                                if (((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_WielderID) != 0) && objectIds.Contains(parsed.wdesc._wielderID))
                                     iidsLine += $"     , ({parsed.object_id}, {(uint)STypeIID.WIELDER_IID}, {(uint)parsed.wdesc._wielderID})" + Environment.NewLine;
-                                //if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_HouseOwner) != 0)
+                                //if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_HouseOwner) != 0)
                                 //{
                                 //    line = $"{sqlCommand} INTO `ace_object_properties_int` (`aceObjectId`, `intPropertyId`, `propertyValue`)" + Environment.NewLine;
                                 //    line += $"VALUES ({parsed.object_id}, {(uint)STypeInt.???}, {parsed.wdesc._house_owner_iid})" + Environment.NewLine;
                                 //    line = line.TrimEnd(Environment.NewLine.ToCharArray()) + ";" + Environment.NewLine;
                                 //    writer.WriteLine(line);
                                 //}
-                                //if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_HouseRestrictions) != 0)
+                                //if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_HouseRestrictions) != 0)
                                 //{
                                 //    line = $"{sqlCommand} INTO `ace_object_properties_int` (`aceObjectId`, `intPropertyId`, `propertyValue`)" + Environment.NewLine;
                                 //    line += $"VALUES ({parsed.object_id}, {(uint)STypeInt.???}, {parsed.wdesc.???})" + Environment.NewLine;
                                 //    line = line.TrimEnd(Environment.NewLine.ToCharArray()) + ";" + Environment.NewLine;
                                 //    writer.WriteLine(line);
                                 //}
-                                //if ((parsed.wdesc.header2 & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader2.PWD2_Packed_PetOwner) != 0)
+                                //if ((parsed.wdesc.header2 & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader2.PWD2_Packed_PetOwner) != 0)
                                 //{
                                 //    line = $"{sqlCommand} INTO `ace_object_properties_int` (`aceObjectId`, `intPropertyId`, `propertyValue`)" + Environment.NewLine;
                                 //    line += $"VALUES ({parsed.object_id}, {(uint)STypeInt.???}, {parsed.wdesc._pet_owner})" + Environment.NewLine;
                                 //    line = line.TrimEnd(Environment.NewLine.ToCharArray()) + ";" + Environment.NewLine;
                                 //    writer.WriteLine(line);
                                 //}
-                                //if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_Monarch) != 0)
+                                //if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_Monarch) != 0)
                                 //{
                                 //    line = $"{sqlCommand} INTO `ace_object_properties_int` (`aceObjectId`, `intPropertyId`, `propertyValue`)" + Environment.NewLine;
                                 //    line += $"VALUES ({parsed.object_id}, {(uint)STypeInt.???}, {parsed.wdesc._monarch})" + Environment.NewLine;
                                 //    line = line.TrimEnd(Environment.NewLine.ToCharArray()) + ";" + Environment.NewLine;
                                 //    writer.WriteLine(line);
                                 //}
-                                //if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_Workmanship) != 0)
+                                //if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_Workmanship) != 0)
                                 //{
                                 //    line = $"{sqlCommand} INTO `ace_object_properties_int` (`aceObjectId`, `intPropertyId`, `propertyValue`)" + Environment.NewLine;
                                 //    line += $"VALUES ({parsed.object_id}, {(uint)STypeInt.ITEM_WORKMANSHIP_INT}, {parsed.wdesc._workmanship})" + Environment.NewLine;
                                 //    line = line.TrimEnd(Environment.NewLine.ToCharArray()) + ";" + Environment.NewLine;
                                 //    writer.WriteLine(line);
                                 //}
-                                if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_PluralName) != 0)
+                                if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_PluralName) != 0)
                                     strsLine += $"     , ({parsed.object_id}, {(uint)STypeString.PLURAL_NAME_STRING}, '{parsed.wdesc._plural_name.m_buffer.Replace("'", "''")}')" + Environment.NewLine;
-                                if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_Priority) != 0)
+                                if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_Priority) != 0)
                                     intsLine += $"     , ({parsed.object_id}, {(uint)STypeInt.CLOTHING_PRIORITY_INT}, {parsed.wdesc._priority})" + Environment.NewLine;
                                 if ((parsed.physicsdesc.bitfield & (uint)PhysicsDesc.PhysicsDescInfo.DEFAULT_SCRIPT_INTENSITY) != 0)
                                     floatsLine += $"     , ({parsed.object_id}, {(uint)STypeFloat.PHYSICS_SCRIPT_INTENSITY_FLOAT}, {parsed.physicsdesc.default_script_intensity})" + Environment.NewLine;
@@ -8187,31 +8187,31 @@ namespace aclogview
                                 //    writer.WriteLine(line);
                                 //}
 
-                                if (((uint)parsed.wdesc._bitfield & (uint)PublicWeenieDesc.BitfieldIndex.BF_ATTACKABLE) != 0)
+                                if (((uint)parsed.wdesc._bitfield & (uint)CM_Physics.PublicWeenieDesc.BitfieldIndex.BF_ATTACKABLE) != 0)
                                     boolsLine += $"     , ({parsed.object_id}, {(uint)STypeBool.ATTACKABLE_BOOL}, {true})" + Environment.NewLine;
-                                if (((uint)parsed.wdesc._bitfield & (uint)PublicWeenieDesc.BitfieldIndex.BF_HIDDEN_ADMIN) != 0)
+                                if (((uint)parsed.wdesc._bitfield & (uint)CM_Physics.PublicWeenieDesc.BitfieldIndex.BF_HIDDEN_ADMIN) != 0)
                                     boolsLine += $"     , ({parsed.object_id}, {(uint)STypeBool.HIDDEN_ADMIN_BOOL}, {true})" + Environment.NewLine;
-                                if (((uint)parsed.wdesc._bitfield & (uint)PublicWeenieDesc.BitfieldIndex.BF_IMMUNE_CELL_RESTRICTIONS) != 0)
+                                if (((uint)parsed.wdesc._bitfield & (uint)CM_Physics.PublicWeenieDesc.BitfieldIndex.BF_IMMUNE_CELL_RESTRICTIONS) != 0)
                                     boolsLine += $"     , ({parsed.object_id}, {(uint)STypeBool.IGNORE_HOUSE_BARRIERS_BOOL}, {true})" + Environment.NewLine;
-                                if (((uint)parsed.wdesc._bitfield & (uint)PublicWeenieDesc.BitfieldIndex.BF_INSCRIBABLE) != 0)
+                                if (((uint)parsed.wdesc._bitfield & (uint)CM_Physics.PublicWeenieDesc.BitfieldIndex.BF_INSCRIBABLE) != 0)
                                     boolsLine += $"     , ({parsed.object_id}, {(uint)STypeBool.INSCRIBABLE_BOOL}, {true})" + Environment.NewLine;
-                                //if (((uint)parsed.wdesc._bitfield & (uint)PublicWeenieDesc.BitfieldIndex.BF_PLAYER_KILLER) != 0)
+                                //if (((uint)parsed.wdesc._bitfield & (uint)CM_Physics.PublicWeenieDesc.BitfieldIndex.BF_PLAYER_KILLER) != 0)
                                 //    boolsLine += $"     , ({parsed.object_id}, {(uint)STypeBool.PK_KILLER_BOOL}, {true})" + Environment.NewLine;
-                                if (((uint)parsed.wdesc._bitfield & (uint)PublicWeenieDesc.BitfieldIndex.BF_REQUIRES_PACKSLOT) != 0)
+                                if (((uint)parsed.wdesc._bitfield & (uint)CM_Physics.PublicWeenieDesc.BitfieldIndex.BF_REQUIRES_PACKSLOT) != 0)
                                     boolsLine += $"     , ({parsed.object_id}, {(uint)STypeBool.REQUIRES_BACKPACK_SLOT_BOOL}, {true})" + Environment.NewLine;
-                                if (((uint)parsed.wdesc._bitfield & (uint)PublicWeenieDesc.BitfieldIndex.BF_RETAINED) != 0)
+                                if (((uint)parsed.wdesc._bitfield & (uint)CM_Physics.PublicWeenieDesc.BitfieldIndex.BF_RETAINED) != 0)
                                     boolsLine += $"     , ({parsed.object_id}, {(uint)STypeBool.RETAINED_BOOL}, {true})" + Environment.NewLine;
-                                if (((uint)parsed.wdesc._bitfield & (uint)PublicWeenieDesc.BitfieldIndex.BF_STUCK) != 0)
+                                if (((uint)parsed.wdesc._bitfield & (uint)CM_Physics.PublicWeenieDesc.BitfieldIndex.BF_STUCK) != 0)
                                     boolsLine += $"     , ({parsed.object_id}, {(uint)STypeBool.STUCK_BOOL}, {true})" + Environment.NewLine;
-                                if (((uint)parsed.wdesc._bitfield & (uint)PublicWeenieDesc.BitfieldIndex.BF_UI_HIDDEN) != 0)
+                                if (((uint)parsed.wdesc._bitfield & (uint)CM_Physics.PublicWeenieDesc.BitfieldIndex.BF_UI_HIDDEN) != 0)
                                     boolsLine += $"     , ({parsed.object_id}, {(uint)STypeBool.UI_HIDDEN_BOOL}, {true})" + Environment.NewLine;
-                                //if (((uint)parsed.wdesc._bitfield & (uint)PublicWeenieDesc.BitfieldIndex.BF_VENDOR) != 0)
+                                //if (((uint)parsed.wdesc._bitfield & (uint)CM_Physics.PublicWeenieDesc.BitfieldIndex.BF_VENDOR) != 0)
                                 //    boolsLine += $"     , ({parsed.object_id}, {(uint)STypeBool.VENDOR_SERVICE_BOOL}, {true})" + Environment.NewLine;
-                                if (((uint)parsed.wdesc._bitfield & (uint)PublicWeenieDesc.BitfieldIndex.BF_WIELD_LEFT) != 0)
+                                if (((uint)parsed.wdesc._bitfield & (uint)CM_Physics.PublicWeenieDesc.BitfieldIndex.BF_WIELD_LEFT) != 0)
                                     boolsLine += $"     , ({parsed.object_id}, {(uint)STypeBool.AUTOWIELD_LEFT_BOOL}, {true})" + Environment.NewLine;
-                                if (((uint)parsed.wdesc._bitfield & (uint)PublicWeenieDesc.BitfieldIndex.BF_WIELD_ON_USE) != 0)
+                                if (((uint)parsed.wdesc._bitfield & (uint)CM_Physics.PublicWeenieDesc.BitfieldIndex.BF_WIELD_ON_USE) != 0)
                                     boolsLine += $"     , ({parsed.object_id}, {(uint)STypeBool.WIELD_ON_USE_BOOL}, {true})" + Environment.NewLine;
-                                //if (((uint)parsed.wdesc._bitfield & (uint)PublicWeenieDesc.BitfieldIndex.BF_ADMIN) != 0)
+                                //if (((uint)parsed.wdesc._bitfield & (uint)CM_Physics.PublicWeenieDesc.BitfieldIndex.BF_ADMIN) != 0)
                                 //    boolsLine += $"     , ({parsed.object_id}, {(uint)STypeBool.IS_ADMIN_BOOL}, {true})" + Environment.NewLine;
 
                                 if (staticObjectsWeenieType.ContainsKey(parsed.object_id))
@@ -8437,15 +8437,15 @@ namespace aclogview
                             $"{parsed.wdesc._wcid}, {parsed.wdesc.header}, "; //+
 
 
-                            if ((parsed.wdesc._bitfield & (uint)PublicWeenieDesc.BitfieldIndex.BF_INCLUDES_SECOND_HEADER) != 0)
+                            if ((parsed.wdesc._bitfield & (uint)CM_Physics.PublicWeenieDesc.BitfieldIndex.BF_INCLUDES_SECOND_HEADER) != 0)
                                 line += $"{parsed.wdesc.header2}, "; //+
                             else
                                 line += $"NULL, "; //+
 
                             didsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeDID.ICON_DID}, {(uint)parsed.wdesc._iconID}) /* {Enum.GetName(typeof(STypeDID), STypeDID.ICON_DID)} */" + Environment.NewLine;
-                            if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_IconOverlay) != 0)
+                            if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_IconOverlay) != 0)
                                 didsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeDID.ICON_OVERLAY_DID}, {(uint)parsed.wdesc._iconOverlayID}) /* {Enum.GetName(typeof(STypeDID), STypeDID.ICON_OVERLAY_DID)} */" + Environment.NewLine;
-                            if ((parsed.wdesc.header2 & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader2.PWD2_Packed_IconUnderlay) != 0)
+                            if ((parsed.wdesc.header2 & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader2.PWD2_Packed_IconUnderlay) != 0)
                                 didsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeDID.ICON_UNDERLAY_DID}, {(uint)parsed.wdesc._iconUnderlayID}) /* {Enum.GetName(typeof(STypeDID), STypeDID.ICON_UNDERLAY_DID)} */" + Environment.NewLine;
 
                             if ((parsed.physicsdesc.bitfield & (uint)PhysicsDesc.PhysicsDescInfo.CSetup) != 0)
@@ -8463,9 +8463,9 @@ namespace aclogview
                             if ((parsed.physicsdesc.bitfield & (uint)PhysicsDesc.PhysicsDescInfo.PETABLE) != 0)
                                 didsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeDID.PHYSICS_EFFECT_TABLE_DID}, {(uint)parsed.physicsdesc.phstable_id}) /* {Enum.GetName(typeof(STypeDID), STypeDID.PHYSICS_EFFECT_TABLE_DID)} */" + Environment.NewLine;
                             line += $"{parsed.physicsdesc.bitfield}";
-                            if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_SpellID) != 0)
+                            if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_SpellID) != 0)
                                 didsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeDID.SPELL_DID}, {(uint)parsed.wdesc._spellID}) /* {Enum.GetName(typeof(STypeDID), STypeDID.SPELL_DID)} - {Enum.GetName(typeof(SpellID), parsed.wdesc._spellID)} */" + Environment.NewLine;
-                            if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_PScript) != 0)
+                            if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_PScript) != 0)
                                 didsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeDID.PHYSICS_SCRIPT_DID}, {(uint)parsed.wdesc._pscript}) /* {Enum.GetName(typeof(STypeDID), STypeDID.PHYSICS_SCRIPT_DID)} */" + Environment.NewLine;
                             if ((parsed.physicsdesc.bitfield & (uint)PhysicsDesc.PhysicsDescInfo.DEFAULT_SCRIPT) != 0)
                                 didsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeDID.ACTIVATION_ANIMATION_DID}, {(uint)parsed.physicsdesc.default_script}) /* {Enum.GetName(typeof(STypeDID), STypeDID.ACTIVATION_ANIMATION_DID)} */" + Environment.NewLine;
@@ -8481,114 +8481,114 @@ namespace aclogview
                                 //intsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeInt.PALETTE_TEMPLATE_INT}, {parsed.objdesc.paletteID})" + Environment.NewLine;
                                 didsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeDID.PALETTE_BASE_DID}, {(uint)parsed.objdesc.paletteID}) /* {Enum.GetName(typeof(STypeDID), STypeDID.PALETTE_BASE_DID)} */" + Environment.NewLine;
 
-                            if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_AmmoType) != 0)
+                            if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_AmmoType) != 0)
                                 intsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeInt.AMMO_TYPE_INT}, {(int)parsed.wdesc._ammoType}) /* {Enum.GetName(typeof(STypeInt), STypeInt.AMMO_TYPE_INT)} */" + Environment.NewLine;
-                            if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_BlipColor) != 0)
+                            if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_BlipColor) != 0)
                                 intsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeInt.RADARBLIP_COLOR_INT}, {(int)parsed.wdesc._blipColor}) /* {Enum.GetName(typeof(STypeInt), STypeInt.RADARBLIP_COLOR_INT)} */" + Environment.NewLine;
-                            if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_Burden) != 0)
+                            if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_Burden) != 0)
                                 intsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeInt.ENCUMB_VAL_INT}, {(int)parsed.wdesc._burden}) /* {Enum.GetName(typeof(STypeInt), STypeInt.ENCUMB_VAL_INT)} */" + Environment.NewLine;
-                            if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_CombatUse) != 0)
+                            if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_CombatUse) != 0)
                                 intsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeInt.COMBAT_USE_INT}, {(int)parsed.wdesc._combatUse}) /* {Enum.GetName(typeof(STypeInt), STypeInt.COMBAT_USE_INT)} */" + Environment.NewLine;
-                            if ((parsed.wdesc.header2 & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader2.PWD2_Packed_CooldownDuration) != 0)
+                            if ((parsed.wdesc.header2 & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader2.PWD2_Packed_CooldownDuration) != 0)
                                 floatsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeFloat.COOLDOWN_DURATION_FLOAT}, {parsed.wdesc._cooldown_duration}) /* {Enum.GetName(typeof(STypeFloat), STypeFloat.COOLDOWN_DURATION_FLOAT)} */" + Environment.NewLine;
-                            if ((parsed.wdesc.header2 & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader2.PWD2_Packed_CooldownID) != 0)
+                            if ((parsed.wdesc.header2 & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader2.PWD2_Packed_CooldownID) != 0)
                                 intsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeInt.SHARED_COOLDOWN_INT}, {(int)parsed.wdesc._cooldown_id}) /* {Enum.GetName(typeof(STypeInt), STypeInt.SHARED_COOLDOWN_INT)} */" + Environment.NewLine;
-                            if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_UIEffects) != 0)
+                            if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_UIEffects) != 0)
                                 intsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeInt.UI_EFFECTS_INT}, {(int)parsed.wdesc._effects}) /* {Enum.GetName(typeof(STypeInt), STypeInt.UI_EFFECTS_INT)} */" + Environment.NewLine;
-                            if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_ContainersCapacity) != 0)
+                            if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_ContainersCapacity) != 0)
                                 if (parsed.wdesc._containersCapacity == 255)
                                     intsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeInt.CONTAINERS_CAPACITY_INT}, {(int)-1}) /* {Enum.GetName(typeof(STypeInt), STypeInt.CONTAINERS_CAPACITY_INT)} */" + Environment.NewLine;
                                 else
                                     intsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeInt.CONTAINERS_CAPACITY_INT}, {(int)parsed.wdesc._containersCapacity}) /* {Enum.GetName(typeof(STypeInt), STypeInt.CONTAINERS_CAPACITY_INT)} */" + Environment.NewLine;
-                            if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_HookType) != 0)
+                            if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_HookType) != 0)
                                 intsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeInt.HOOK_TYPE_INT}, {(int)parsed.wdesc._hook_type}) /* {Enum.GetName(typeof(STypeInt), STypeInt.HOOK_TYPE_INT)} */" + Environment.NewLine;
-                            if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_HookItemTypes) != 0)
+                            if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_HookItemTypes) != 0)
                                 intsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeInt.HOOK_ITEM_TYPE_INT}, {(int)parsed.wdesc._hook_item_types}) /* {Enum.GetName(typeof(STypeInt), STypeInt.HOOK_ITEM_TYPE_INT)} */" + Environment.NewLine;
-                            if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_ItemsCapacity) != 0)
+                            if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_ItemsCapacity) != 0)
                                 if (parsed.wdesc._itemsCapacity == 255)
                                     intsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeInt.ITEMS_CAPACITY_INT}, {(int)-1}) /* {Enum.GetName(typeof(STypeInt), STypeInt.ITEMS_CAPACITY_INT)} */" + Environment.NewLine;
                                 else
                                     intsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeInt.ITEMS_CAPACITY_INT}, {(int)parsed.wdesc._itemsCapacity}) /* {Enum.GetName(typeof(STypeInt), STypeInt.ITEMS_CAPACITY_INT)} */" + Environment.NewLine;
-                            //if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_Location) != 0)
+                            //if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_Location) != 0)
                             //    intsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeInt.CURRENT_WIELDED_LOCATION_INT}, {parsed.wdesc._location})" + Environment.NewLine;
-                            if ((parsed.wdesc.header & unchecked((uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_MaterialType)) != 0)
+                            if ((parsed.wdesc.header & unchecked((uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_MaterialType)) != 0)
                                 intsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeInt.MATERIAL_TYPE_INT}, {(int)parsed.wdesc._material_type}) /* {Enum.GetName(typeof(STypeInt), STypeInt.MATERIAL_TYPE_INT)} */" + Environment.NewLine;
-                            if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_MaxStackSize) != 0)
+                            if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_MaxStackSize) != 0)
                                 intsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeInt.MAX_STACK_SIZE_INT}, {(int)parsed.wdesc._maxStackSize}) /* {Enum.GetName(typeof(STypeInt), STypeInt.MAX_STACK_SIZE_INT)} */" + Environment.NewLine;
-                            if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_MaxStructure) != 0)
+                            if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_MaxStructure) != 0)
                                 intsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeInt.MAX_STRUCTURE_INT}, {(int)parsed.wdesc._maxStructure}) /* {Enum.GetName(typeof(STypeInt), STypeInt.MAX_STRUCTURE_INT)} */" + Environment.NewLine;
-                            if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_RadarEnum) != 0)
+                            if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_RadarEnum) != 0)
                                 intsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeInt.SHOWABLE_ON_RADAR_INT}, {(int)parsed.wdesc._radar_enum}) /* {Enum.GetName(typeof(STypeInt), STypeInt.SHOWABLE_ON_RADAR_INT)} */" + Environment.NewLine;
-                            //if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_StackSize) != 0)
+                            //if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_StackSize) != 0)
                             //    intsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeInt.STACK_SIZE_INT}, {parsed.wdesc._stackSize})" + Environment.NewLine;
-                            if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_StackSize) != 0)
+                            if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_StackSize) != 0)
                                 intsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeInt.STACK_SIZE_INT}, {(int)parsed.wdesc._stackSize}) /* {Enum.GetName(typeof(STypeInt), STypeInt.STACK_SIZE_INT)} */" + Environment.NewLine;
-                            //if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_Structure) != 0)
+                            //if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_Structure) != 0)
                             //    intsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeInt.STRUCTURE_INT}, {parsed.wdesc._structure})" + Environment.NewLine;
-                            if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_Structure) != 0)
+                            if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_Structure) != 0)
                                 intsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeInt.STRUCTURE_INT}, {(int)parsed.wdesc._maxStructure}) /* {Enum.GetName(typeof(STypeInt), STypeInt.STRUCTURE_INT)} */" + Environment.NewLine;
-                            if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_TargetType) != 0)
+                            if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_TargetType) != 0)
                                 intsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeInt.TARGET_TYPE_INT}, {(int)parsed.wdesc._targetType}) /* {Enum.GetName(typeof(STypeInt), STypeInt.TARGET_TYPE_INT)} */" + Environment.NewLine;
-                            if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_Useability) != 0)
+                            if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_Useability) != 0)
                                 intsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeInt.ITEM_USEABLE_INT}, {(int)parsed.wdesc._useability}) /* {Enum.GetName(typeof(STypeInt), STypeInt.ITEM_USEABLE_INT)} */" + Environment.NewLine;
-                            if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_UseRadius) != 0)
+                            if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_UseRadius) != 0)
                                 floatsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeFloat.USE_RADIUS_FLOAT}, {parsed.wdesc._useRadius}) /* {Enum.GetName(typeof(STypeFloat), STypeFloat.USE_RADIUS_FLOAT)} */" + Environment.NewLine;
-                            if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_ValidLocations) != 0)
+                            if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_ValidLocations) != 0)
                                 intsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeInt.LOCATIONS_INT}, {(int)parsed.wdesc._valid_locations}) /* {Enum.GetName(typeof(STypeInt), STypeInt.LOCATIONS_INT)} */" + Environment.NewLine;
-                            if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_Value) != 0)
+                            if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_Value) != 0)
                                 intsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeInt.VALUE_INT}, {(int)parsed.wdesc._value}) /* {Enum.GetName(typeof(STypeInt), STypeInt.VALUE_INT)} */" + Environment.NewLine;
-                            //if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_ContainerID) != 0)
+                            //if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_ContainerID) != 0)
                             //{
                             //    line = $"{sqlCommand} INTO `ace_object_properties_int` (`aceObjectId`, `intPropertyId`, `propertyValue`)" + Environment.NewLine;
                             //    line += $"VALUES ({parsed.object_id}, {(uint)STypeInt.???}, {parsed.wdesc._containerID})" + Environment.NewLine;
                             //    line = line.TrimEnd(Environment.NewLine.ToCharArray()) + ";" + Environment.NewLine;
                             //    writer.WriteLine(line);
                             //}
-                            //if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_WielderID) != 0)
+                            //if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_WielderID) != 0)
                             //{
                             //    line = $"{sqlCommand} INTO `ace_object_properties_int` (`aceObjectId`, `intPropertyId`, `propertyValue`)" + Environment.NewLine;
                             //    line += $"VALUES ({parsed.object_id}, {(uint)STypeInt.???}, {parsed.wdesc._wielderID})" + Environment.NewLine;
                             //    line = line.TrimEnd(Environment.NewLine.ToCharArray()) + ";" + Environment.NewLine;
                             //    writer.WriteLine(line);
                             //}
-                            //if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_HouseOwner) != 0)
+                            //if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_HouseOwner) != 0)
                             //{
                             //    line = $"{sqlCommand} INTO `ace_object_properties_int` (`aceObjectId`, `intPropertyId`, `propertyValue`)" + Environment.NewLine;
                             //    line += $"VALUES ({parsed.object_id}, {(uint)STypeInt.???}, {parsed.wdesc._house_owner_iid})" + Environment.NewLine;
                             //    line = line.TrimEnd(Environment.NewLine.ToCharArray()) + ";" + Environment.NewLine;
                             //    writer.WriteLine(line);
                             //}
-                            //if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_HouseRestrictions) != 0)
+                            //if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_HouseRestrictions) != 0)
                             //{
                             //    line = $"{sqlCommand} INTO `ace_object_properties_int` (`aceObjectId`, `intPropertyId`, `propertyValue`)" + Environment.NewLine;
                             //    line += $"VALUES ({parsed.object_id}, {(uint)STypeInt.???}, {parsed.wdesc.???})" + Environment.NewLine;
                             //    line = line.TrimEnd(Environment.NewLine.ToCharArray()) + ";" + Environment.NewLine;
                             //    writer.WriteLine(line);
                             //}
-                            //if ((parsed.wdesc.header2 & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader2.PWD2_Packed_PetOwner) != 0)
+                            //if ((parsed.wdesc.header2 & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader2.PWD2_Packed_PetOwner) != 0)
                             //{
                             //    line = $"{sqlCommand} INTO `ace_object_properties_int` (`aceObjectId`, `intPropertyId`, `propertyValue`)" + Environment.NewLine;
                             //    line += $"VALUES ({parsed.object_id}, {(uint)STypeInt.???}, {parsed.wdesc._pet_owner})" + Environment.NewLine;
                             //    line = line.TrimEnd(Environment.NewLine.ToCharArray()) + ";" + Environment.NewLine;
                             //    writer.WriteLine(line);
                             //}
-                            //if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_Monarch) != 0)
+                            //if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_Monarch) != 0)
                             //{
                             //    line = $"{sqlCommand} INTO `ace_object_properties_int` (`aceObjectId`, `intPropertyId`, `propertyValue`)" + Environment.NewLine;
                             //    line += $"VALUES ({parsed.object_id}, {(uint)STypeInt.???}, {parsed.wdesc._monarch})" + Environment.NewLine;
                             //    line = line.TrimEnd(Environment.NewLine.ToCharArray()) + ";" + Environment.NewLine;
                             //    writer.WriteLine(line);
                             //}
-                            //if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_Workmanship) != 0)
+                            //if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_Workmanship) != 0)
                             //{
                             //    line = $"{sqlCommand} INTO `ace_object_properties_int` (`aceObjectId`, `intPropertyId`, `propertyValue`)" + Environment.NewLine;
                             //    line += $"VALUES ({parsed.object_id}, {(uint)STypeInt.ITEM_WORKMANSHIP_INT}, {parsed.wdesc._workmanship})" + Environment.NewLine;
                             //    line = line.TrimEnd(Environment.NewLine.ToCharArray()) + ";" + Environment.NewLine;
                             //    writer.WriteLine(line);
                             //}
-                            if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_PluralName) != 0)
+                            if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_PluralName) != 0)
                                 strsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeString.PLURAL_NAME_STRING}, '{parsed.wdesc._plural_name.m_buffer.Replace("'", "''")}') /* {Enum.GetName(typeof(STypeString), STypeString.PLURAL_NAME_STRING)} */" + Environment.NewLine;
-                            if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_Priority) != 0)
+                            if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_Priority) != 0)
                                 intsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeInt.CLOTHING_PRIORITY_INT}, {(int)parsed.wdesc._priority}) /* {Enum.GetName(typeof(STypeInt), STypeInt.CLOTHING_PRIORITY_INT)} */" + Environment.NewLine;
                             if ((parsed.physicsdesc.bitfield & (uint)PhysicsDesc.PhysicsDescInfo.DEFAULT_SCRIPT_INTENSITY) != 0)
                                 floatsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeFloat.PHYSICS_SCRIPT_INTENSITY_FLOAT}, {parsed.physicsdesc.default_script_intensity}) /* {Enum.GetName(typeof(STypeFloat), STypeFloat.PHYSICS_SCRIPT_INTENSITY_FLOAT)} */" + Environment.NewLine;
@@ -8652,31 +8652,31 @@ namespace aclogview
                             //    writer.WriteLine(line);
                             //}
 
-                            if (((uint)parsed.wdesc._bitfield & (uint)PublicWeenieDesc.BitfieldIndex.BF_ATTACKABLE) != 0)
+                            if (((uint)parsed.wdesc._bitfield & (uint)CM_Physics.PublicWeenieDesc.BitfieldIndex.BF_ATTACKABLE) != 0)
                                 boolsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeBool.ATTACKABLE_BOOL}, {true}) /* {Enum.GetName(typeof(STypeBool), STypeBool.ATTACKABLE_BOOL)} */" + Environment.NewLine;
-                            if (((uint)parsed.wdesc._bitfield & (uint)PublicWeenieDesc.BitfieldIndex.BF_HIDDEN_ADMIN) != 0)
+                            if (((uint)parsed.wdesc._bitfield & (uint)CM_Physics.PublicWeenieDesc.BitfieldIndex.BF_HIDDEN_ADMIN) != 0)
                                 boolsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeBool.HIDDEN_ADMIN_BOOL}, {true}) /* {Enum.GetName(typeof(STypeBool), STypeBool.HIDDEN_ADMIN_BOOL)} */" + Environment.NewLine;
-                            if (((uint)parsed.wdesc._bitfield & (uint)PublicWeenieDesc.BitfieldIndex.BF_IMMUNE_CELL_RESTRICTIONS) != 0)
+                            if (((uint)parsed.wdesc._bitfield & (uint)CM_Physics.PublicWeenieDesc.BitfieldIndex.BF_IMMUNE_CELL_RESTRICTIONS) != 0)
                                 boolsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeBool.IGNORE_HOUSE_BARRIERS_BOOL}, {true}) /* {Enum.GetName(typeof(STypeBool), STypeBool.IGNORE_HOUSE_BARRIERS_BOOL)} */" + Environment.NewLine;
-                            if (((uint)parsed.wdesc._bitfield & (uint)PublicWeenieDesc.BitfieldIndex.BF_INSCRIBABLE) != 0)
+                            if (((uint)parsed.wdesc._bitfield & (uint)CM_Physics.PublicWeenieDesc.BitfieldIndex.BF_INSCRIBABLE) != 0)
                                 boolsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeBool.INSCRIBABLE_BOOL}, {true}) /* {Enum.GetName(typeof(STypeBool), STypeBool.INSCRIBABLE_BOOL)} */" + Environment.NewLine;
-                            //if (((uint)parsed.wdesc._bitfield & (uint)PublicWeenieDesc.BitfieldIndex.BF_PLAYER_KILLER) != 0)
+                            //if (((uint)parsed.wdesc._bitfield & (uint)CM_Physics.PublicWeenieDesc.BitfieldIndex.BF_PLAYER_KILLER) != 0)
                             //    boolsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeBool.PK_KILLER_BOOL}, {true})" + Environment.NewLine;
-                            if (((uint)parsed.wdesc._bitfield & (uint)PublicWeenieDesc.BitfieldIndex.BF_REQUIRES_PACKSLOT) != 0)
+                            if (((uint)parsed.wdesc._bitfield & (uint)CM_Physics.PublicWeenieDesc.BitfieldIndex.BF_REQUIRES_PACKSLOT) != 0)
                                 boolsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeBool.REQUIRES_BACKPACK_SLOT_BOOL}, {true}) /* {Enum.GetName(typeof(STypeBool), STypeBool.REQUIRES_BACKPACK_SLOT_BOOL)} */" + Environment.NewLine;
-                            if (((uint)parsed.wdesc._bitfield & (uint)PublicWeenieDesc.BitfieldIndex.BF_RETAINED) != 0)
+                            if (((uint)parsed.wdesc._bitfield & (uint)CM_Physics.PublicWeenieDesc.BitfieldIndex.BF_RETAINED) != 0)
                                 boolsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeBool.RETAINED_BOOL}, {true}) /* {Enum.GetName(typeof(STypeBool), STypeBool.RETAINED_BOOL)} */" + Environment.NewLine;
-                            if (((uint)parsed.wdesc._bitfield & (uint)PublicWeenieDesc.BitfieldIndex.BF_STUCK) != 0)
+                            if (((uint)parsed.wdesc._bitfield & (uint)CM_Physics.PublicWeenieDesc.BitfieldIndex.BF_STUCK) != 0)
                                 boolsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeBool.STUCK_BOOL}, {true}) /* {Enum.GetName(typeof(STypeBool), STypeBool.STUCK_BOOL)} */" + Environment.NewLine;
-                            if (((uint)parsed.wdesc._bitfield & (uint)PublicWeenieDesc.BitfieldIndex.BF_UI_HIDDEN) != 0)
+                            if (((uint)parsed.wdesc._bitfield & (uint)CM_Physics.PublicWeenieDesc.BitfieldIndex.BF_UI_HIDDEN) != 0)
                                 boolsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeBool.UI_HIDDEN_BOOL}, {true}) /* {Enum.GetName(typeof(STypeBool), STypeBool.UI_HIDDEN_BOOL)} */" + Environment.NewLine;
-                            //if (((uint)parsed.wdesc._bitfield & (uint)PublicWeenieDesc.BitfieldIndex.BF_VENDOR) != 0)
+                            //if (((uint)parsed.wdesc._bitfield & (uint)CM_Physics.PublicWeenieDesc.BitfieldIndex.BF_VENDOR) != 0)
                             //    boolsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeBool.VENDOR_SERVICE_BOOL}, {true})" + Environment.NewLine;
-                            if (((uint)parsed.wdesc._bitfield & (uint)PublicWeenieDesc.BitfieldIndex.BF_WIELD_LEFT) != 0)
+                            if (((uint)parsed.wdesc._bitfield & (uint)CM_Physics.PublicWeenieDesc.BitfieldIndex.BF_WIELD_LEFT) != 0)
                                 boolsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeBool.AUTOWIELD_LEFT_BOOL}, {true}) /* {Enum.GetName(typeof(STypeBool), STypeBool.AUTOWIELD_LEFT_BOOL)} */" + Environment.NewLine;
-                            if (((uint)parsed.wdesc._bitfield & (uint)PublicWeenieDesc.BitfieldIndex.BF_WIELD_ON_USE) != 0)
+                            if (((uint)parsed.wdesc._bitfield & (uint)CM_Physics.PublicWeenieDesc.BitfieldIndex.BF_WIELD_ON_USE) != 0)
                                 boolsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeBool.WIELD_ON_USE_BOOL}, {true}) /* {Enum.GetName(typeof(STypeBool), STypeBool.WIELD_ON_USE_BOOL)} */" + Environment.NewLine;
-                            //if (((uint)parsed.wdesc._bitfield & (uint)PublicWeenieDesc.BitfieldIndex.BF_ADMIN) != 0)
+                            //if (((uint)parsed.wdesc._bitfield & (uint)CM_Physics.PublicWeenieDesc.BitfieldIndex.BF_ADMIN) != 0)
                             //    boolsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeBool.IS_ADMIN_BOOL}, {true})" + Environment.NewLine;
 
                             if (weeniesWeenieType.ContainsKey(parsed.wdesc._wcid))
@@ -8877,15 +8877,15 @@ namespace aclogview
                             $"{parsed.wdesc._wcid}, {parsed.wdesc.header}, "; //+
 
 
-                            if ((parsed.wdesc._bitfield & (uint)PublicWeenieDesc.BitfieldIndex.BF_INCLUDES_SECOND_HEADER) != 0)
+                            if ((parsed.wdesc._bitfield & (uint)CM_Physics.PublicWeenieDesc.BitfieldIndex.BF_INCLUDES_SECOND_HEADER) != 0)
                                 line += $"{parsed.wdesc.header2}, "; //+
                             else
                                 line += $"NULL, "; //+
 
                             didsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeDID.ICON_DID}, {(uint)parsed.wdesc._iconID})" + Environment.NewLine;
-                            if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_IconOverlay) != 0)
+                            if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_IconOverlay) != 0)
                                 didsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeDID.ICON_OVERLAY_DID}, {(uint)parsed.wdesc._iconOverlayID})" + Environment.NewLine;
-                            if ((parsed.wdesc.header2 & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader2.PWD2_Packed_IconUnderlay) != 0)
+                            if ((parsed.wdesc.header2 & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader2.PWD2_Packed_IconUnderlay) != 0)
                                 didsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeDID.ICON_UNDERLAY_DID}, {(uint)parsed.wdesc._iconUnderlayID})" + Environment.NewLine;
 
                             if ((parsed.physicsdesc.bitfield & (uint)PhysicsDesc.PhysicsDescInfo.CSetup) != 0)
@@ -8903,9 +8903,9 @@ namespace aclogview
                             if ((parsed.physicsdesc.bitfield & (uint)PhysicsDesc.PhysicsDescInfo.PETABLE) != 0)
                                 didsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeDID.PHYSICS_EFFECT_TABLE_DID}, {(uint)parsed.physicsdesc.phstable_id})" + Environment.NewLine;
                             line += $"{parsed.physicsdesc.bitfield}";
-                            if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_SpellID) != 0)
+                            if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_SpellID) != 0)
                                 didsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeDID.SPELL_DID}, {(uint)parsed.wdesc._spellID})" + Environment.NewLine;
-                            if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_PScript) != 0)
+                            if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_PScript) != 0)
                                 didsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeDID.PHYSICS_SCRIPT_DID}, {(uint)parsed.wdesc._pscript})" + Environment.NewLine;
                             if ((parsed.physicsdesc.bitfield & (uint)PhysicsDesc.PhysicsDescInfo.DEFAULT_SCRIPT) != 0)
                                 didsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeDID.USE_USER_ANIMATION_DID}, {(uint)parsed.physicsdesc.default_script})" + Environment.NewLine;
@@ -8921,104 +8921,104 @@ namespace aclogview
                                 //intsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeInt.PALETTE_TEMPLATE_INT}, {parsed.objdesc.paletteID})" + Environment.NewLine;
                                 didsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeDID.PALETTE_BASE_DID}, {(uint)parsed.objdesc.paletteID})" + Environment.NewLine;
 
-                            if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_AmmoType) != 0)
+                            if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_AmmoType) != 0)
                                 intsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeInt.AMMO_TYPE_INT}, {(uint)parsed.wdesc._ammoType})" + Environment.NewLine;
-                            if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_BlipColor) != 0)
+                            if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_BlipColor) != 0)
                                 intsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeInt.RADARBLIP_COLOR_INT}, {parsed.wdesc._blipColor})" + Environment.NewLine;
-                            if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_Burden) != 0)
+                            if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_Burden) != 0)
                                 intsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeInt.ENCUMB_VAL_INT}, {parsed.wdesc._burden})" + Environment.NewLine;
-                            if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_CombatUse) != 0)
+                            if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_CombatUse) != 0)
                                 intsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeInt.COMBAT_USE_INT}, {parsed.wdesc._combatUse})" + Environment.NewLine;
-                            if ((parsed.wdesc.header2 & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader2.PWD2_Packed_CooldownDuration) != 0)
+                            if ((parsed.wdesc.header2 & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader2.PWD2_Packed_CooldownDuration) != 0)
                                 floatsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeFloat.COOLDOWN_DURATION_FLOAT}, {parsed.wdesc._cooldown_duration})" + Environment.NewLine;
-                            if ((parsed.wdesc.header2 & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader2.PWD2_Packed_CooldownID) != 0)
+                            if ((parsed.wdesc.header2 & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader2.PWD2_Packed_CooldownID) != 0)
                                 intsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeInt.SHARED_COOLDOWN_INT}, {parsed.wdesc._cooldown_id})" + Environment.NewLine;
-                            if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_UIEffects) != 0)
+                            if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_UIEffects) != 0)
                                 intsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeInt.UI_EFFECTS_INT}, {parsed.wdesc._effects})" + Environment.NewLine;
-                            if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_ContainersCapacity) != 0)
+                            if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_ContainersCapacity) != 0)
                                 intsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeInt.CONTAINERS_CAPACITY_INT}, {parsed.wdesc._containersCapacity})" + Environment.NewLine;
-                            if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_HookType) != 0)
+                            if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_HookType) != 0)
                                 intsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeInt.HOOK_TYPE_INT}, {(uint)parsed.wdesc._hook_type})" + Environment.NewLine;
-                            if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_HookItemTypes) != 0)
+                            if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_HookItemTypes) != 0)
                                 intsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeInt.HOOK_ITEM_TYPE_INT}, {parsed.wdesc._hook_item_types})" + Environment.NewLine;
-                            if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_ItemsCapacity) != 0)
+                            if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_ItemsCapacity) != 0)
                                 intsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeInt.ITEMS_CAPACITY_INT}, {parsed.wdesc._itemsCapacity})" + Environment.NewLine;
-                            if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_Location) != 0)
+                            if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_Location) != 0)
                                 intsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeInt.CURRENT_WIELDED_LOCATION_INT}, {parsed.wdesc._location})" + Environment.NewLine;
-                            if ((parsed.wdesc.header & unchecked((uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_MaterialType)) != 0)
+                            if ((parsed.wdesc.header & unchecked((uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_MaterialType)) != 0)
                                 intsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeInt.MATERIAL_TYPE_INT}, {(uint)parsed.wdesc._material_type})" + Environment.NewLine;
-                            if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_MaxStackSize) != 0)
+                            if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_MaxStackSize) != 0)
                                 intsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeInt.MAX_STACK_SIZE_INT}, {parsed.wdesc._maxStackSize})" + Environment.NewLine;
-                            if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_MaxStructure) != 0)
+                            if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_MaxStructure) != 0)
                                 intsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeInt.MAX_STRUCTURE_INT}, {parsed.wdesc._maxStructure})" + Environment.NewLine;
-                            if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_RadarEnum) != 0)
+                            if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_RadarEnum) != 0)
                                 intsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeInt.SHOWABLE_ON_RADAR_INT}, {(uint)parsed.wdesc._radar_enum})" + Environment.NewLine;
-                            if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_StackSize) != 0)
+                            if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_StackSize) != 0)
                                 intsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeInt.STACK_SIZE_INT}, {parsed.wdesc._stackSize})" + Environment.NewLine;
-                            if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_Structure) != 0)
+                            if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_Structure) != 0)
                                 intsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeInt.STRUCTURE_INT}, {parsed.wdesc._structure})" + Environment.NewLine;
-                            if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_TargetType) != 0)
+                            if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_TargetType) != 0)
                                 intsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeInt.TARGET_TYPE_INT}, {(uint)parsed.wdesc._targetType})" + Environment.NewLine;
-                            if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_Useability) != 0)
+                            if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_Useability) != 0)
                                 intsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeInt.ITEM_USEABLE_INT}, {(uint)parsed.wdesc._useability})" + Environment.NewLine;
-                            if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_UseRadius) != 0)
+                            if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_UseRadius) != 0)
                                 floatsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeFloat.USE_RADIUS_FLOAT}, {parsed.wdesc._useRadius})" + Environment.NewLine;
-                            if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_ValidLocations) != 0)
+                            if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_ValidLocations) != 0)
                                 intsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeInt.LOCATIONS_INT}, {parsed.wdesc._valid_locations})" + Environment.NewLine;
-                            if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_Value) != 0)
+                            if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_Value) != 0)
                                 intsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeInt.VALUE_INT}, {parsed.wdesc._value})" + Environment.NewLine;
-                            //if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_ContainerID) != 0)
+                            //if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_ContainerID) != 0)
                             //{
                             //    line = $"{sqlCommand} INTO `ace_object_properties_int` (`aceObjectId`, `intPropertyId`, `propertyValue`)" + Environment.NewLine;
                             //    line += $"VALUES ({parsed.object_id}, {(uint)STypeInt.???}, {parsed.wdesc._containerID})" + Environment.NewLine;
                             //    line = line.TrimEnd(Environment.NewLine.ToCharArray()) + ";" + Environment.NewLine;
                             //    writer.WriteLine(line);
                             //}
-                            //if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_WielderID) != 0)
+                            //if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_WielderID) != 0)
                             //{
                             //    line = $"{sqlCommand} INTO `ace_object_properties_int` (`aceObjectId`, `intPropertyId`, `propertyValue`)" + Environment.NewLine;
                             //    line += $"VALUES ({parsed.object_id}, {(uint)STypeInt.???}, {parsed.wdesc._wielderID})" + Environment.NewLine;
                             //    line = line.TrimEnd(Environment.NewLine.ToCharArray()) + ";" + Environment.NewLine;
                             //    writer.WriteLine(line);
                             //}
-                            //if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_HouseOwner) != 0)
+                            //if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_HouseOwner) != 0)
                             //{
                             //    line = $"{sqlCommand} INTO `ace_object_properties_int` (`aceObjectId`, `intPropertyId`, `propertyValue`)" + Environment.NewLine;
                             //    line += $"VALUES ({parsed.object_id}, {(uint)STypeInt.???}, {parsed.wdesc._house_owner_iid})" + Environment.NewLine;
                             //    line = line.TrimEnd(Environment.NewLine.ToCharArray()) + ";" + Environment.NewLine;
                             //    writer.WriteLine(line);
                             //}
-                            //if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_HouseRestrictions) != 0)
+                            //if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_HouseRestrictions) != 0)
                             //{
                             //    line = $"{sqlCommand} INTO `ace_object_properties_int` (`aceObjectId`, `intPropertyId`, `propertyValue`)" + Environment.NewLine;
                             //    line += $"VALUES ({parsed.object_id}, {(uint)STypeInt.???}, {parsed.wdesc.???})" + Environment.NewLine;
                             //    line = line.TrimEnd(Environment.NewLine.ToCharArray()) + ";" + Environment.NewLine;
                             //    writer.WriteLine(line);
                             //}
-                            //if ((parsed.wdesc.header2 & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader2.PWD2_Packed_PetOwner) != 0)
+                            //if ((parsed.wdesc.header2 & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader2.PWD2_Packed_PetOwner) != 0)
                             //{
                             //    line = $"{sqlCommand} INTO `ace_object_properties_int` (`aceObjectId`, `intPropertyId`, `propertyValue`)" + Environment.NewLine;
                             //    line += $"VALUES ({parsed.object_id}, {(uint)STypeInt.???}, {parsed.wdesc._pet_owner})" + Environment.NewLine;
                             //    line = line.TrimEnd(Environment.NewLine.ToCharArray()) + ";" + Environment.NewLine;
                             //    writer.WriteLine(line);
                             //}
-                            //if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_Monarch) != 0)
+                            //if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_Monarch) != 0)
                             //{
                             //    line = $"{sqlCommand} INTO `ace_object_properties_int` (`aceObjectId`, `intPropertyId`, `propertyValue`)" + Environment.NewLine;
                             //    line += $"VALUES ({parsed.object_id}, {(uint)STypeInt.???}, {parsed.wdesc._monarch})" + Environment.NewLine;
                             //    line = line.TrimEnd(Environment.NewLine.ToCharArray()) + ";" + Environment.NewLine;
                             //    writer.WriteLine(line);
                             //}
-                            //if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_Workmanship) != 0)
+                            //if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_Workmanship) != 0)
                             //{
                             //    line = $"{sqlCommand} INTO `ace_object_properties_int` (`aceObjectId`, `intPropertyId`, `propertyValue`)" + Environment.NewLine;
                             //    line += $"VALUES ({parsed.object_id}, {(uint)STypeInt.ITEM_WORKMANSHIP_INT}, {parsed.wdesc._workmanship})" + Environment.NewLine;
                             //    line = line.TrimEnd(Environment.NewLine.ToCharArray()) + ";" + Environment.NewLine;
                             //    writer.WriteLine(line);
                             //}
-                            if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_PluralName) != 0)
+                            if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_PluralName) != 0)
                                 strsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeString.PLURAL_NAME_STRING}, '{parsed.wdesc._plural_name.m_buffer.Replace("'", "''")}')" + Environment.NewLine;
-                            if ((parsed.wdesc.header & (uint)PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_Priority) != 0)
+                            if ((parsed.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_Priority) != 0)
                                 intsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeInt.CLOTHING_PRIORITY_INT}, {parsed.wdesc._priority})" + Environment.NewLine;
                             if ((parsed.physicsdesc.bitfield & (uint)PhysicsDesc.PhysicsDescInfo.DEFAULT_SCRIPT_INTENSITY) != 0)
                                 floatsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeFloat.PHYSICS_SCRIPT_INTENSITY_FLOAT}, {parsed.physicsdesc.default_script_intensity})" + Environment.NewLine;
@@ -9082,31 +9082,31 @@ namespace aclogview
                             //    writer.WriteLine(line);
                             //}
 
-                            if (((uint)parsed.wdesc._bitfield & (uint)PublicWeenieDesc.BitfieldIndex.BF_ATTACKABLE) != 0)
+                            if (((uint)parsed.wdesc._bitfield & (uint)CM_Physics.PublicWeenieDesc.BitfieldIndex.BF_ATTACKABLE) != 0)
                                 boolsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeBool.ATTACKABLE_BOOL}, {true})" + Environment.NewLine;
-                            if (((uint)parsed.wdesc._bitfield & (uint)PublicWeenieDesc.BitfieldIndex.BF_HIDDEN_ADMIN) != 0)
+                            if (((uint)parsed.wdesc._bitfield & (uint)CM_Physics.PublicWeenieDesc.BitfieldIndex.BF_HIDDEN_ADMIN) != 0)
                                 boolsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeBool.HIDDEN_ADMIN_BOOL}, {true})" + Environment.NewLine;
-                            if (((uint)parsed.wdesc._bitfield & (uint)PublicWeenieDesc.BitfieldIndex.BF_IMMUNE_CELL_RESTRICTIONS) != 0)
+                            if (((uint)parsed.wdesc._bitfield & (uint)CM_Physics.PublicWeenieDesc.BitfieldIndex.BF_IMMUNE_CELL_RESTRICTIONS) != 0)
                                 boolsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeBool.IGNORE_HOUSE_BARRIERS_BOOL}, {true})" + Environment.NewLine;
-                            if (((uint)parsed.wdesc._bitfield & (uint)PublicWeenieDesc.BitfieldIndex.BF_INSCRIBABLE) != 0)
+                            if (((uint)parsed.wdesc._bitfield & (uint)CM_Physics.PublicWeenieDesc.BitfieldIndex.BF_INSCRIBABLE) != 0)
                                 boolsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeBool.INSCRIBABLE_BOOL}, {true})" + Environment.NewLine;
-                            //if (((uint)parsed.wdesc._bitfield & (uint)PublicWeenieDesc.BitfieldIndex.BF_PLAYER_KILLER) != 0)
+                            //if (((uint)parsed.wdesc._bitfield & (uint)CM_Physics.PublicWeenieDesc.BitfieldIndex.BF_PLAYER_KILLER) != 0)
                             //    boolsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeBool.PK_KILLER_BOOL}, {true})" + Environment.NewLine;
-                            if (((uint)parsed.wdesc._bitfield & (uint)PublicWeenieDesc.BitfieldIndex.BF_REQUIRES_PACKSLOT) != 0)
+                            if (((uint)parsed.wdesc._bitfield & (uint)CM_Physics.PublicWeenieDesc.BitfieldIndex.BF_REQUIRES_PACKSLOT) != 0)
                                 boolsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeBool.REQUIRES_BACKPACK_SLOT_BOOL}, {true})" + Environment.NewLine;
-                            if (((uint)parsed.wdesc._bitfield & (uint)PublicWeenieDesc.BitfieldIndex.BF_RETAINED) != 0)
+                            if (((uint)parsed.wdesc._bitfield & (uint)CM_Physics.PublicWeenieDesc.BitfieldIndex.BF_RETAINED) != 0)
                                 boolsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeBool.RETAINED_BOOL}, {true})" + Environment.NewLine;
-                            if (((uint)parsed.wdesc._bitfield & (uint)PublicWeenieDesc.BitfieldIndex.BF_STUCK) != 0)
+                            if (((uint)parsed.wdesc._bitfield & (uint)CM_Physics.PublicWeenieDesc.BitfieldIndex.BF_STUCK) != 0)
                                 boolsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeBool.STUCK_BOOL}, {true})" + Environment.NewLine;
-                            if (((uint)parsed.wdesc._bitfield & (uint)PublicWeenieDesc.BitfieldIndex.BF_UI_HIDDEN) != 0)
+                            if (((uint)parsed.wdesc._bitfield & (uint)CM_Physics.PublicWeenieDesc.BitfieldIndex.BF_UI_HIDDEN) != 0)
                                 boolsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeBool.UI_HIDDEN_BOOL}, {true})" + Environment.NewLine;
-                            //if (((uint)parsed.wdesc._bitfield & (uint)PublicWeenieDesc.BitfieldIndex.BF_VENDOR) != 0)
+                            //if (((uint)parsed.wdesc._bitfield & (uint)CM_Physics.PublicWeenieDesc.BitfieldIndex.BF_VENDOR) != 0)
                             //    boolsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeBool.VENDOR_SERVICE_BOOL}, {true})" + Environment.NewLine;
-                            if (((uint)parsed.wdesc._bitfield & (uint)PublicWeenieDesc.BitfieldIndex.BF_WIELD_LEFT) != 0)
+                            if (((uint)parsed.wdesc._bitfield & (uint)CM_Physics.PublicWeenieDesc.BitfieldIndex.BF_WIELD_LEFT) != 0)
                                 boolsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeBool.AUTOWIELD_LEFT_BOOL}, {true})" + Environment.NewLine;
-                            if (((uint)parsed.wdesc._bitfield & (uint)PublicWeenieDesc.BitfieldIndex.BF_WIELD_ON_USE) != 0)
+                            if (((uint)parsed.wdesc._bitfield & (uint)CM_Physics.PublicWeenieDesc.BitfieldIndex.BF_WIELD_ON_USE) != 0)
                                 boolsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeBool.WIELD_ON_USE_BOOL}, {true})" + Environment.NewLine;
-                            //if (((uint)parsed.wdesc._bitfield & (uint)PublicWeenieDesc.BitfieldIndex.BF_ADMIN) != 0)
+                            //if (((uint)parsed.wdesc._bitfield & (uint)CM_Physics.PublicWeenieDesc.BitfieldIndex.BF_ADMIN) != 0)
                             //    boolsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeBool.IS_ADMIN_BOOL}, {true})" + Environment.NewLine;
 
                             if (weeniesWeenieType.ContainsKey(parsed.wdesc._wcid))
