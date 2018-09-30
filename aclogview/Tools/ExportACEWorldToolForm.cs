@@ -7482,7 +7482,7 @@ namespace aclogview
                                     if ((parsed.physicsdesc.bitfield & (uint)CM_Physics.PhysicsDesc.PhysicsDescInfo.MTABLE) != 0)
                                         didsLine += $"     , ({guid}, {(uint)STypeDID.MOTION_TABLE_DID}, {(uint)parsed.physicsdesc.mtable_id})" + Environment.NewLine;
                                     if ((parsed.physicsdesc.bitfield & (uint)CM_Physics.PhysicsDesc.PhysicsDescInfo.MOVEMENT) != 0)
-                                        line += $"'{ConvertMovementBufferToString(parsed.physicsdesc.movement_buffer)}', ";
+                                        line += $"'{ConvertMovementBufferToString(parsed.physicsdesc.CMS)}', ";
                                     else
                                         line += $"NULL, ";
                                     if ((parsed.physicsdesc.bitfield & (uint)CM_Physics.PhysicsDesc.PhysicsDescInfo.ANIMFRAME_ID) != 0)
@@ -7980,7 +7980,7 @@ namespace aclogview
                                 if ((parsed.physicsdesc.bitfield & (uint)CM_Physics.PhysicsDesc.PhysicsDescInfo.MTABLE) != 0)
                                     didsLine += $"     , ({parsed.object_id}, {(uint)STypeDID.MOTION_TABLE_DID}, {(uint)parsed.physicsdesc.mtable_id})" + Environment.NewLine;
                                 if ((parsed.physicsdesc.bitfield & (uint)CM_Physics.PhysicsDesc.PhysicsDescInfo.MOVEMENT) != 0)
-                                    line += $"'{ConvertMovementBufferToString(parsed.physicsdesc.movement_buffer)}', ";
+                                    line += $"'{ConvertMovementBufferToString(parsed.physicsdesc.CMS)}', ";
                                 else
                                     line += $"NULL, ";
                                 if ((parsed.physicsdesc.bitfield & (uint)CM_Physics.PhysicsDesc.PhysicsDescInfo.ANIMFRAME_ID) != 0)
@@ -8455,7 +8455,7 @@ namespace aclogview
                             if ((parsed.physicsdesc.bitfield & (uint)CM_Physics.PhysicsDesc.PhysicsDescInfo.MTABLE) != 0)
                                 didsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeDID.MOTION_TABLE_DID}, {(uint)parsed.physicsdesc.mtable_id}) /* {Enum.GetName(typeof(STypeDID), STypeDID.MOTION_TABLE_DID)} */" + Environment.NewLine;
                             if ((parsed.physicsdesc.bitfield & (uint)CM_Physics.PhysicsDesc.PhysicsDescInfo.MOVEMENT) != 0)
-                                line += $"'{ConvertMovementBufferToString(parsed.physicsdesc.movement_buffer)}', ";
+                                line += $"'{ConvertMovementBufferToString(parsed.physicsdesc.CMS)}', ";
                             else
                                 line += $"NULL, ";
                             if ((parsed.physicsdesc.bitfield & (uint)CM_Physics.PhysicsDesc.PhysicsDescInfo.ANIMFRAME_ID) != 0)
@@ -8895,7 +8895,7 @@ namespace aclogview
                             if ((parsed.physicsdesc.bitfield & (uint)CM_Physics.PhysicsDesc.PhysicsDescInfo.MTABLE) != 0)
                                 didsLine += $"     , ({parsed.wdesc._wcid}, {(uint)STypeDID.MOTION_TABLE_DID}, {(uint)parsed.physicsdesc.mtable_id})" + Environment.NewLine;
                             if ((parsed.physicsdesc.bitfield & (uint)CM_Physics.PhysicsDesc.PhysicsDescInfo.MOVEMENT) != 0)
-                                line += $"'{ConvertMovementBufferToString(parsed.physicsdesc.movement_buffer)}', ";
+                                line += $"'{ConvertMovementBufferToString(parsed.physicsdesc.CMS)}', ";
                             else
                                 line += $"NULL, ";
                             if ((parsed.physicsdesc.bitfield & (uint)CM_Physics.PhysicsDesc.PhysicsDescInfo.ANIMFRAME_ID) != 0)

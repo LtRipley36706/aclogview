@@ -244,6 +244,7 @@ public class CM_Physics : MessageProcessor {
         public uint state;
         public uint buff_length;
         public CM_Movement.MovementDataUnpack movement_buffer;
+        public byte[] CMS; // temp byte array for Export compatibility
         public int autonomous_movement;
         public uint animframe_id;
         public Position pos = new Position();
@@ -276,6 +277,9 @@ public class CM_Physics : MessageProcessor {
                 // Note: the client uses the MOVEMENT_TS and SERVER_CONTROLLED_MOVE_TS from the timestamps array
                 // in addition to the following movement data. See SmartBox::HandleCreateObject.
                 newObj.buff_length = binaryReader.ReadUInt32();
+                var brPOS = binaryReader.BaseStream.Position;
+                newObj.CMS = binaryReader.ReadBytes((int)newObj.buff_length);
+                binaryReader.BaseStream.Position = brPOS;
                 newObj.movement_buffer = CM_Movement.MovementDataUnpack.read(binaryReader);
                 newObj.autonomous_movement = binaryReader.ReadInt32();
                 newObj.packedItems.Add(PhysicsDescInfo.MOVEMENT.ToString());
