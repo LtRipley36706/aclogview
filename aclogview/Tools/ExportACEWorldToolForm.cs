@@ -336,19 +336,6 @@ namespace aclogview
             if (!fragDatListFile.OpenFile(fileName))
                 return;
 
-            var itemTypesToParse = new List<ITEM_TYPE>();
-
-            var itemTypeKeys = new Dictionary<ITEM_TYPE, List<string>>();
-            //var itemTypeStreamWriters = new Dictionary<ITEM_TYPE, StreamWriter>();
-
-            // If you only want to output a single item_type, you can change this code
-            foreach (ITEM_TYPE itemType in Enum.GetValues(typeof(ITEM_TYPE)))
-            {
-                itemTypesToParse.Add(itemType);
-                itemTypeKeys[itemType] = new List<string>();
-                //itemTypeStreamWriters[itemType] = new StreamWriter(Path.Combine(txtOutputFolder.Text, itemType + ".csv.temp"));
-            }
-
             try
             {
                 TreeView treeView = new TreeView();
@@ -413,10 +400,6 @@ namespace aclogview
                 Dictionary<uint, uint> chestObjectsInstances = new Dictionary<uint, uint>();
 
                 string currentWorld = "Unknown";
-                //Dictionary<string, List<uint>> worldObjectIds = new Dictionary<string, List<uint>>();
-                // Dictionary<string, Dictionary<uint, List<uint>>> worldWeenieObjectIds = new Dictionary<string, Dictionary<uint, List<uint>>>();
-                //worldObjectIds.Add(currentWorld, new List<uint>());
-                // worldWeenieObjectIds.Add(currentWorld, new Dictionary<uint, List<uint>>());
                 Dictionary<string, Dictionary<uint, uint>> worldIDQueue = new Dictionary<string, Dictionary<uint, uint>>();
                 Dictionary<uint, uint> idObjectsStatus = new Dictionary<uint, uint>();
                 Dictionary<uint, uint> weenieIdObjectsStatus = new Dictionary<uint, uint>();
@@ -437,72 +420,8 @@ namespace aclogview
 
                         try
                         {
-                            // ********************************************************************
-                            // ********************** CUSTOM PROCESSING CODE ********************** 
-                            // ********************************************************************
                             if (frag.Data.Length <= 4)
                                 continue;
-
-                            //using (BinaryReader fragDataReader = new BinaryReader(new MemoryStream(frag.Data)))
-                            //{
-                            //	var messageCode = fragDataReader.ReadUInt32();
-
-                            //	if (messageCode == 0xF745) // Create Object
-                            //	{
-                            //		var parsed = CM_Physics.CreateObject.read(fragDataReader);
-
-                            //		if (!itemTypesToParse.Contains(parsed.wdesc._type))
-                            //			continue;
-
-                            //		totalHits++;
-
-                            //		// This bit of trickery uses the existing tree view parser code to create readable output, which we can then convert to csv
-                            //		treeView.Nodes.Clear();
-                            //		parsed.contributeToTreeView(treeView);
-                            //		if (treeView.Nodes.Count == 1)
-                            //		{
-                            //			var lineItems = new string[256];
-                            //			int lineItemCount = 0;
-
-                            //			ProcessNode(treeView.Nodes[0], itemTypeKeys[parsed.wdesc._type], null, lineItems, ref lineItemCount);
-
-                            //			var sb = new StringBuilder();
-
-                            //			for (int i = 0; i < lineItemCount; i++)
-                            //			{
-                            //				if (i > 0)
-                            //					sb.Append(',');
-
-                            //				var output = lineItems[i];
-
-                            //				// Format the value for CSV output, if needed.
-                            //				// We only do this for certain columns. This is very time consuming
-                            //				if (output != null && itemTypeKeys[parsed.wdesc._type][i].EndsWith("name"))
-                            //				{
-                            //					if (output.Contains(",") || output.Contains("\"") || output.Contains("\r") || output.Contains("\n"))
-                            //					{
-                            //						var sb2 = new StringBuilder();
-                            //						sb2.Append("\"");
-                            //						foreach (char nextChar in output)
-                            //						{
-                            //							sb2.Append(nextChar);
-                            //							if (nextChar == '"')
-                            //								sb2.Append("\"");
-                            //						}
-                            //						sb2.Append("\"");
-                            //						output = sb2.ToString();
-                            //					}
-
-                            //				}
-
-                            //				if (output != null)
-                            //					sb.Append(output);
-                            //			}
-
-                            //			itemTypeStreamWriters[parsed.wdesc._type].WriteLine(sb.ToString());
-                            //		}
-                            //	}
-                            //}
 
                             BinaryReader fragDataReader = new BinaryReader(new MemoryStream(frag.Data));
 
@@ -719,43 +638,9 @@ namespace aclogview
             }
             finally
             {
-                //foreach (var streamWriter in itemTypeStreamWriters.Values)
-                //    streamWriter.Close();
-
                 fragDatListFile.CloseFile();
 
                 Interlocked.Increment(ref filesProcessed);
-            }
-
-            // Read in the temp file and save it to a new file with the column headers
-            foreach (var kvp in itemTypeKeys)
-            {
-                if (kvp.Value.Count > 0)
-                {
-                    using (var writer = new StreamWriter(Path.Combine(txtOutputFolder.Text, kvp.Key + ".csv")))
-                    {
-                        var sb = new StringBuilder();
-
-                        for (int i = 0; i < kvp.Value.Count; i++)
-                        {
-                            if (i > 0)
-                                sb.Append(',');
-
-                            sb.Append(kvp.Value[i] ?? String.Empty);
-                        }
-
-                        writer.WriteLine(sb.ToString());
-
-                        using (var reader = new StreamReader(Path.Combine(txtOutputFolder.Text, kvp.Key + ".csv.temp")))
-                        {
-                            string line;
-                            while ((line = reader.ReadLine()) != null)
-                                writer.WriteLine(line);
-                        }
-                    }
-                }
-
-                File.Delete(Path.Combine(txtOutputFolder.Text, kvp.Key + ".csv.temp"));
             }
         }
 
@@ -9372,117 +9257,6 @@ namespace aclogview
                                 && Math.Abs(p.frame.m_fOrigin.y - newPosition.frame.m_fOrigin.y) < margin
                                 && Math.Abs(p.frame.m_fOrigin.z - newPosition.frame.m_fOrigin.z) < margin);
         }
-
-        private void WriteUniqueTypes(CM_Physics.CreateObject parsed, StreamWriter writer, List<ITEM_TYPE> itemTypesToParse, Dictionary<ITEM_TYPE, List<string>> itemTypeKeys)
-        {
-            TreeView treeView = new TreeView();
-
-            if (!itemTypesToParse.Contains(parsed.wdesc._type))
-                return;
-
-            totalHits++;
-
-            // This bit of trickery uses the existing tree view parser code to create readable output, which we can then convert to csv
-            treeView.Nodes.Clear();
-            parsed.contributeToTreeView(treeView);
-            if (treeView.Nodes.Count == 1)
-            {
-                var lineItems = new string[256];
-                int lineItemCount = 0;
-
-                ProcessNode(treeView.Nodes[0], itemTypeKeys[parsed.wdesc._type], null, lineItems, ref lineItemCount);
-
-                var sb = new StringBuilder();
-
-                for (int i = 0; i < lineItemCount; i++)
-                {
-                    if (i > 0)
-                        sb.Append(',');
-
-                    var output = lineItems[i];
-
-                    // Format the value for CSV output, if needed.
-                    // We only do this for certain columns. This is very time consuming
-                    if (output != null && itemTypeKeys[parsed.wdesc._type][i].EndsWith("name"))
-                    {
-                        if (output.Contains(",") || output.Contains("\"") || output.Contains("\r") || output.Contains("\n"))
-                        {
-                            var sb2 = new StringBuilder();
-                            sb2.Append("\"");
-                            foreach (char nextChar in output)
-                            {
-                                sb2.Append(nextChar);
-                                if (nextChar == '"')
-                                    sb2.Append("\"");
-                            }
-                            sb2.Append("\"");
-                            output = sb2.ToString();
-                        }
-
-                    }
-
-                    if (output != null)
-                        sb.Append(output);
-                }
-
-                writer.WriteLine(sb.ToString());
-            }
-        }
-
-
-        private void ProcessNode(TreeNode node, List<string> keys, string prefix, string[] lineItems, ref int lineItemCount)
-        {
-            var kvp = ConvertNodeTextToKVP(node.Text);
-
-            var nodeKey = (prefix == null ? kvp.Key : (prefix + "." + kvp.Key));
-
-            // ********************************************************************
-            // ***************** YOU CAN OMIT CERTAIN NODES HERE ****************** 
-            // ********************************************************************
-            //if (nodeKey.StartsWith("physicsdesc.timestamps")) return;
-
-            if (node.Nodes.Count == 0)
-            {
-                if (!keys.Contains(nodeKey))
-                    keys.Add(nodeKey);
-
-                var keyIndex = keys.IndexOf(nodeKey);
-
-                if (keyIndex >= lineItems.Length)
-                    MessageBox.Show("Increase the lineItems array size");
-
-                lineItems[keyIndex] = kvp.Value;
-
-                if (keyIndex + 1 > lineItemCount)
-                    lineItemCount = keyIndex + 1;
-            }
-            else
-            {
-                foreach (TreeNode child in node.Nodes)
-                    ProcessNode(child, keys, nodeKey, lineItems, ref lineItemCount);
-            }
-        }
-
-        private static KeyValuePair<string, string> ConvertNodeTextToKVP(string nodeText)
-        {
-            string key = null;
-            string value = null;
-
-            var indexOfEquals = nodeText.IndexOf('=');
-
-            if (indexOfEquals == -1)
-                value = nodeText;
-            else
-            {
-                key = nodeText.Substring(0, indexOfEquals).Trim();
-
-                if (nodeText.Length > indexOfEquals + 1)
-                    value = nodeText.Substring(indexOfEquals + 1, nodeText.Length - indexOfEquals - 1).Trim();
-            }
-
-            return new KeyValuePair<string, string>(key, value);
-        }
-
 
         private void timer1_Tick(object sender, EventArgs e)
         {
