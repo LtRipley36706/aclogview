@@ -1706,7 +1706,7 @@ namespace aclogview
 
                         if (!weeniesFromVendors.ContainsKey(item.pwd._wcid))
                         {
-                            CreateObject newObj = GenerateCreateObjectfromVendorItemProfile(item, weeniesTypeTemplate);
+                            CM_Physics.CreateObject newObj = GenerateCreateObjectfromVendorItemProfile(item, weeniesTypeTemplate);
 
                             if (newObj == null)
                                 continue;
@@ -1742,17 +1742,17 @@ namespace aclogview
             }
         }
 
-        private CreateObject GenerateCreateObjectfromVendorItemProfile(CM_Vendor.ItemProfile item, Dictionary<uint, CM_Physics.CreateObject> weeniesTypeTemplate)
+        private CM_Physics.CreateObject GenerateCreateObjectfromVendorItemProfile(CM_Vendor.ItemProfile item, Dictionary<uint, CM_Physics.CreateObject> weeniesTypeTemplate)
         {
             try
             {
-                CreateObject obj = new CreateObject();
+                CM_Physics.CreateObject obj = new CM_Physics.CreateObject();
 
                 obj.object_id = item.iid;
                 // obj.object_id = item.pwd._wcid;
                 obj.wdesc = item.pwd;
 
-                CreateObject template = new CreateObject();
+                CM_Physics.CreateObject template = new CM_Physics.CreateObject();
 
                 //if ((obj.wdesc._bitfield & (uint)CM_Physics.PublicWeenieDesc.BitfieldIndex.BF_LIFESTONE) != 0)
                 //{
@@ -6788,7 +6788,7 @@ namespace aclogview
                             inventoryParents[parsed.physicsdesc.parent_id].Add(parsed.object_id);
 
                             if (!wieldedObjects.ContainsKey(parsed.physicsdesc.parent_id))
-                                wieldedObjects.Add(parsed.physicsdesc.parent_id, new List<CreateObject>());
+                                wieldedObjects.Add(parsed.physicsdesc.parent_id, new List<CM_Physics.CreateObject>());
 
                             wieldedObjects[parsed.physicsdesc.parent_id].Add(parsed);
                         }
@@ -6890,7 +6890,7 @@ namespace aclogview
                     {
                         uint landblock = (parsed.physicsdesc.pos.objcell_id >> 16);
                         if (!landblockInstances.ContainsKey(landblock))
-                            landblockInstances.Add(landblock, new Dictionary<string, List<CreateObject>>());
+                            landblockInstances.Add(landblock, new Dictionary<string, List<CM_Physics.CreateObject>>());
 
                         if (!landblockInstances[landblock].ContainsKey(fileToPutItIn))
                             landblockInstances[landblock].Add(fileToPutItIn, new List<CM_Physics.CreateObject>());
