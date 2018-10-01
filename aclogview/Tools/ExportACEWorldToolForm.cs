@@ -219,10 +219,10 @@ namespace aclogview
                             OrderHdr orderHeader = OrderHdr.read(fragDataReader);
                             opCode = fragDataReader.ReadUInt32();
                         }
-                        else
-                        {
-                            opCode = messageCode;
-                        }
+                    }
+                    else
+                    {
+                        opCode = messageCode;
                     }
 
                     if (opCode == (uint)PacketOpcode.Evt_Physics__CreateObject_ID
