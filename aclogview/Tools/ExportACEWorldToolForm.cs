@@ -427,81 +427,51 @@ namespace aclogview
 
                             var messageCode = fragDataReader.ReadUInt32();
 
-                            if (messageCode == (uint)PacketOpcode.Evt_Login__WorldInfo_ID)
+                            uint opCode = 0;
+
+                            if (messageCode == (uint)PacketOpcode.WEENIE_ORDERED_EVENT || messageCode == (uint)PacketOpcode.ORDERED_EVENT)
+                            {
+                                if (messageCode == (uint)PacketOpcode.WEENIE_ORDERED_EVENT)
+                                {
+                                    WOrderHdr orderHeader = WOrderHdr.read(fragDataReader);
+                                    opCode = fragDataReader.ReadUInt32();
+                                }
+                                else if (messageCode == (uint)PacketOpcode.ORDERED_EVENT)
+                                {
+                                    OrderHdr orderHeader = OrderHdr.read(fragDataReader);
+                                    opCode = fragDataReader.ReadUInt32();
+                                }
+                            }
+                            else
+                            {
+                                opCode = messageCode;
+                            }
+
+                            if (opCode == (uint)PacketOpcode.Evt_Login__WorldInfo_ID)
                             {
                                 var parsed = CM_Login.WorldInfo.read(fragDataReader);
-
-                                //if (currentWorld != parsed.strWorldName.m_buffer)
-                                //    worldIDQueue.Clear();
 
                                 currentWorld = parsed.strWorldName.m_buffer;
 
                                 if (!worldIDQueue.ContainsKey(currentWorld))
                                     worldIDQueue.Add(currentWorld, new Dictionary<uint, uint>());
-
-                                //System.Diagnostics.Debug.WriteLine($"Switched currentWorld to {currentWorld}");
                             }
 
-                            if (messageCode == (uint)PacketOpcode.Evt_Physics__CreateObject_ID)
+                            if (opCode == (uint)PacketOpcode.Evt_Physics__CreateObject_ID)
                             {
                                 var parsed = CM_Physics.CreateObject.read(fragDataReader);
 
                                 if (!worldIDQueue[currentWorld].ContainsKey(parsed.object_id))
                                 {
                                     worldIDQueue[currentWorld].Add(parsed.object_id, parsed.wdesc._wcid);
-
-                                    //worldWeenieObjectIds[currentWorld][parsed.wdesc._wcid].Add(parsed.object_id);
-
-                                    //if (parsed.object_id == 3707680050)
-                                    //{
-                                    //    System.Diagnostics.Debug.WriteLine($"Found {parsed.wdesc._name.m_buffer} ({parsed.object_id}), wcid {parsed.wdesc._wcid}, in {currentWorld}");
-                                    //}
-
-                                    //System.Diagnostics.Debug.WriteLine($"Found {parsed.wdesc._name.m_buffer} ({parsed.object_id}), wcid {parsed.wdesc._wcid}, in {currentWorld}");
-
-                                    //if (parsed.wdesc._wcid == 42717)
-                                    //{
-                                    //    System.Diagnostics.Debug.WriteLine($"Found {parsed.wdesc._name.m_buffer} ({parsed.object_id}), wcid {parsed.wdesc._wcid}, in {currentWorld}, added as a new wcid and objectid");
-                                    //}
-
-                                    //if (parsed.wdesc._wcid == 975)
-                                    //{
-                                    //    System.Diagnostics.Debug.WriteLine($"Found {parsed.wdesc._name.m_buffer} ({parsed.object_id}), wcid {parsed.wdesc._wcid}, in {currentWorld}, added objectid and wcid to id queue");
-                                    //}
                                 }
                                 else
                                 {
                                     if (worldIDQueue[currentWorld][parsed.object_id] != parsed.wdesc._wcid)
                                     {
-                                        //worldWeenieObjectIds[currentWorld][parsed.wdesc._wcid].Add(parsed.object_id);
-                                        //if (parsed.wdesc._wcid == 975)
-                                        //{
-                                        //    System.Diagnostics.Debug.WriteLine($"Found {parsed.wdesc._name.m_buffer} ({parsed.object_id}), wcid {parsed.wdesc._wcid}, in {currentWorld}, Already ID queue for {worldIDQueue[currentWorld][parsed.object_id]}, updating wcid.");
-                                        //}
                                         worldIDQueue[currentWorld][parsed.object_id] = parsed.wdesc._wcid;
-                                        //if (parsed.wdesc._wcid == 42717)
-                                        //{
-                                        //    System.Diagnostics.Debug.WriteLine($"Found {parsed.wdesc._name.m_buffer} ({parsed.object_id}), wcid {parsed.wdesc._wcid}, in {currentWorld}, added as new objectid");
-                                        //}
-                                    }
-                                    else
-                                    {
-                                        //if (parsed.wdesc._wcid == 42717)
-                                        //{
-                                        //    System.Diagnostics.Debug.WriteLine($"Found {parsed.wdesc._name.m_buffer} ({parsed.object_id}), wcid {parsed.wdesc._wcid}, in {currentWorld}, already indexed.");
-                                        //}
-
-                                        //if (parsed.wdesc._wcid == 975)
-                                        //{
-                                        //    System.Diagnostics.Debug.WriteLine($"Found {parsed.wdesc._name.m_buffer} ({parsed.object_id}), wcid {parsed.wdesc._wcid}, in {currentWorld}, already awaiting to be id'd.");
-                                        //}
                                     }
                                 }
-
-                                //if (parsed.wdesc._wcid == 46601)
-                                //{
-                                //    System.Diagnostics.Debug.WriteLine($"Found {parsed.wdesc._name.m_buffer} ({parsed.object_id}), wcid {parsed.wdesc._wcid}, in {currentWorld}, what is this?");
-                                //}
 
                                 CreateStaticObjectsList(parsed,
                                     objectIds, staticObjects,
@@ -521,111 +491,73 @@ namespace aclogview
                                     chestObjectsContainedItems, chestObjectsInstances);
                             }
 
-                            if (messageCode == (uint)PacketOpcode.WEENIE_ORDERED_EVENT || messageCode == (uint)PacketOpcode.ORDERED_EVENT)
+                            if (opCode == (uint)PacketOpcode.APPRAISAL_INFO_EVENT)
                             {
-                                uint opCode = 0;
+                                var parsed = CM_Examine.SetAppraiseInfo.read(fragDataReader);
 
-                                if (messageCode == (uint)PacketOpcode.WEENIE_ORDERED_EVENT)
-                                {
-                                    WOrderHdr orderHeader = WOrderHdr.read(fragDataReader);
-                                    opCode = fragDataReader.ReadUInt32();
-                                }
-                                if (messageCode == (uint)PacketOpcode.ORDERED_EVENT)
-                                {
-                                    OrderHdr orderHeader = OrderHdr.read(fragDataReader);
-                                    opCode = fragDataReader.ReadUInt32();
-                                }
+                                CreateAppraisalObjectsList(parsed,
+                                    objectIds, staticObjects,
+                                    weenieIds, weenies,
+                                    appraisalObjects, appraisalObjectIds, appraisalObjectsCatagoryMap, appraisalObjectToWeenieId,
+                                    weenieAppraisalObjects,
+                                    weenieAppraisalObjectsIdx, weenieAppraisalObjectsSuccess,
+                                    weenieObjectsCatagoryMap,
+                                    currentWorld, worldIDQueue, idObjectsStatus, weenieIdObjectsStatus);
+                            }
 
-                                //if (opCode == (uint)PacketOpcode.Evt_Physics__CreateObject_ID)
-                                //{
-                                //    var parsed = CM_Physics.CreateObject.read(fragDataReader);
+                            if (opCode == (uint)PacketOpcode.BOOK_DATA_RESPONSE_EVENT)
+                            {
+                                var parsed = CM_Writing.BookDataResponse.read(fragDataReader);
 
-                                //    CreateStaticObjectsList(parsed,
-                                //        objectIds, staticObjects,
-                                //        outputAsLandblocks, landblockInstances,
-                                //        weenieIds, weenies,
-                                //        processedWeeniePositions, dedupeWeenies,
-                                //        weenieNames,
-                                //        appraisalObjectsCatagoryMap, appraisalObjectToWeenieId,
-                                //        weenieObjectsCatagoryMap,
-                                //        weeniesWeenieType, staticObjectsWeenieType,
-                                //        wieldedObjectsParentMap, wieldedObjects,
-                                //        inventoryParents, inventoryObjects,
-                                //        parentWieldsWeenies,
-                                //        weeniesTypeTemplate,
-                                //        exportEverything,
-                                //        corpseObjectsDroppedItems, corpseObjectsInstances,
-                                //        chestObjectsContainedItems, chestObjectsInstances);
-                                //}
+                                CreateBookObjectsList(parsed,
+                                    objectIds, staticObjects,
+                                    weenieIds, weenies,
+                                    appraisalObjects, appraisalObjectIds, appraisalObjectsCatagoryMap, appraisalObjectToWeenieId,
+                                    bookObjectIds, bookObjects,
+                                    weenieObjectsCatagoryMap,
+                                    currentWorld, worldIDQueue);
+                            }
 
-                                if (opCode == (uint)PacketOpcode.APPRAISAL_INFO_EVENT)
-                                {
-                                    var parsed = CM_Examine.SetAppraiseInfo.read(fragDataReader);
+                            if (opCode == (uint)PacketOpcode.BOOK_PAGE_DATA_RESPONSE_EVENT)
+                            {
+                                var parsed = CM_Writing.BookPageDataResponse.read(fragDataReader);
 
-                                    CreateAppraisalObjectsList(parsed,
-                                        objectIds, staticObjects,
-                                        weenieIds, weenies,
-                                        appraisalObjects, appraisalObjectIds, appraisalObjectsCatagoryMap, appraisalObjectToWeenieId,
-                                        weenieAppraisalObjects,
-                                        weenieAppraisalObjectsIdx, weenieAppraisalObjectsSuccess,
-                                        weenieObjectsCatagoryMap,
-                                        currentWorld, worldIDQueue, idObjectsStatus, weenieIdObjectsStatus);
-                                }
+                                CreatePageObjectsList(parsed,
+                                    objectIds, staticObjects,
+                                    weenieIds, weenies,
+                                    appraisalObjects, appraisalObjectIds, appraisalObjectsCatagoryMap, appraisalObjectToWeenieId,
+                                    pageObjectIds, pageObjects,
+                                    weenieObjectsCatagoryMap,
+                                    currentWorld, worldIDQueue);
+                            }
 
-                                if (opCode == (uint)PacketOpcode.BOOK_DATA_RESPONSE_EVENT)
-                                {
-                                    var parsed = CM_Writing.BookDataResponse.read(fragDataReader);
+                            if (opCode == (uint)PacketOpcode.VENDOR_INFO_EVENT)
+                            {
+                                var parsed = CM_Vendor.gmVendorUI.read(fragDataReader);
 
-                                    CreateBookObjectsList(parsed,
-                                        objectIds, staticObjects,
-                                        weenieIds, weenies,
-                                        appraisalObjects, appraisalObjectIds, appraisalObjectsCatagoryMap, appraisalObjectToWeenieId,
-                                        bookObjectIds, bookObjects,
-                                        weenieObjectsCatagoryMap,
-                                        currentWorld, worldIDQueue);
-                                }
+                                CreateVendorObjectsList(parsed,
+                                    objectIds, staticObjects,
+                                    weenieIds, weenies,
+                                    appraisalObjects, appraisalObjectIds, appraisalObjectsCatagoryMap, appraisalObjectToWeenieId,
+                                    vendorObjectIds, vendorObjects, vendorSellsWeenies,
+                                    weeniesFromVendors,
+                                    weeniesTypeTemplate,
+                                    weenieObjectsCatagoryMap,
+                                    currentWorld, worldIDQueue);
+                            }
 
-                                if (opCode == (uint)PacketOpcode.BOOK_PAGE_DATA_RESPONSE_EVENT)
-                                {
-                                    var parsed = CM_Writing.BookPageDataResponse.read(fragDataReader);
+                            if (opCode == (uint)PacketOpcode.Evt_House__Recv_HouseProfile_ID)
+                            {
+                                var parsed = CM_House.Recv_HouseProfile.read(fragDataReader);
 
-                                    CreatePageObjectsList(parsed,
-                                        objectIds, staticObjects,
-                                        weenieIds, weenies,
-                                        appraisalObjects, appraisalObjectIds, appraisalObjectsCatagoryMap, appraisalObjectToWeenieId,
-                                        pageObjectIds, pageObjects,
-                                        weenieObjectsCatagoryMap,
-                                        currentWorld, worldIDQueue);
-                                }
-
-                                if (opCode == (uint)PacketOpcode.VENDOR_INFO_EVENT)
-                                {
-                                    var parsed = CM_Vendor.gmVendorUI.read(fragDataReader);
-
-                                    CreateVendorObjectsList(parsed,
-                                        objectIds, staticObjects,
-                                        weenieIds, weenies,
-                                        appraisalObjects, appraisalObjectIds, appraisalObjectsCatagoryMap, appraisalObjectToWeenieId,
-                                        vendorObjectIds, vendorObjects, vendorSellsWeenies,
-                                        weeniesFromVendors,
-                                        weeniesTypeTemplate,
-                                        weenieObjectsCatagoryMap,
-                                        currentWorld, worldIDQueue);
-                                }
-
-                                if (opCode == (uint)PacketOpcode.Evt_House__Recv_HouseProfile_ID)
-                                {
-                                    var parsed = CM_House.Recv_HouseProfile.read(fragDataReader);
-
-                                    CreateSlumlordObjectsList(parsed,
-                                        objectIds, staticObjects,
-                                        weenieIds, weenies,
-                                        appraisalObjects, appraisalObjectIds, appraisalObjectsCatagoryMap, appraisalObjectToWeenieId,
-                                        slumlordObjectIds, slumlordObjects,
-                                        weeniesTypeTemplate,
-                                        weenieObjectsCatagoryMap,
-                                        currentWorld, worldIDQueue);
-                                }
+                                CreateSlumlordObjectsList(parsed,
+                                    objectIds, staticObjects,
+                                    weenieIds, weenies,
+                                    appraisalObjects, appraisalObjectIds, appraisalObjectsCatagoryMap, appraisalObjectToWeenieId,
+                                    slumlordObjectIds, slumlordObjects,
+                                    weeniesTypeTemplate,
+                                    weenieObjectsCatagoryMap,
+                                    currentWorld, worldIDQueue);
                             }
                         }
                         catch (EndOfStreamException) // This can happen when a frag is incomplete and we try to parse it
