@@ -267,6 +267,7 @@ namespace aclogview
             if (ethernetHeader.proto != 8)
             {
                 throw new InvalidDataException();
+                //return(false, 0);
             }
 
             IpHeader ipHeader = IpHeader.read(binaryReader);
@@ -275,12 +276,13 @@ namespace aclogview
             if (ipHeader.proto != 17)
             {
                 throw new InvalidDataException();
+                //return (false, 0);
             }
 
             UdpHeader udpHeader = UdpHeader.read(binaryReader);
 
-            bool isSend = (udpHeader.dPort >= 9000 && udpHeader.dPort <= 10013);
-            bool isRecv = (udpHeader.sPort >= 9000 && udpHeader.sPort <= 10013);
+            bool isSend = (udpHeader.dPort >= 9000 && udpHeader.dPort <= 9013);
+            bool isRecv = (udpHeader.sPort >= 9000 && udpHeader.sPort <= 9013);
 
             uint port = 0;
             if (isSend)
@@ -292,6 +294,7 @@ namespace aclogview
             if (!isSend && !isRecv)
             {
                 throw new InvalidDataException();
+                //return (false, 0);
             }
 
             return (isSend, port);
@@ -303,6 +306,10 @@ namespace aclogview
             long packetStartPos = binaryReader.BaseStream.Position;
 
             (bool isSend, uint port) = readNetworkHeaders(binaryReader);
+
+            //// skip non-AC packets
+            //if (!(port >= 9000 && port <= 9013))
+            //    return null;
 
             long headersSize = binaryReader.BaseStream.Position - packetStartPos;
 
@@ -396,6 +403,10 @@ namespace aclogview
             long packetStartPos = binaryReader.BaseStream.Position;
 
             (bool isSend, uint port) = readNetworkHeaders(binaryReader);
+
+            //// skip non-AC packets
+            //if (!(port >= 9000 && port <= 9013))
+            //    return false;
 
             long headersSize = binaryReader.BaseStream.Position - packetStartPos;
 
