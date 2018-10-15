@@ -159,6 +159,8 @@ namespace aclogview
 
         private void DoBuild()
         {
+            DateTime start = DateTime.Now;
+
             aceWorldFragDatFile.CreateFile(Path.Combine(txtOutputFolder.Text, "ACE-World.frags"), chkCompressOutput.Checked ? FragDatListFile.CompressionType.DeflateStream : FragDatListFile.CompressionType.None);
 
             // Do not parallel this search
@@ -169,7 +171,10 @@ namespace aclogview
 
                 try
                 {
+                    var fileStart = DateTime.Now;
+                    System.Diagnostics.Debug.WriteLine($"Processing file {currentFile}");
                     ProcessFileForBuild(currentFile);
+                    System.Diagnostics.Debug.WriteLine($"File process started at {fileStart.ToString()}, completed at {DateTime.Now.ToString()} and took {(DateTime.Now - fileStart).TotalMinutes} minutes.");
                 }
                 catch (Exception ex)
                 {
@@ -178,6 +183,7 @@ namespace aclogview
             }
 
             aceWorldFragDatFile.CloseFile();
+            MessageBox.Show($"Build started at {start.ToString()}, completed at {DateTime.Now.ToString()} and took {(DateTime.Now - start).TotalMinutes} minutes.");
         }
 
         private void ProcessFileForBuild(string fileName)
@@ -689,7 +695,7 @@ namespace aclogview
                         WriteVendorObjectData(vendorObjects, txtOutputFolder.Text);
                     }
                 }
-                MessageBox.Show($"Export completed at {DateTime.Now.ToString()} and took {(DateTime.Now - start).TotalMinutes} minutes.");
+                MessageBox.Show($"Export started at {start.ToString()}, completed at {DateTime.Now.ToString()} and took {(DateTime.Now - start).TotalMinutes} minutes.");
             }
             finally
             {
@@ -5729,7 +5735,7 @@ namespace aclogview
                         || parsed.wdesc._name.m_buffer.Contains("Dwellings")
                         || parsed.wdesc._name.m_buffer.Contains("SylvanDwellings")
                         || parsed.wdesc._name.m_buffer.Contains("Veranda")
-                        || parsed.wdesc._name.m_buffer.Contains("Gate")
+                        || (parsed.wdesc._name.m_buffer.Contains("Gate") && !parsed.wdesc._name.m_buffer.Contains("Token"))
                         || (parsed.wdesc._name.m_buffer.Contains("Yard") && !parsed.wdesc._name.m_buffer.Contains("Balloons"))
                         || parsed.wdesc._name.m_buffer.Contains("Gardens")
                         || parsed.wdesc._name.m_buffer.Contains("Lodge")
@@ -9306,6 +9312,9 @@ namespace aclogview
         private bool PositionRecorded(CM_Physics.CreateObject parsed, List<Position> positions, Position newPosition, float margin = 0.02f)
         {
             if (newPosition?.frame?.m_fOrigin == null)
+                return true; // can't dedupe this
+
+            if (newPosition?.objcell_id == 0)
                 return true; // can't dedupe this
 
             return positions.Any(p => p.objcell_id == newPosition.objcell_id
