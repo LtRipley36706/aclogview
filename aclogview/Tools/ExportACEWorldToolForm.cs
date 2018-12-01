@@ -616,8 +616,8 @@ namespace aclogview
                                             weenies[weeniesByGUID[parsed.i_objid].ClassId].WeeniePropertiesFloat.Add(new ACE.Database.Models.World.WeeniePropertiesFloat { Type = (ushort)STypeFloat.MAXIMUM_VELOCITY_FLOAT, Value = parsed.i_prof._weaponProfileTable._max_velocity });
                                         if (!weenies[weeniesByGUID[parsed.i_objid].ClassId].WeeniePropertiesFloat.Any(y => y.Type == (ushort)STypeFloat.WEAPON_OFFENSE_FLOAT))
                                             weenies[weeniesByGUID[parsed.i_objid].ClassId].WeeniePropertiesFloat.Add(new ACE.Database.Models.World.WeeniePropertiesFloat { Type = (ushort)STypeFloat.WEAPON_OFFENSE_FLOAT, Value = parsed.i_prof._weaponProfileTable._weapon_offense });
-                                        if (!weenies[weeniesByGUID[parsed.i_objid].ClassId].WeeniePropertiesInt.Any(y => y.Type == 9030))
-                                            weenies[weeniesByGUID[parsed.i_objid].ClassId].WeeniePropertiesInt.Add(new ACE.Database.Models.World.WeeniePropertiesInt { Type = 9030, Value = (int)parsed.i_prof._weaponProfileTable._max_velocity_estimated });
+                                        if (!weenies[weeniesByGUID[parsed.i_objid].ClassId].WeeniePropertiesInt.Any(y => y.Type == 8030))
+                                            weenies[weeniesByGUID[parsed.i_objid].ClassId].WeeniePropertiesInt.Add(new ACE.Database.Models.World.WeeniePropertiesInt { Type = 8030, Value = (int)parsed.i_prof._weaponProfileTable._max_velocity_estimated });
                                     }
 
                                     if ((parsed.i_prof.header & (uint)CM_Examine.AppraisalProfile.AppraisalProfilePackHeader.Packed_HookProfile) != 0)
@@ -795,12 +795,12 @@ namespace aclogview
 
             result.ClassName = className;
 
-            result.WeeniePropertiesIID.Add(new ACE.Database.Models.World.WeeniePropertiesIID { Type = 9000, Value = message.object_id });
+            result.WeeniePropertiesIID.Add(new ACE.Database.Models.World.WeeniePropertiesIID { Type = 8000, Value = message.object_id });
 
-            result.WeeniePropertiesDID.Add(new ACE.Database.Models.World.WeeniePropertiesDID { Type = 9001, Value = message.wdesc.header });
+            result.WeeniePropertiesDID.Add(new ACE.Database.Models.World.WeeniePropertiesDID { Type = 8001, Value = message.wdesc.header });
 
             if ((message.wdesc._bitfield & (uint)CM_Physics.PublicWeenieDesc.BitfieldIndex.BF_INCLUDES_SECOND_HEADER) != 0)
-                result.WeeniePropertiesDID.Add(new ACE.Database.Models.World.WeeniePropertiesDID { Type = 9002, Value = message.wdesc.header2 });
+                result.WeeniePropertiesDID.Add(new ACE.Database.Models.World.WeeniePropertiesDID { Type = 8002, Value = message.wdesc.header2 });
 
             result.WeeniePropertiesString.Add(new ACE.Database.Models.World.WeeniePropertiesString { Type = (int)STypeString.NAME_STRING, Value = message.wdesc._name.m_buffer });
 
@@ -808,7 +808,7 @@ namespace aclogview
 
             result.WeeniePropertiesInt.Add(new ACE.Database.Models.World.WeeniePropertiesInt { Type = (int)STypeInt.ITEM_TYPE_INT, Value = (int)message.wdesc._type });
 
-            result.WeeniePropertiesDID.Add(new ACE.Database.Models.World.WeeniePropertiesDID { Type = 9003, Value = message.wdesc._bitfield });
+            result.WeeniePropertiesDID.Add(new ACE.Database.Models.World.WeeniePropertiesDID { Type = 8003, Value = message.wdesc._bitfield });
 
             if ((message.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_PluralName) != 0)
                 result.WeeniePropertiesString.Add(new ACE.Database.Models.World.WeeniePropertiesString { Type = (int)STypeString.PLURAL_NAME_STRING, Value = message.wdesc._plural_name.m_buffer });
@@ -877,7 +877,7 @@ namespace aclogview
                 result.WeeniePropertiesDID.Add(new ACE.Database.Models.World.WeeniePropertiesDID { Type = (int)STypeDID.PHYSICS_SCRIPT_DID, Value = message.wdesc._pscript });
 
             if ((message.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_Workmanship) != 0)
-                result.WeeniePropertiesFloat.Add(new ACE.Database.Models.World.WeeniePropertiesFloat { Type = 9004, Value = message.wdesc._workmanship });
+                result.WeeniePropertiesFloat.Add(new ACE.Database.Models.World.WeeniePropertiesFloat { Type = 8004, Value = message.wdesc._workmanship });
 
             if ((message.wdesc.header & (uint)CM_Physics.PublicWeenieDesc.PublicWeenieDescPackHeader.PWD_Packed_Burden) != 0)
                 result.WeeniePropertiesInt.Add(new ACE.Database.Models.World.WeeniePropertiesInt { Type = (int)STypeInt.ENCUMB_VAL_INT, Value = (int)message.wdesc._burden });
@@ -971,14 +971,14 @@ namespace aclogview
                 }
             }
 
-            result.WeeniePropertiesDID.Add(new ACE.Database.Models.World.WeeniePropertiesDID { Type = 9005, Value = message.physicsdesc.bitfield });
+            result.WeeniePropertiesDID.Add(new ACE.Database.Models.World.WeeniePropertiesDID { Type = 8005, Value = message.physicsdesc.bitfield });
 
             result.WeeniePropertiesInt.Add(new ACE.Database.Models.World.WeeniePropertiesInt { Type = (int)STypeInt.PHYSICS_STATE_INT, Value = (int)message.physicsdesc.state });
 
             if ((message.physicsdesc.bitfield & (uint)CM_Physics.PhysicsDesc.PhysicsDescInfo.MOVEMENT) != 0)
             {
-                result.WeeniePropertiesString.Add(new ACE.Database.Models.World.WeeniePropertiesString { Type = 9006, Value = ConvertMovementBufferToString(message.physicsdesc.CMS) });
-                result.WeeniePropertiesInt.Add(new ACE.Database.Models.World.WeeniePropertiesInt { Type = 9007, Value = message.physicsdesc.autonomous_movement });
+                result.WeeniePropertiesString.Add(new ACE.Database.Models.World.WeeniePropertiesString { Type = 8006, Value = ConvertMovementBufferToString(message.physicsdesc.CMS) });
+                result.WeeniePropertiesInt.Add(new ACE.Database.Models.World.WeeniePropertiesInt { Type = 8007, Value = message.physicsdesc.autonomous_movement });
             }
 
             if ((message.physicsdesc.bitfield & (uint)CM_Physics.PhysicsDesc.PhysicsDescInfo.ANIMFRAME_ID) != 0)
@@ -1013,14 +1013,14 @@ namespace aclogview
 
             if ((message.physicsdesc.bitfield & (uint)CM_Physics.PhysicsDesc.PhysicsDescInfo.PARENT) != 0)
             {
-                result.WeeniePropertiesIID.Add(new ACE.Database.Models.World.WeeniePropertiesIID { Type = 9008, Value = message.physicsdesc.parent_id });
-                result.WeeniePropertiesDID.Add(new ACE.Database.Models.World.WeeniePropertiesDID { Type = 9009, Value = message.physicsdesc.location_id });
+                result.WeeniePropertiesIID.Add(new ACE.Database.Models.World.WeeniePropertiesIID { Type = 8008, Value = message.physicsdesc.parent_id });
+                result.WeeniePropertiesDID.Add(new ACE.Database.Models.World.WeeniePropertiesDID { Type = 8009, Value = message.physicsdesc.location_id });
             }
 
             if ((message.physicsdesc.bitfield & (uint)CM_Physics.PhysicsDesc.PhysicsDescInfo.CHILDREN) != 0)
             {
-                //result.WeeniePropertiesIID.Add(new ACE.Database.Models.World.WeeniePropertiesIID { Type = 9008, Value = message.physicsdesc.parent_id });
-                //result.WeeniePropertiesDID.Add(new ACE.Database.Models.World.WeeniePropertiesDID { Type = 9009, Value = message.physicsdesc.location_id });
+                //result.WeeniePropertiesIID.Add(new ACE.Database.Models.World.WeeniePropertiesIID { Type = 8008, Value = message.physicsdesc.parent_id });
+                //result.WeeniePropertiesDID.Add(new ACE.Database.Models.World.WeeniePropertiesDID { Type = 8009, Value = message.physicsdesc.location_id });
             }
 
             if ((message.physicsdesc.bitfield & (uint)CM_Physics.PhysicsDesc.PhysicsDescInfo.OBJSCALE) != 0)
@@ -1037,27 +1037,27 @@ namespace aclogview
 
             if ((message.physicsdesc.bitfield & (uint)CM_Physics.PhysicsDesc.PhysicsDescInfo.VELOCITY) != 0)
             {
-                result.WeeniePropertiesFloat.Add(new ACE.Database.Models.World.WeeniePropertiesFloat { Type = 9010, Value = message.physicsdesc.velocity.x });
-                result.WeeniePropertiesFloat.Add(new ACE.Database.Models.World.WeeniePropertiesFloat { Type = 9011, Value = message.physicsdesc.velocity.y });
-                result.WeeniePropertiesFloat.Add(new ACE.Database.Models.World.WeeniePropertiesFloat { Type = 9012, Value = message.physicsdesc.velocity.z });
+                result.WeeniePropertiesFloat.Add(new ACE.Database.Models.World.WeeniePropertiesFloat { Type = 8010, Value = message.physicsdesc.velocity.x });
+                result.WeeniePropertiesFloat.Add(new ACE.Database.Models.World.WeeniePropertiesFloat { Type = 8011, Value = message.physicsdesc.velocity.y });
+                result.WeeniePropertiesFloat.Add(new ACE.Database.Models.World.WeeniePropertiesFloat { Type = 8012, Value = message.physicsdesc.velocity.z });
             }
 
             if ((message.physicsdesc.bitfield & (uint)CM_Physics.PhysicsDesc.PhysicsDescInfo.ACCELERATION) != 0)
             {
-                result.WeeniePropertiesFloat.Add(new ACE.Database.Models.World.WeeniePropertiesFloat { Type = 9013, Value = message.physicsdesc.acceleration.x });
-                result.WeeniePropertiesFloat.Add(new ACE.Database.Models.World.WeeniePropertiesFloat { Type = 9014, Value = message.physicsdesc.acceleration.y });
-                result.WeeniePropertiesFloat.Add(new ACE.Database.Models.World.WeeniePropertiesFloat { Type = 9015, Value = message.physicsdesc.acceleration.z });
+                result.WeeniePropertiesFloat.Add(new ACE.Database.Models.World.WeeniePropertiesFloat { Type = 8013, Value = message.physicsdesc.acceleration.x });
+                result.WeeniePropertiesFloat.Add(new ACE.Database.Models.World.WeeniePropertiesFloat { Type = 8014, Value = message.physicsdesc.acceleration.y });
+                result.WeeniePropertiesFloat.Add(new ACE.Database.Models.World.WeeniePropertiesFloat { Type = 8015, Value = message.physicsdesc.acceleration.z });
             }
 
             if ((message.physicsdesc.bitfield & (uint)CM_Physics.PhysicsDesc.PhysicsDescInfo.OMEGA) != 0)
             {
-                result.WeeniePropertiesFloat.Add(new ACE.Database.Models.World.WeeniePropertiesFloat { Type = 9016, Value = message.physicsdesc.omega.x });
-                result.WeeniePropertiesFloat.Add(new ACE.Database.Models.World.WeeniePropertiesFloat { Type = 9017, Value = message.physicsdesc.omega.y });
-                result.WeeniePropertiesFloat.Add(new ACE.Database.Models.World.WeeniePropertiesFloat { Type = 9018, Value = message.physicsdesc.omega.z });
+                result.WeeniePropertiesFloat.Add(new ACE.Database.Models.World.WeeniePropertiesFloat { Type = 8016, Value = message.physicsdesc.omega.x });
+                result.WeeniePropertiesFloat.Add(new ACE.Database.Models.World.WeeniePropertiesFloat { Type = 8017, Value = message.physicsdesc.omega.y });
+                result.WeeniePropertiesFloat.Add(new ACE.Database.Models.World.WeeniePropertiesFloat { Type = 8018, Value = message.physicsdesc.omega.z });
             }
 
             if ((message.physicsdesc.bitfield & (uint)CM_Physics.PhysicsDesc.PhysicsDescInfo.DEFAULT_SCRIPT) != 0)
-                result.WeeniePropertiesDID.Add(new ACE.Database.Models.World.WeeniePropertiesDID { Type = 9019, Value = (uint)message.physicsdesc.default_script });
+                result.WeeniePropertiesDID.Add(new ACE.Database.Models.World.WeeniePropertiesDID { Type = 8019, Value = (uint)message.physicsdesc.default_script });
 
             if ((message.physicsdesc.bitfield & (uint)CM_Physics.PhysicsDesc.PhysicsDescInfo.DEFAULT_SCRIPT_INTENSITY) != 0)
                 result.WeeniePropertiesFloat.Add(new ACE.Database.Models.World.WeeniePropertiesFloat { Type = (int)STypeFloat.PHYSICS_SCRIPT_INTENSITY_FLOAT, Value = message.physicsdesc.default_script_intensity });
@@ -1066,7 +1066,7 @@ namespace aclogview
             {
                 for (int i = 0; i < message.physicsdesc.timestamps.Length; ++i)
                 {
-                    result.WeeniePropertiesDID.Add(new ACE.Database.Models.World.WeeniePropertiesDID { Type = (ushort)(9020 + i), Value = message.physicsdesc.timestamps[i] });
+                    result.WeeniePropertiesDID.Add(new ACE.Database.Models.World.WeeniePropertiesDID { Type = (ushort)(8020 + i), Value = message.physicsdesc.timestamps[i] });
                 }
             }
 
