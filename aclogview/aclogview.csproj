@@ -82,6 +82,7 @@
       <DependentUpon>GotoLine.cs</DependentUpon>
     </Compile>
     <Compile Include="Message Processors\CM_DDD.cs" />
+    <Compile Include="SQLWriters\LandblockSQLWriter.cs" />
     <Compile Include="SQLWriters\WeenieSQLWriter.cs" />
     <Compile Include="Tools\ExportACEWorldToolForm.cs">
       <SubType>Form</SubType>

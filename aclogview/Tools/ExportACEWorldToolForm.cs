@@ -348,6 +348,9 @@ namespace aclogview
             {
                 Dictionary<uint, ACE.Database.Models.World.Weenie> weenies = new Dictionary<uint, ACE.Database.Models.World.Weenie>();
                 Dictionary<uint, ACE.Database.Models.World.Weenie> weeniesByGUID = new Dictionary<uint, ACE.Database.Models.World.Weenie>();
+                Dictionary<uint, string> weenieNames = new Dictionary<uint, string>();
+
+                Dictionary<uint, ACE.Database.Models.World.LandblockInstance> instances = new Dictionary<uint, ACE.Database.Models.World.LandblockInstance>();
 
                 while (true)
                 {
@@ -441,10 +444,40 @@ namespace aclogview
 
                                     weenies.Add(parsed.wdesc._wcid, wo);
 
+                                    if (!weenieNames.ContainsKey(parsed.wdesc._wcid))
+                                        weenieNames.Add(parsed.wdesc._wcid, parsed.wdesc._name.m_buffer);
+
                                     if (!weeniesByGUID.ContainsKey(parsed.object_id))
                                         weeniesByGUID.Add(parsed.object_id, wo);
 
                                     totalHits++;
+                                }
+
+                                if (parsed.wdesc._wcid != 1) // Skip players
+                                {
+                                    if (parsed.object_id < 0x80000000) // static objects
+                                    {
+                                        if (!instances.ContainsKey(parsed.object_id))
+                                        {
+                                            instances.Add(parsed.object_id,
+                                                new ACE.Database.Models.World.LandblockInstance
+                                                {
+                                                    Guid = parsed.object_id,
+                                                    WeenieClassId = parsed.wdesc._wcid,
+                                                    ObjCellId = parsed.physicsdesc.pos.objcell_id,
+                                                    OriginX = parsed.physicsdesc.pos.frame.m_fOrigin.x,
+                                                    OriginY = parsed.physicsdesc.pos.frame.m_fOrigin.y,
+                                                    OriginZ = parsed.physicsdesc.pos.frame.m_fOrigin.z,
+                                                    AnglesW = parsed.physicsdesc.pos.frame.qw,
+                                                    AnglesX = parsed.physicsdesc.pos.frame.qx,
+                                                    AnglesY = parsed.physicsdesc.pos.frame.qy,
+                                                    AnglesZ = parsed.physicsdesc.pos.frame.qz,
+                                                    IsLinkChild = false
+                                                });
+
+                                            totalHits++;
+                                        }
+                                    }
                                 }
                             }
 
@@ -765,7 +798,9 @@ namespace aclogview
                     }
                 }
 
-                WeenieSQLWriter.WriteFiles(weenies.Values, txtOutputFolder.Text + "\\9 WeenieDefaults\\SQL\\", new Dictionary<uint, string>(), null, null, weenies, true);
+                WeenieSQLWriter.WriteFiles(weenies.Values, txtOutputFolder.Text + "\\9 WeenieDefaults\\SQL\\", weenieNames, null, null, weenies, true);
+
+                LandblockSQLWriter.WriteFiles(instances.Values, txtOutputFolder.Text + "\\6 LandBlockExtendedData\\SQL\\", weenieNames, true);
 
                 MessageBox.Show($"Export started at {start.ToString()}, completed at {DateTime.Now.ToString()} and took {(DateTime.Now - start).TotalMinutes} minutes.");
             }
