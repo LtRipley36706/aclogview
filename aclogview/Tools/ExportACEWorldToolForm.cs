@@ -8,6 +8,8 @@ using System.Text;
 using System.Threading;
 using System.Windows.Forms;
 
+using ACE.Database.Models.World;
+
 using aclogview.Properties;
 using aclogview.SQLWriters;
 
@@ -438,44 +440,50 @@ namespace aclogview
                                 //    corpseObjectsDroppedItems, corpseObjectsInstances,
                                 //    chestObjectsContainedItems, chestObjectsInstances);
 
-                                if (!weenies.ContainsKey(parsed.wdesc._wcid))
+                                if (parsed.wdesc._name.m_buffer == "Portal to Town Network" || ((parsed.physicsdesc.pos.objcell_id >> 16) == 7 && parsed.object_id < 0x80000000))
                                 {
-                                    var wo = CreateWeenieFromCreateObjectMsg(parsed);
 
-                                    weenies.Add(parsed.wdesc._wcid, wo);
-
-                                    if (!weenieNames.ContainsKey(parsed.wdesc._wcid))
-                                        weenieNames.Add(parsed.wdesc._wcid, parsed.wdesc._name.m_buffer);
-
-                                    if (!weeniesByGUID.ContainsKey(parsed.object_id))
-                                        weeniesByGUID.Add(parsed.object_id, wo);
-
-                                    totalHits++;
-                                }
-
-                                if (parsed.wdesc._wcid != 1) // Skip players
-                                {
-                                    if (parsed.object_id < 0x80000000) // static objects
+                                    if (!weenies.ContainsKey(parsed.wdesc._wcid))
                                     {
-                                        if (!instances.ContainsKey(parsed.object_id))
-                                        {
-                                            instances.Add(parsed.object_id,
-                                                new ACE.Database.Models.World.LandblockInstance
-                                                {
-                                                    Guid = parsed.object_id,
-                                                    WeenieClassId = parsed.wdesc._wcid,
-                                                    ObjCellId = parsed.physicsdesc.pos.objcell_id,
-                                                    OriginX = parsed.physicsdesc.pos.frame.m_fOrigin.x,
-                                                    OriginY = parsed.physicsdesc.pos.frame.m_fOrigin.y,
-                                                    OriginZ = parsed.physicsdesc.pos.frame.m_fOrigin.z,
-                                                    AnglesW = parsed.physicsdesc.pos.frame.qw,
-                                                    AnglesX = parsed.physicsdesc.pos.frame.qx,
-                                                    AnglesY = parsed.physicsdesc.pos.frame.qy,
-                                                    AnglesZ = parsed.physicsdesc.pos.frame.qz,
-                                                    IsLinkChild = false
-                                                });
+                                        var wo = CreateWeenieFromCreateObjectMsg(parsed);
 
-                                            totalHits++;
+                                        SetWeenieType(wo);
+
+                                        weenies.Add(parsed.wdesc._wcid, wo);
+
+                                        if (!weenieNames.ContainsKey(parsed.wdesc._wcid))
+                                            weenieNames.Add(parsed.wdesc._wcid, parsed.wdesc._name.m_buffer);
+
+                                        if (!weeniesByGUID.ContainsKey(parsed.object_id))
+                                            weeniesByGUID.Add(parsed.object_id, wo);
+
+                                        totalHits++;
+                                    }
+
+                                    if (parsed.wdesc._wcid != 1) // Skip players
+                                    {
+                                        if (parsed.object_id < 0x80000000) // static objects
+                                        {
+                                            if (!instances.ContainsKey(parsed.object_id))
+                                            {
+                                                instances.Add(parsed.object_id,
+                                                    new ACE.Database.Models.World.LandblockInstance
+                                                    {
+                                                        Guid = parsed.object_id,
+                                                        WeenieClassId = parsed.wdesc._wcid,
+                                                        ObjCellId = parsed.physicsdesc.pos.objcell_id,
+                                                        OriginX = parsed.physicsdesc.pos.frame.m_fOrigin.x,
+                                                        OriginY = parsed.physicsdesc.pos.frame.m_fOrigin.y,
+                                                        OriginZ = parsed.physicsdesc.pos.frame.m_fOrigin.z,
+                                                        AnglesW = parsed.physicsdesc.pos.frame.qw,
+                                                        AnglesX = parsed.physicsdesc.pos.frame.qx,
+                                                        AnglesY = parsed.physicsdesc.pos.frame.qy,
+                                                        AnglesZ = parsed.physicsdesc.pos.frame.qz,
+                                                        IsLinkChild = false
+                                                    });
+
+                                                totalHits++;
+                                            }
                                         }
                                     }
                                 }
@@ -773,6 +781,17 @@ namespace aclogview
                                     if (!weenies[weeniesByGUID[parsed.shopVendorID].ClassId].WeeniePropertiesBool.Any(y => y.Type == (ushort)STypeBool.DEAL_MAGICAL_ITEMS_BOOL))
                                         weenies[weeniesByGUID[parsed.shopVendorID].ClassId].WeeniePropertiesBool.Add(new ACE.Database.Models.World.WeeniePropertiesBool { Type = (ushort)STypeBool.DEAL_MAGICAL_ITEMS_BOOL, Value = parsed.shopVendorProfile.magic == 1 });
 
+                                    if (parsed.shopItemProfileList.list.Count > 0)
+                                    {
+                                        foreach (var item in parsed.shopItemProfileList.list)
+                                        {
+                                            if (item.pwd._wcid > 31000)
+                                                continue; // skip new things for now
+                                            if (!weenies[weeniesByGUID[parsed.shopVendorID].ClassId].WeeniePropertiesCreateList.Any(y => y.DestinationType == (sbyte)ACE.Entity.Enum.DestinationType.Shop && y.WeenieClassId == item.pwd._wcid))
+                                                weenies[weeniesByGUID[parsed.shopVendorID].ClassId].WeeniePropertiesCreateList.Add(new ACE.Database.Models.World.WeeniePropertiesCreateList { DestinationType = (sbyte)ACE.Entity.Enum.DestinationType.Shop, WeenieClassId = item.pwd._wcid, StackSize = -1, TryToBond = false });
+                                        }
+                                    }
+
                                     totalHits++;
                                 }
                             }
@@ -800,7 +819,7 @@ namespace aclogview
 
                 WeenieSQLWriter.WriteFiles(weenies.Values, txtOutputFolder.Text + "\\9 WeenieDefaults\\SQL\\", weenieNames, null, null, weenies, true);
 
-                LandblockSQLWriter.WriteFiles(instances.Values, txtOutputFolder.Text + "\\6 LandBlockExtendedData\\SQL\\", weenieNames, true);
+                LandblockSQLWriter.WriteFiles(instances.Values, txtOutputFolder.Text + "\\6 LandBlockExtendedData\\SQL\\", weenieNames, false);
 
                 MessageBox.Show($"Export started at {start.ToString()}, completed at {DateTime.Now.ToString()} and took {(DateTime.Now - start).TotalMinutes} minutes.");
             }
@@ -810,6 +829,43 @@ namespace aclogview
 
                 Interlocked.Increment(ref filesProcessed);
             }
+        }
+
+        private void SetWeenieType(ACE.Database.Models.World.Weenie wo)
+        {
+            var objectDescriptionFlag = (ACE.Entity.Enum.ObjectDescriptionFlag)wo.GetProperty((ACE.Entity.Enum.Properties.PropertyDataId)8003);
+
+            if (objectDescriptionFlag.HasFlag(ACE.Entity.Enum.ObjectDescriptionFlag.Vendor))
+            {
+                wo.Type = (int)ACE.Entity.Enum.WeenieType.Vendor;
+                return;
+            }
+
+            var itemType = (ACE.Entity.Enum.ItemType)wo.GetProperty(ACE.Entity.Enum.Properties.PropertyInt.ItemType);
+
+            switch (itemType)
+            {
+                case ACE.Entity.Enum.ItemType.Caster:
+                    wo.Type = (int)ACE.Entity.Enum.WeenieType.Caster;
+                    break;
+                case ACE.Entity.Enum.ItemType.Clothing:
+                    wo.Type = (int)ACE.Entity.Enum.WeenieType.Clothing;
+                    break;
+                case ACE.Entity.Enum.ItemType.Container:
+                    wo.Type = (int)ACE.Entity.Enum.WeenieType.Container;
+                    break;
+                case ACE.Entity.Enum.ItemType.Creature:
+                    wo.Type = (int)ACE.Entity.Enum.WeenieType.Creature;
+                    break;
+                case ACE.Entity.Enum.ItemType.Portal:
+                    wo.Type = (int)ACE.Entity.Enum.WeenieType.Portal;
+                    break;
+                default:
+                    wo.Type = (int)ACE.Entity.Enum.WeenieType.Generic;
+                    break;
+            }
+
+            return;
         }
 
         private ACE.Database.Models.World.Weenie CreateWeenieFromCreateObjectMsg(CM_Physics.CreateObject message)
@@ -1023,7 +1079,7 @@ namespace aclogview
                 result.WeeniePropertiesPosition.Add(
                     new ACE.Database.Models.World.WeeniePropertiesPosition
                     {
-                        PositionType = (int)STypePosition.LOCATION_POSITION,
+                        PositionType = 8040,
                         ObjCellId = message.physicsdesc.pos.objcell_id,
                         OriginX = message.physicsdesc.pos.frame.m_fOrigin.x,
                         OriginY = message.physicsdesc.pos.frame.m_fOrigin.y,
