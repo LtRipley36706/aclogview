@@ -1157,7 +1157,7 @@ namespace aclogview
             {
                 for (int i = 0; i < message.physicsdesc.timestamps.Length; ++i)
                 {
-                    result.WeeniePropertiesDID.Add(new ACE.Database.Models.World.WeeniePropertiesDID { Type = (ushort)(8020 + i), Value = message.physicsdesc.timestamps[i] });
+                    result.WeeniePropertiesDID.Add(new ACE.Database.Models.World.WeeniePropertiesDID { Type = (ushort)(8020 + i), Value = message.physicsdesc.timestamps[i - 1] });
                 }
             }
 
