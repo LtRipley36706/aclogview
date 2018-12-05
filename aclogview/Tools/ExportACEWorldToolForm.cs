@@ -440,7 +440,7 @@ namespace aclogview
                                 //    corpseObjectsDroppedItems, corpseObjectsInstances,
                                 //    chestObjectsContainedItems, chestObjectsInstances);
 
-                                if (parsed.wdesc._name.m_buffer == "Portal to Town Network" || ((parsed.physicsdesc.pos.objcell_id >> 16) == 7 && parsed.object_id < 0x80000000))
+                                if ((parsed.physicsdesc.pos.objcell_id >> 16) == 35330)
                                 {
 
                                     if (!weenies.ContainsKey(parsed.wdesc._wcid))
