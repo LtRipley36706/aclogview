@@ -338,6 +338,27 @@ namespace aclogview
             }
         }
 
+        class Landblock
+        {
+            //public uint LandblockId;
+
+            public Dictionary<uint, ACE.Database.Models.World.LandblockInstance> StaticObjects;
+
+            public Dictionary<uint, ACE.Database.Models.World.LandblockInstance> LinkableMonsterObjects;
+
+            public Dictionary<uint, ACE.Database.Models.World.LandblockInstance> LinkableItemObjects;
+
+            public Dictionary<uint, ACE.Database.Models.World.LandblockInstance> LinkableNPCObjects;
+
+            public Landblock()
+            {
+                StaticObjects = new Dictionary<uint, ACE.Database.Models.World.LandblockInstance>();
+                LinkableMonsterObjects = new Dictionary<uint, ACE.Database.Models.World.LandblockInstance>();
+                LinkableItemObjects = new Dictionary<uint, ACE.Database.Models.World.LandblockInstance>();
+                LinkableNPCObjects = new Dictionary<uint, ACE.Database.Models.World.LandblockInstance>();
+            }
+        }
+
         private void ProcessFileForExport(string fileName)
         {
             var fragDatListFile = new FragDatListFile();
@@ -352,7 +373,11 @@ namespace aclogview
                 Dictionary<uint, uint> weeniesByGUID = new Dictionary<uint, uint>();
                 Dictionary<uint, string> weenieNames = new Dictionary<uint, string>();
 
-                Dictionary<uint, ACE.Database.Models.World.LandblockInstance> instances = new Dictionary<uint, ACE.Database.Models.World.LandblockInstance>();
+                //Dictionary<uint, ACE.Database.Models.World.LandblockInstance> instances = new Dictionary<uint, ACE.Database.Models.World.LandblockInstance>();
+
+                Dictionary<uint, Landblock> instances = new Dictionary<uint, Landblock>();
+
+                Dictionary<uint, List<Position>> processedWeeniePositions = new Dictionary<uint, List<Position>>();
 
                 string currentWorld = "Unknown";
                 Dictionary<string, Dictionary<uint, uint>> worldIDQueue = new Dictionary<string, Dictionary<uint, uint>>();
@@ -452,7 +477,49 @@ namespace aclogview
                                 //    corpseObjectsDroppedItems, corpseObjectsInstances,
                                 //    chestObjectsContainedItems, chestObjectsInstances);
 
-                                if (true)
+                                //if ((parsed.physicsdesc.pos.objcell_id >> 16) == 0x8603 || parsed.physicsdesc.pos.objcell_id == 0)
+                                //if ((parsed.physicsdesc.pos.objcell_id >> 16) == 0x8602
+                                //    || (parsed.physicsdesc.pos.objcell_id >> 16) == 0x8603
+                                //    || (parsed.physicsdesc.pos.objcell_id >> 16) == 0x8604
+                                //    || (parsed.physicsdesc.pos.objcell_id >> 16) == 0x8702
+                                //    || (parsed.physicsdesc.pos.objcell_id >> 16) == 0x8703
+                                //    || (parsed.physicsdesc.pos.objcell_id >> 16) == 0x7F03
+                                //    || (parsed.physicsdesc.pos.objcell_id >> 16) == 0x7F04
+                                //    || (parsed.physicsdesc.pos.objcell_id >> 16) == 0x8002
+                                //    || (parsed.physicsdesc.pos.objcell_id >> 16) == 0x8003
+                                //    || (parsed.physicsdesc.pos.objcell_id >> 16) == 0x8004
+                                //    || (parsed.physicsdesc.pos.objcell_id >> 16) == 0x8C04
+                                //    || (parsed.physicsdesc.pos.objcell_id >> 16) == 0x8D02
+                                //    || (parsed.physicsdesc.pos.objcell_id >> 16) == 0x8D03
+                                //    || (parsed.physicsdesc.pos.objcell_id >> 16) == 0x8D04
+                                //    || (parsed.physicsdesc.pos.objcell_id >> 16) == 0x8E02
+                                //    || (parsed.physicsdesc.pos.objcell_id >> 16) == 0x7202
+                                //    || (parsed.physicsdesc.pos.objcell_id >> 16) == 0x7203
+                                //    || (parsed.physicsdesc.pos.objcell_id >> 16) == 0x7204
+                                //    || (parsed.physicsdesc.pos.objcell_id >> 16) == 0x7302
+                                //    || (parsed.physicsdesc.pos.objcell_id >> 16) == 0x7303
+                                //    )
+                                if (/*(parsed.physicsdesc.pos.objcell_id >> 16) == 0x8602*/
+                                    (parsed.physicsdesc.pos.objcell_id >> 16) == 0x8603
+                                    /* || (parsed.physicsdesc.pos.objcell_id >> 16) == 0x8604
+                                    || (parsed.physicsdesc.pos.objcell_id >> 16) == 0x8702
+                                    || (parsed.physicsdesc.pos.objcell_id >> 16) == 0x8703 */
+                                    || (parsed.physicsdesc.pos.objcell_id >> 16) == 0x7F03
+                                    /* || (parsed.physicsdesc.pos.objcell_id >> 16) == 0x7F04
+                                    || (parsed.physicsdesc.pos.objcell_id >> 16) == 0x8002
+                                    || (parsed.physicsdesc.pos.objcell_id >> 16) == 0x8003
+                                    || (parsed.physicsdesc.pos.objcell_id >> 16) == 0x8004 */
+                                    || (parsed.physicsdesc.pos.objcell_id >> 16) == 0x8C04
+                                    /* || (parsed.physicsdesc.pos.objcell_id >> 16) == 0x8D02
+                                    || (parsed.physicsdesc.pos.objcell_id >> 16) == 0x8D03
+                                    || (parsed.physicsdesc.pos.objcell_id >> 16) == 0x8D04
+                                    || (parsed.physicsdesc.pos.objcell_id >> 16) == 0x8E02
+                                    || (parsed.physicsdesc.pos.objcell_id >> 16) == 0x7202 */
+                                    || (parsed.physicsdesc.pos.objcell_id >> 16) == 0x7203
+                                    /* || (parsed.physicsdesc.pos.objcell_id >> 16) == 0x7204
+                                    || (parsed.physicsdesc.pos.objcell_id >> 16) == 0x7302
+                                    || (parsed.physicsdesc.pos.objcell_id >> 16) == 0x7303 */
+                                    )
                                 {
 
                                     if (!weenies.ContainsKey(parsed.wdesc._wcid))
@@ -464,7 +531,10 @@ namespace aclogview
                                         weenies.Add(parsed.wdesc._wcid, wo);
 
                                         if (!weenieNames.ContainsKey(parsed.wdesc._wcid))
-                                            weenieNames.Add(parsed.wdesc._wcid, parsed.wdesc._name.m_buffer);                                        
+                                            weenieNames.Add(parsed.wdesc._wcid, parsed.wdesc._name.m_buffer);
+
+                                        if (!processedWeeniePositions.ContainsKey(parsed.wdesc._wcid))
+                                            processedWeeniePositions.Add(parsed.wdesc._wcid, new List<Position>());
 
                                         totalHits++;
                                     }
@@ -475,29 +545,198 @@ namespace aclogview
                                         totalHits++;
                                     }
 
-                                    if (parsed.wdesc._wcid != 1) // Skip players
+                                    if (parsed.wdesc._wcid != 1 && parsed.wdesc._containerID == 0 && parsed.wdesc._wielderID == 0) // Skip players and objects without 
                                     {
                                         if (parsed.object_id < 0x80000000) // static objects
                                         {
-                                            if (!instances.ContainsKey(parsed.object_id))
-                                            {
-                                                instances.Add(parsed.object_id,
-                                                    new ACE.Database.Models.World.LandblockInstance
-                                                    {
-                                                        Guid = parsed.object_id,
-                                                        WeenieClassId = parsed.wdesc._wcid,
-                                                        ObjCellId = parsed.physicsdesc.pos.objcell_id,
-                                                        OriginX = parsed.physicsdesc.pos.frame.m_fOrigin.x,
-                                                        OriginY = parsed.physicsdesc.pos.frame.m_fOrigin.y,
-                                                        OriginZ = parsed.physicsdesc.pos.frame.m_fOrigin.z,
-                                                        AnglesW = parsed.physicsdesc.pos.frame.qw,
-                                                        AnglesX = parsed.physicsdesc.pos.frame.qx,
-                                                        AnglesY = parsed.physicsdesc.pos.frame.qy,
-                                                        AnglesZ = parsed.physicsdesc.pos.frame.qz,
-                                                        IsLinkChild = false
-                                                    });
+                                            //if (!instances.ContainsKey(parsed.object_id))
+                                            //{
+                                            //    //instances.Add(parsed.object_id,
+                                            //    //    new ACE.Database.Models.World.LandblockInstance
+                                            //    //    {
+                                            //    //        Guid = parsed.object_id,
+                                            //    //        WeenieClassId = parsed.wdesc._wcid,
+                                            //    //        ObjCellId = parsed.physicsdesc.pos.objcell_id,
+                                            //    //        OriginX = parsed.physicsdesc.pos.frame.m_fOrigin.x,
+                                            //    //        OriginY = parsed.physicsdesc.pos.frame.m_fOrigin.y,
+                                            //    //        OriginZ = parsed.physicsdesc.pos.frame.m_fOrigin.z,
+                                            //    //        AnglesW = parsed.physicsdesc.pos.frame.qw,
+                                            //    //        AnglesX = parsed.physicsdesc.pos.frame.qx,
+                                            //    //        AnglesY = parsed.physicsdesc.pos.frame.qy,
+                                            //    //        AnglesZ = parsed.physicsdesc.pos.frame.qz,
+                                            //    //        IsLinkChild = false
+                                            //    //    });
 
-                                                totalHits++;
+                                            //    totalHits++;
+                                            //}
+                                            if (parsed.physicsdesc.pos.objcell_id > 0)
+                                            {
+                                                var landblockId = parsed.physicsdesc.pos.objcell_id >> 16;
+                                                if (!instances.ContainsKey(landblockId))
+                                                {
+                                                    instances.Add(landblockId, new Landblock());
+                                                }
+
+                                                if (!instances[landblockId].StaticObjects.ContainsKey(parsed.object_id))
+                                                {
+                                                    instances[landblockId].StaticObjects.Add(parsed.object_id,
+                                                        new ACE.Database.Models.World.LandblockInstance
+                                                        {
+                                                            Guid = parsed.object_id,
+                                                            WeenieClassId = parsed.wdesc._wcid,
+                                                            ObjCellId = parsed.physicsdesc.pos.objcell_id,
+                                                            OriginX = parsed.physicsdesc.pos.frame.m_fOrigin.x,
+                                                            OriginY = parsed.physicsdesc.pos.frame.m_fOrigin.y,
+                                                            OriginZ = parsed.physicsdesc.pos.frame.m_fOrigin.z,
+                                                            AnglesW = parsed.physicsdesc.pos.frame.qw,
+                                                            AnglesX = parsed.physicsdesc.pos.frame.qx,
+                                                            AnglesY = parsed.physicsdesc.pos.frame.qy,
+                                                            AnglesZ = parsed.physicsdesc.pos.frame.qz,
+                                                            IsLinkChild = false
+                                                        });
+                                                }
+                                            }
+                                        }
+                                        else
+                                        {
+                                            if (parsed.physicsdesc.pos.objcell_id > 0 && parsed.wdesc._wielderID == 0)
+                                            {
+                                                var landblockId = parsed.physicsdesc.pos.objcell_id >> 16;
+                                                if (!instances.ContainsKey(landblockId))
+                                                {
+                                                    instances.Add(landblockId, new Landblock());
+                                                }
+
+                                                float margin = 0.02f;
+
+                                                if (weenies[parsed.wdesc._wcid].Type == (int)ACE.Entity.Enum.WeenieType.Creature && parsed.wdesc._blipColor != (int)ACE.Entity.Enum.RadarColor.NPC)
+                                                {
+                                                    //margin = 0.05f;
+                                                    margin = 2f;
+                                                    if (!instances[landblockId].LinkableMonsterObjects.ContainsKey(parsed.object_id)
+                                                        && !PositionRecorded(parsed, processedWeeniePositions[parsed.wdesc._wcid], parsed.physicsdesc.pos, margin))
+                                                    {
+                                                        instances[landblockId].LinkableMonsterObjects.Add(parsed.object_id,
+                                                            new ACE.Database.Models.World.LandblockInstance
+                                                            {
+                                                                Guid = parsed.object_id,
+                                                                WeenieClassId = parsed.wdesc._wcid,
+                                                                ObjCellId = parsed.physicsdesc.pos.objcell_id,
+                                                                OriginX = parsed.physicsdesc.pos.frame.m_fOrigin.x,
+                                                                OriginY = parsed.physicsdesc.pos.frame.m_fOrigin.y,
+                                                                OriginZ = parsed.physicsdesc.pos.frame.m_fOrigin.z,
+                                                                AnglesW = parsed.physicsdesc.pos.frame.qw,
+                                                                AnglesX = parsed.physicsdesc.pos.frame.qx,
+                                                                AnglesY = parsed.physicsdesc.pos.frame.qy,
+                                                                AnglesZ = parsed.physicsdesc.pos.frame.qz,
+                                                                IsLinkChild = false
+                                                            });
+
+                                                        processedWeeniePositions[parsed.wdesc._wcid].Add(parsed.physicsdesc.pos);
+                                                    }
+                                                }
+                                                else if (weenies[parsed.wdesc._wcid].Type == (int)ACE.Entity.Enum.WeenieType.Creature && parsed.wdesc._blipColor == (int)ACE.Entity.Enum.RadarColor.NPC)
+                                                {
+                                                    if (!instances[landblockId].LinkableNPCObjects.ContainsKey(parsed.object_id)
+                                                        && !PositionRecorded(parsed, processedWeeniePositions[parsed.wdesc._wcid], parsed.physicsdesc.pos, margin))
+                                                    {
+                                                        instances[landblockId].LinkableNPCObjects.Add(parsed.object_id,
+                                                            new ACE.Database.Models.World.LandblockInstance
+                                                            {
+                                                                Guid = parsed.object_id,
+                                                                WeenieClassId = parsed.wdesc._wcid,
+                                                                ObjCellId = parsed.physicsdesc.pos.objcell_id,
+                                                                OriginX = parsed.physicsdesc.pos.frame.m_fOrigin.x,
+                                                                OriginY = parsed.physicsdesc.pos.frame.m_fOrigin.y,
+                                                                OriginZ = parsed.physicsdesc.pos.frame.m_fOrigin.z,
+                                                                AnglesW = parsed.physicsdesc.pos.frame.qw,
+                                                                AnglesX = parsed.physicsdesc.pos.frame.qx,
+                                                                AnglesY = parsed.physicsdesc.pos.frame.qy,
+                                                                AnglesZ = parsed.physicsdesc.pos.frame.qz,
+                                                                IsLinkChild = false
+                                                            });
+
+                                                        processedWeeniePositions[parsed.wdesc._wcid].Add(parsed.physicsdesc.pos);
+                                                    }
+                                                }
+                                                else if (weenies[parsed.wdesc._wcid].Type != (int)ACE.Entity.Enum.WeenieType.Missile
+                                                    && weenies[parsed.wdesc._wcid].Type != (int)ACE.Entity.Enum.WeenieType.Coin
+                                                    && weenies[parsed.wdesc._wcid].Type != (int)ACE.Entity.Enum.WeenieType.Corpse
+                                                    && weenies[parsed.wdesc._wcid].Type != (int)ACE.Entity.Enum.WeenieType.ProjectileSpell
+                                                    && weenies[parsed.wdesc._wcid].Type != (int)ACE.Entity.Enum.WeenieType.Pet
+                                                    && weenies[parsed.wdesc._wcid].Type != (int)ACE.Entity.Enum.WeenieType.PetDevice
+                                                    && weenies[parsed.wdesc._wcid].Type != (int)ACE.Entity.Enum.WeenieType.CombatPet
+                                                    && weenies[parsed.wdesc._wcid].Type != (int)ACE.Entity.Enum.WeenieType.Ammunition
+                                                    )
+                                                {
+                                                    margin = 2.0f;
+                                                    if (!instances[landblockId].LinkableItemObjects.ContainsKey(parsed.object_id)
+                                                        && !PositionRecorded(parsed, processedWeeniePositions[parsed.wdesc._wcid], parsed.physicsdesc.pos, margin))
+                                                    {
+                                                        instances[landblockId].LinkableItemObjects.Add(parsed.object_id,
+                                                            new ACE.Database.Models.World.LandblockInstance
+                                                            {
+                                                                Guid = parsed.object_id,
+                                                                WeenieClassId = parsed.wdesc._wcid,
+                                                                ObjCellId = parsed.physicsdesc.pos.objcell_id,
+                                                                OriginX = parsed.physicsdesc.pos.frame.m_fOrigin.x,
+                                                                OriginY = parsed.physicsdesc.pos.frame.m_fOrigin.y,
+                                                                OriginZ = parsed.physicsdesc.pos.frame.m_fOrigin.z,
+                                                                AnglesW = parsed.physicsdesc.pos.frame.qw,
+                                                                AnglesX = parsed.physicsdesc.pos.frame.qx,
+                                                                AnglesY = parsed.physicsdesc.pos.frame.qy,
+                                                                AnglesZ = parsed.physicsdesc.pos.frame.qz,
+                                                                IsLinkChild = false
+                                                            });
+
+                                                        processedWeeniePositions[parsed.wdesc._wcid].Add(parsed.physicsdesc.pos);
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+
+                                    if (parsed.wdesc._wielderID > 0)
+                                    {
+                                        if (worldIDQueue[currentWorld].ContainsKey(parsed.wdesc._wielderID))
+                                        {
+                                            if (weenies.ContainsKey(worldIDQueue[currentWorld][parsed.wdesc._wielderID]))
+                                            {
+                                                if (!weenies[worldIDQueue[currentWorld][parsed.wdesc._wielderID]].WeeniePropertiesCreateList.Any(y => y.WeenieClassId == parsed.wdesc._wcid))
+                                                    weenies[worldIDQueue[currentWorld][parsed.wdesc._wielderID]].WeeniePropertiesCreateList.Add(new WeeniePropertiesCreateList
+                                                    {
+                                                        DestinationType = (int)ACE.Entity.Enum.DestinationType.Wield,
+                                                        WeenieClassId = parsed.wdesc._wcid,
+                                                        StackSize = 1,
+                                                        Palette = 0,
+                                                        Shade = 0,
+                                                        TryToBond = false
+                                                    });
+                                            }
+                                        }
+                                    }
+
+                                    if (parsed.wdesc._containerID > 0)
+                                    {
+                                        if (worldIDQueue[currentWorld].ContainsKey(parsed.wdesc._containerID))
+                                        {
+                                            if (weenies.ContainsKey(worldIDQueue[currentWorld][parsed.wdesc._containerID]))
+                                            {
+                                                if (!weenies[worldIDQueue[currentWorld][parsed.wdesc._containerID]].WeeniePropertiesGenerator.Any(y => y.WeenieClassId == parsed.wdesc._wcid)
+                                                    && weenies[worldIDQueue[currentWorld][parsed.wdesc._containerID]].Type == (int)ACE.Entity.Enum.WeenieType.Chest)
+                                                    weenies[worldIDQueue[currentWorld][parsed.wdesc._containerID]].WeeniePropertiesGenerator.Add(new WeeniePropertiesGenerator
+                                                    {
+                                                        Probability = -1,
+                                                        WeenieClassId = parsed.wdesc._wcid,
+                                                        StackSize = 1,
+                                                        PaletteId = 0,
+                                                        Shade = 0,
+                                                        Delay = 0,
+                                                        InitCreate = 1,
+                                                        MaxCreate = 1,
+                                                        WhenCreate = (int)ACE.Entity.Enum.RegenerationType.PickUp,
+                                                        WhereCreate = (int)ACE.Entity.Enum.RegenLocationType.Contain
+                                                    });
                                             }
                                         }
                                     }
@@ -522,146 +761,150 @@ namespace aclogview
                                 if (worldIDQueue[currentWorld].ContainsKey(parsed.i_objid))
                                 {
 
-                                    if (weenieIdObjectsStatus.ContainsKey(worldIDQueue[currentWorld][parsed.i_objid]))
-                                    {
-                                        var success = weenieIdObjectsStatus[worldIDQueue[currentWorld][parsed.i_objid]].Key;
-                                        var header = weenieIdObjectsStatus[worldIDQueue[currentWorld][parsed.i_objid]].Value;
-                                        if (success == 0 && parsed.i_prof.success_flag == 1 && parsed.i_prof.header >= header)
-                                        {
-                                            weenieIdObjectsStatus.Remove(worldIDQueue[currentWorld][parsed.i_objid]);
-                                        }
-                                        else
-                                            addIt = false;
-                                    }
-
                                     if (weenies.ContainsKey(worldIDQueue[currentWorld][parsed.i_objid]))
                                     {
-                                        if (weenies[worldIDQueue[currentWorld][parsed.i_objid]].Type == (int)ACE.Entity.Enum.WeenieType.ProjectileSpell)
-                                            addIt = false;
-                                    }
 
-                                    if (addIt)
-                                    {
-                                        foreach (var x in parsed.i_prof._intStatsTable.hashTable)
+                                        if (weenieIdObjectsStatus.ContainsKey(worldIDQueue[currentWorld][parsed.i_objid]))
                                         {
-                                            if (!weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesInt.Any(y => y.Type == (ushort)x.Key))
-                                                weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesInt.Add(new ACE.Database.Models.World.WeeniePropertiesInt { Type = (ushort)x.Key, Value = x.Value });
-                                        }
-                                        foreach (var x in parsed.i_prof._int64StatsTable.hashTable)
-                                        {
-                                            if (!weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesInt64.Any(y => y.Type == (ushort)x.Key))
-                                                weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesInt64.Add(new ACE.Database.Models.World.WeeniePropertiesInt64 { Type = (ushort)x.Key, Value = x.Value });
-                                        }
-                                        foreach (var x in parsed.i_prof._boolStatsTable.hashTable)
-                                        {
-                                            if (!weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesBool.Any(y => y.Type == (ushort)x.Key))
-                                                weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesBool.Add(new ACE.Database.Models.World.WeeniePropertiesBool { Type = (ushort)x.Key, Value = x.Value == 1 });
-                                        }
-                                        foreach (var x in parsed.i_prof._floatStatsTable.hashTable)
-                                        {
-                                            if (!weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesFloat.Any(y => y.Type == (ushort)x.Key))
-                                                weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesFloat.Add(new ACE.Database.Models.World.WeeniePropertiesFloat { Type = (ushort)x.Key, Value = x.Value });
-                                        }
-                                        foreach (var x in parsed.i_prof._strStatsTable.hashTable)
-                                        {
-                                            if (!weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesString.Any(y => y.Type == (ushort)x.Key))
-                                                weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesString.Add(new ACE.Database.Models.World.WeeniePropertiesString { Type = (ushort)x.Key, Value = x.Value.m_buffer });
-                                        }
-                                        foreach (var x in parsed.i_prof._didStatsTable.hashTable)
-                                        {
-                                            if (!weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesDID.Any(y => y.Type == (ushort)x.Key))
-                                                weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesDID.Add(new ACE.Database.Models.World.WeeniePropertiesDID { Type = (ushort)x.Key, Value = x.Value });
-                                        }
-                                        foreach (var x in parsed.i_prof._spellsTable.list)
-                                        {
-                                            if ((int)x < 0)
-                                                continue;
-                                            if (!weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesSpellBook.Any(y => y.Spell == (int)x))
-                                                weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesSpellBook.Add(new ACE.Database.Models.World.WeeniePropertiesSpellBook { Spell = (int)x, Probability = 2f });
-                                        }
-
-                                        if ((parsed.i_prof.header & (uint)CM_Examine.AppraisalProfile.AppraisalProfilePackHeader.Packed_ArmorProfile) != 0)
-                                        {
-                                            if (!weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesFloat.Any(y => y.Type == (ushort)STypeFloat.ARMOR_MOD_VS_SLASH_FLOAT))
-                                                weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesFloat.Add(new ACE.Database.Models.World.WeeniePropertiesFloat { Type = (ushort)STypeFloat.ARMOR_MOD_VS_SLASH_FLOAT, Value = parsed.i_prof._armorProfileTable._mod_vs_slash });
-                                            if (!weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesFloat.Any(y => y.Type == (ushort)STypeFloat.ARMOR_MOD_VS_PIERCE_FLOAT))
-                                                weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesFloat.Add(new ACE.Database.Models.World.WeeniePropertiesFloat { Type = (ushort)STypeFloat.ARMOR_MOD_VS_PIERCE_FLOAT, Value = parsed.i_prof._armorProfileTable._mod_vs_pierce });
-                                            if (!weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesFloat.Any(y => y.Type == (ushort)STypeFloat.ARMOR_MOD_VS_BLUDGEON_FLOAT))
-                                                weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesFloat.Add(new ACE.Database.Models.World.WeeniePropertiesFloat { Type = (ushort)STypeFloat.ARMOR_MOD_VS_BLUDGEON_FLOAT, Value = parsed.i_prof._armorProfileTable._mod_vs_bludgeon });
-                                            if (!weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesFloat.Any(y => y.Type == (ushort)STypeFloat.ARMOR_MOD_VS_COLD_FLOAT))
-                                                weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesFloat.Add(new ACE.Database.Models.World.WeeniePropertiesFloat { Type = (ushort)STypeFloat.ARMOR_MOD_VS_COLD_FLOAT, Value = parsed.i_prof._armorProfileTable._mod_vs_cold });
-                                            if (!weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesFloat.Any(y => y.Type == (ushort)STypeFloat.ARMOR_MOD_VS_FIRE_FLOAT))
-                                                weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesFloat.Add(new ACE.Database.Models.World.WeeniePropertiesFloat { Type = (ushort)STypeFloat.ARMOR_MOD_VS_FIRE_FLOAT, Value = parsed.i_prof._armorProfileTable._mod_vs_fire });
-                                            if (!weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesFloat.Any(y => y.Type == (ushort)STypeFloat.ARMOR_MOD_VS_ACID_FLOAT))
-                                                weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesFloat.Add(new ACE.Database.Models.World.WeeniePropertiesFloat { Type = (ushort)STypeFloat.ARMOR_MOD_VS_ACID_FLOAT, Value = parsed.i_prof._armorProfileTable._mod_vs_acid });
-                                            if (!weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesFloat.Any(y => y.Type == (ushort)STypeFloat.ARMOR_MOD_VS_NETHER_FLOAT))
-                                                weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesFloat.Add(new ACE.Database.Models.World.WeeniePropertiesFloat { Type = (ushort)STypeFloat.ARMOR_MOD_VS_NETHER_FLOAT, Value = parsed.i_prof._armorProfileTable._mod_vs_nether });
-                                            if (!weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesFloat.Any(y => y.Type == (ushort)STypeFloat.ARMOR_MOD_VS_ELECTRIC_FLOAT))
-                                                weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesFloat.Add(new ACE.Database.Models.World.WeeniePropertiesFloat { Type = (ushort)STypeFloat.ARMOR_MOD_VS_ELECTRIC_FLOAT, Value = parsed.i_prof._armorProfileTable._mod_vs_electric });
-                                        }
-
-                                        if ((parsed.i_prof.header & (uint)CM_Examine.AppraisalProfile.AppraisalProfilePackHeader.Packed_CreatureProfile) != 0)
-                                        {
-                                            if (!weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesAttribute2nd.Any(y => y.Type == (ushort)ACE.Entity.Enum.Properties.PropertyAttribute2nd.MaxHealth))
-                                                weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesAttribute2nd.Add(new ACE.Database.Models.World.WeeniePropertiesAttribute2nd { Type = (ushort)ACE.Entity.Enum.Properties.PropertyAttribute2nd.MaxHealth, CurrentLevel = parsed.i_prof._creatureProfileTable._health, InitLevel = parsed.i_prof._creatureProfileTable._max_health });
-
-                                            if ((parsed.i_prof._creatureProfileTable._header & (uint)CM_Examine.CreatureAppraisalProfile.CreatureAppraisalProfilePackHeader.Packed_Attributes) != 0)
+                                            var success = weenieIdObjectsStatus[worldIDQueue[currentWorld][parsed.i_objid]].Key;
+                                            var header = weenieIdObjectsStatus[worldIDQueue[currentWorld][parsed.i_objid]].Value;
+                                            if (success == 0 && parsed.i_prof.success_flag == 1 && parsed.i_prof.header >= header)
                                             {
-                                                if (!weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesAttribute.Any(y => y.Type == (ushort)ACE.Entity.Enum.Properties.PropertyAttribute.Strength))
-                                                    weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesAttribute.Add(new ACE.Database.Models.World.WeeniePropertiesAttribute { Type = (ushort)ACE.Entity.Enum.Properties.PropertyAttribute.Strength, InitLevel = parsed.i_prof._creatureProfileTable._strength });
-                                                if (!weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesAttribute.Any(y => y.Type == (ushort)ACE.Entity.Enum.Properties.PropertyAttribute.Endurance))
-                                                    weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesAttribute.Add(new ACE.Database.Models.World.WeeniePropertiesAttribute { Type = (ushort)ACE.Entity.Enum.Properties.PropertyAttribute.Endurance, InitLevel = parsed.i_prof._creatureProfileTable._endurance });
-                                                if (!weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesAttribute.Any(y => y.Type == (ushort)ACE.Entity.Enum.Properties.PropertyAttribute.Quickness))
-                                                    weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesAttribute.Add(new ACE.Database.Models.World.WeeniePropertiesAttribute { Type = (ushort)ACE.Entity.Enum.Properties.PropertyAttribute.Quickness, InitLevel = parsed.i_prof._creatureProfileTable._quickness });
-                                                if (!weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesAttribute.Any(y => y.Type == (ushort)ACE.Entity.Enum.Properties.PropertyAttribute.Coordination))
-                                                    weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesAttribute.Add(new ACE.Database.Models.World.WeeniePropertiesAttribute { Type = (ushort)ACE.Entity.Enum.Properties.PropertyAttribute.Coordination, InitLevel = parsed.i_prof._creatureProfileTable._coordination });
-                                                if (!weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesAttribute.Any(y => y.Type == (ushort)ACE.Entity.Enum.Properties.PropertyAttribute.Focus))
-                                                    weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesAttribute.Add(new ACE.Database.Models.World.WeeniePropertiesAttribute { Type = (ushort)ACE.Entity.Enum.Properties.PropertyAttribute.Focus, InitLevel = parsed.i_prof._creatureProfileTable._focus });
-                                                if (!weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesAttribute.Any(y => y.Type == (ushort)ACE.Entity.Enum.Properties.PropertyAttribute.Self))
-                                                    weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesAttribute.Add(new ACE.Database.Models.World.WeeniePropertiesAttribute { Type = (ushort)ACE.Entity.Enum.Properties.PropertyAttribute.Self, InitLevel = parsed.i_prof._creatureProfileTable._self });
-
-                                                if (!weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesAttribute2nd.Any(y => y.Type == (ushort)ACE.Entity.Enum.Properties.PropertyAttribute2nd.MaxStamina))
-                                                    weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesAttribute2nd.Add(new ACE.Database.Models.World.WeeniePropertiesAttribute2nd { Type = (ushort)ACE.Entity.Enum.Properties.PropertyAttribute2nd.MaxStamina, CurrentLevel = parsed.i_prof._creatureProfileTable._stamina, InitLevel = parsed.i_prof._creatureProfileTable._max_stamina });
-                                                if (!weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesAttribute2nd.Any(y => y.Type == (ushort)ACE.Entity.Enum.Properties.PropertyAttribute2nd.MaxMana))
-                                                    weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesAttribute2nd.Add(new ACE.Database.Models.World.WeeniePropertiesAttribute2nd { Type = (ushort)ACE.Entity.Enum.Properties.PropertyAttribute2nd.MaxMana, CurrentLevel = parsed.i_prof._creatureProfileTable._mana, InitLevel = parsed.i_prof._creatureProfileTable._max_mana });
+                                                weenieIdObjectsStatus.Remove(worldIDQueue[currentWorld][parsed.i_objid]);
                                             }
+                                            else
+                                                addIt = false;
                                         }
 
-                                        if ((parsed.i_prof.header & (uint)CM_Examine.AppraisalProfile.AppraisalProfilePackHeader.Packed_WeaponProfile) != 0)
+                                        if (weenies.ContainsKey(worldIDQueue[currentWorld][parsed.i_objid]))
                                         {
-                                            if (!weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesInt.Any(y => y.Type == (ushort)STypeInt.DAMAGE_TYPE_INT))
-                                                weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesInt.Add(new ACE.Database.Models.World.WeeniePropertiesInt { Type = (ushort)STypeInt.DAMAGE_TYPE_INT, Value = (int)parsed.i_prof._weaponProfileTable._damage_type });
-                                            if (!weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesInt.Any(y => y.Type == (ushort)STypeInt.WEAPON_TIME_INT))
-                                                weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesInt.Add(new ACE.Database.Models.World.WeeniePropertiesInt { Type = (ushort)STypeInt.WEAPON_TIME_INT, Value = (int)parsed.i_prof._weaponProfileTable._weapon_time });
-                                            if (!weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesInt.Any(y => y.Type == (ushort)STypeInt.WEAPON_SKILL_INT))
-                                                weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesInt.Add(new ACE.Database.Models.World.WeeniePropertiesInt { Type = (ushort)STypeInt.WEAPON_SKILL_INT, Value = (int)parsed.i_prof._weaponProfileTable._weapon_skill });
-                                            if (!weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesInt.Any(y => y.Type == (ushort)STypeInt.DAMAGE_INT))
-                                                weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesInt.Add(new ACE.Database.Models.World.WeeniePropertiesInt { Type = (ushort)STypeInt.DAMAGE_INT, Value = (int)parsed.i_prof._weaponProfileTable._weapon_damage });
-                                            if (!weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesFloat.Any(y => y.Type == (ushort)STypeFloat.DAMAGE_VARIANCE_FLOAT))
-                                                weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesFloat.Add(new ACE.Database.Models.World.WeeniePropertiesFloat { Type = (ushort)STypeFloat.DAMAGE_VARIANCE_FLOAT, Value = parsed.i_prof._weaponProfileTable._damage_variance });
-                                            if (!weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesFloat.Any(y => y.Type == (ushort)STypeFloat.DAMAGE_MOD_FLOAT))
-                                                weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesFloat.Add(new ACE.Database.Models.World.WeeniePropertiesFloat { Type = (ushort)STypeFloat.DAMAGE_MOD_FLOAT, Value = parsed.i_prof._weaponProfileTable._damage_mod });
-                                            if (!weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesFloat.Any(y => y.Type == (ushort)STypeFloat.WEAPON_LENGTH_FLOAT))
-                                                weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesFloat.Add(new ACE.Database.Models.World.WeeniePropertiesFloat { Type = (ushort)STypeFloat.WEAPON_LENGTH_FLOAT, Value = parsed.i_prof._weaponProfileTable._weapon_length });
-                                            if (!weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesFloat.Any(y => y.Type == (ushort)STypeFloat.MAXIMUM_VELOCITY_FLOAT))
-                                                weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesFloat.Add(new ACE.Database.Models.World.WeeniePropertiesFloat { Type = (ushort)STypeFloat.MAXIMUM_VELOCITY_FLOAT, Value = parsed.i_prof._weaponProfileTable._max_velocity });
-                                            if (!weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesFloat.Any(y => y.Type == (ushort)STypeFloat.WEAPON_OFFENSE_FLOAT))
-                                                weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesFloat.Add(new ACE.Database.Models.World.WeeniePropertiesFloat { Type = (ushort)STypeFloat.WEAPON_OFFENSE_FLOAT, Value = parsed.i_prof._weaponProfileTable._weapon_offense });
-                                            if (!weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesInt.Any(y => y.Type == 8030))
-                                                weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesInt.Add(new ACE.Database.Models.World.WeeniePropertiesInt { Type = 8030, Value = (int)parsed.i_prof._weaponProfileTable._max_velocity_estimated });
+                                            if (weenies[worldIDQueue[currentWorld][parsed.i_objid]].Type == (int)ACE.Entity.Enum.WeenieType.ProjectileSpell)
+                                                addIt = false;
                                         }
 
-                                        if ((parsed.i_prof.header & (uint)CM_Examine.AppraisalProfile.AppraisalProfilePackHeader.Packed_HookProfile) != 0)
+                                        if (addIt)
                                         {
+                                            foreach (var x in parsed.i_prof._intStatsTable.hashTable)
+                                            {
+                                                if (!weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesInt.Any(y => y.Type == (ushort)x.Key))
+                                                    weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesInt.Add(new ACE.Database.Models.World.WeeniePropertiesInt { Type = (ushort)x.Key, Value = x.Value });
+                                            }
+                                            foreach (var x in parsed.i_prof._int64StatsTable.hashTable)
+                                            {
+                                                if (!weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesInt64.Any(y => y.Type == (ushort)x.Key))
+                                                    weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesInt64.Add(new ACE.Database.Models.World.WeeniePropertiesInt64 { Type = (ushort)x.Key, Value = x.Value });
+                                            }
+                                            foreach (var x in parsed.i_prof._boolStatsTable.hashTable)
+                                            {
+                                                if (!weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesBool.Any(y => y.Type == (ushort)x.Key))
+                                                    weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesBool.Add(new ACE.Database.Models.World.WeeniePropertiesBool { Type = (ushort)x.Key, Value = x.Value == 1 });
+                                            }
+                                            foreach (var x in parsed.i_prof._floatStatsTable.hashTable)
+                                            {
+                                                if (!weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesFloat.Any(y => y.Type == (ushort)x.Key))
+                                                    weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesFloat.Add(new ACE.Database.Models.World.WeeniePropertiesFloat { Type = (ushort)x.Key, Value = x.Value });
+                                            }
+                                            foreach (var x in parsed.i_prof._strStatsTable.hashTable)
+                                            {
+                                                if (!weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesString.Any(y => y.Type == (ushort)x.Key))
+                                                    weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesString.Add(new ACE.Database.Models.World.WeeniePropertiesString { Type = (ushort)x.Key, Value = x.Value.m_buffer });
+                                            }
+                                            foreach (var x in parsed.i_prof._didStatsTable.hashTable)
+                                            {
+                                                if (!weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesDID.Any(y => y.Type == (ushort)x.Key))
+                                                    weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesDID.Add(new ACE.Database.Models.World.WeeniePropertiesDID { Type = (ushort)x.Key, Value = x.Value });
+                                            }
+                                            foreach (var x in parsed.i_prof._spellsTable.list)
+                                            {
+                                                if ((int)x < 0)
+                                                    continue;
+                                                if (!weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesSpellBook.Any(y => y.Spell == (int)x))
+                                                    weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesSpellBook.Add(new ACE.Database.Models.World.WeeniePropertiesSpellBook { Spell = (int)x, Probability = 2f });
+                                            }
+
+                                            if ((parsed.i_prof.header & (uint)CM_Examine.AppraisalProfile.AppraisalProfilePackHeader.Packed_ArmorProfile) != 0)
+                                            {
+                                                if (!weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesFloat.Any(y => y.Type == (ushort)STypeFloat.ARMOR_MOD_VS_SLASH_FLOAT))
+                                                    weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesFloat.Add(new ACE.Database.Models.World.WeeniePropertiesFloat { Type = (ushort)STypeFloat.ARMOR_MOD_VS_SLASH_FLOAT, Value = parsed.i_prof._armorProfileTable._mod_vs_slash });
+                                                if (!weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesFloat.Any(y => y.Type == (ushort)STypeFloat.ARMOR_MOD_VS_PIERCE_FLOAT))
+                                                    weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesFloat.Add(new ACE.Database.Models.World.WeeniePropertiesFloat { Type = (ushort)STypeFloat.ARMOR_MOD_VS_PIERCE_FLOAT, Value = parsed.i_prof._armorProfileTable._mod_vs_pierce });
+                                                if (!weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesFloat.Any(y => y.Type == (ushort)STypeFloat.ARMOR_MOD_VS_BLUDGEON_FLOAT))
+                                                    weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesFloat.Add(new ACE.Database.Models.World.WeeniePropertiesFloat { Type = (ushort)STypeFloat.ARMOR_MOD_VS_BLUDGEON_FLOAT, Value = parsed.i_prof._armorProfileTable._mod_vs_bludgeon });
+                                                if (!weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesFloat.Any(y => y.Type == (ushort)STypeFloat.ARMOR_MOD_VS_COLD_FLOAT))
+                                                    weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesFloat.Add(new ACE.Database.Models.World.WeeniePropertiesFloat { Type = (ushort)STypeFloat.ARMOR_MOD_VS_COLD_FLOAT, Value = parsed.i_prof._armorProfileTable._mod_vs_cold });
+                                                if (!weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesFloat.Any(y => y.Type == (ushort)STypeFloat.ARMOR_MOD_VS_FIRE_FLOAT))
+                                                    weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesFloat.Add(new ACE.Database.Models.World.WeeniePropertiesFloat { Type = (ushort)STypeFloat.ARMOR_MOD_VS_FIRE_FLOAT, Value = parsed.i_prof._armorProfileTable._mod_vs_fire });
+                                                if (!weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesFloat.Any(y => y.Type == (ushort)STypeFloat.ARMOR_MOD_VS_ACID_FLOAT))
+                                                    weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesFloat.Add(new ACE.Database.Models.World.WeeniePropertiesFloat { Type = (ushort)STypeFloat.ARMOR_MOD_VS_ACID_FLOAT, Value = parsed.i_prof._armorProfileTable._mod_vs_acid });
+                                                if (!weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesFloat.Any(y => y.Type == (ushort)STypeFloat.ARMOR_MOD_VS_NETHER_FLOAT))
+                                                    weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesFloat.Add(new ACE.Database.Models.World.WeeniePropertiesFloat { Type = (ushort)STypeFloat.ARMOR_MOD_VS_NETHER_FLOAT, Value = parsed.i_prof._armorProfileTable._mod_vs_nether });
+                                                if (!weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesFloat.Any(y => y.Type == (ushort)STypeFloat.ARMOR_MOD_VS_ELECTRIC_FLOAT))
+                                                    weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesFloat.Add(new ACE.Database.Models.World.WeeniePropertiesFloat { Type = (ushort)STypeFloat.ARMOR_MOD_VS_ELECTRIC_FLOAT, Value = parsed.i_prof._armorProfileTable._mod_vs_electric });
+                                            }
+
+                                            if ((parsed.i_prof.header & (uint)CM_Examine.AppraisalProfile.AppraisalProfilePackHeader.Packed_CreatureProfile) != 0)
+                                            {
+                                                if (!weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesAttribute2nd.Any(y => y.Type == (ushort)ACE.Entity.Enum.Properties.PropertyAttribute2nd.MaxHealth))
+                                                    weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesAttribute2nd.Add(new ACE.Database.Models.World.WeeniePropertiesAttribute2nd { Type = (ushort)ACE.Entity.Enum.Properties.PropertyAttribute2nd.MaxHealth, CurrentLevel = parsed.i_prof._creatureProfileTable._health, InitLevel = parsed.i_prof._creatureProfileTable._max_health });
+
+                                                if ((parsed.i_prof._creatureProfileTable._header & (uint)CM_Examine.CreatureAppraisalProfile.CreatureAppraisalProfilePackHeader.Packed_Attributes) != 0)
+                                                {
+                                                    if (!weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesAttribute.Any(y => y.Type == (ushort)ACE.Entity.Enum.Properties.PropertyAttribute.Strength))
+                                                        weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesAttribute.Add(new ACE.Database.Models.World.WeeniePropertiesAttribute { Type = (ushort)ACE.Entity.Enum.Properties.PropertyAttribute.Strength, InitLevel = parsed.i_prof._creatureProfileTable._strength });
+                                                    if (!weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesAttribute.Any(y => y.Type == (ushort)ACE.Entity.Enum.Properties.PropertyAttribute.Endurance))
+                                                        weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesAttribute.Add(new ACE.Database.Models.World.WeeniePropertiesAttribute { Type = (ushort)ACE.Entity.Enum.Properties.PropertyAttribute.Endurance, InitLevel = parsed.i_prof._creatureProfileTable._endurance });
+                                                    if (!weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesAttribute.Any(y => y.Type == (ushort)ACE.Entity.Enum.Properties.PropertyAttribute.Quickness))
+                                                        weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesAttribute.Add(new ACE.Database.Models.World.WeeniePropertiesAttribute { Type = (ushort)ACE.Entity.Enum.Properties.PropertyAttribute.Quickness, InitLevel = parsed.i_prof._creatureProfileTable._quickness });
+                                                    if (!weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesAttribute.Any(y => y.Type == (ushort)ACE.Entity.Enum.Properties.PropertyAttribute.Coordination))
+                                                        weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesAttribute.Add(new ACE.Database.Models.World.WeeniePropertiesAttribute { Type = (ushort)ACE.Entity.Enum.Properties.PropertyAttribute.Coordination, InitLevel = parsed.i_prof._creatureProfileTable._coordination });
+                                                    if (!weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesAttribute.Any(y => y.Type == (ushort)ACE.Entity.Enum.Properties.PropertyAttribute.Focus))
+                                                        weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesAttribute.Add(new ACE.Database.Models.World.WeeniePropertiesAttribute { Type = (ushort)ACE.Entity.Enum.Properties.PropertyAttribute.Focus, InitLevel = parsed.i_prof._creatureProfileTable._focus });
+                                                    if (!weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesAttribute.Any(y => y.Type == (ushort)ACE.Entity.Enum.Properties.PropertyAttribute.Self))
+                                                        weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesAttribute.Add(new ACE.Database.Models.World.WeeniePropertiesAttribute { Type = (ushort)ACE.Entity.Enum.Properties.PropertyAttribute.Self, InitLevel = parsed.i_prof._creatureProfileTable._self });
+
+                                                    if (!weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesAttribute2nd.Any(y => y.Type == (ushort)ACE.Entity.Enum.Properties.PropertyAttribute2nd.MaxStamina))
+                                                        weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesAttribute2nd.Add(new ACE.Database.Models.World.WeeniePropertiesAttribute2nd { Type = (ushort)ACE.Entity.Enum.Properties.PropertyAttribute2nd.MaxStamina, CurrentLevel = parsed.i_prof._creatureProfileTable._stamina, InitLevel = parsed.i_prof._creatureProfileTable._max_stamina });
+                                                    if (!weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesAttribute2nd.Any(y => y.Type == (ushort)ACE.Entity.Enum.Properties.PropertyAttribute2nd.MaxMana))
+                                                        weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesAttribute2nd.Add(new ACE.Database.Models.World.WeeniePropertiesAttribute2nd { Type = (ushort)ACE.Entity.Enum.Properties.PropertyAttribute2nd.MaxMana, CurrentLevel = parsed.i_prof._creatureProfileTable._mana, InitLevel = parsed.i_prof._creatureProfileTable._max_mana });
+                                                }
+                                            }
+
+                                            if ((parsed.i_prof.header & (uint)CM_Examine.AppraisalProfile.AppraisalProfilePackHeader.Packed_WeaponProfile) != 0)
+                                            {
+                                                if (!weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesInt.Any(y => y.Type == (ushort)STypeInt.DAMAGE_TYPE_INT))
+                                                    weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesInt.Add(new ACE.Database.Models.World.WeeniePropertiesInt { Type = (ushort)STypeInt.DAMAGE_TYPE_INT, Value = (int)parsed.i_prof._weaponProfileTable._damage_type });
+                                                if (!weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesInt.Any(y => y.Type == (ushort)STypeInt.WEAPON_TIME_INT))
+                                                    weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesInt.Add(new ACE.Database.Models.World.WeeniePropertiesInt { Type = (ushort)STypeInt.WEAPON_TIME_INT, Value = (int)parsed.i_prof._weaponProfileTable._weapon_time });
+                                                if (!weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesInt.Any(y => y.Type == (ushort)STypeInt.WEAPON_SKILL_INT))
+                                                    weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesInt.Add(new ACE.Database.Models.World.WeeniePropertiesInt { Type = (ushort)STypeInt.WEAPON_SKILL_INT, Value = (int)parsed.i_prof._weaponProfileTable._weapon_skill });
+                                                if (!weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesInt.Any(y => y.Type == (ushort)STypeInt.DAMAGE_INT))
+                                                    weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesInt.Add(new ACE.Database.Models.World.WeeniePropertiesInt { Type = (ushort)STypeInt.DAMAGE_INT, Value = (int)parsed.i_prof._weaponProfileTable._weapon_damage });
+                                                if (!weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesFloat.Any(y => y.Type == (ushort)STypeFloat.DAMAGE_VARIANCE_FLOAT))
+                                                    weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesFloat.Add(new ACE.Database.Models.World.WeeniePropertiesFloat { Type = (ushort)STypeFloat.DAMAGE_VARIANCE_FLOAT, Value = parsed.i_prof._weaponProfileTable._damage_variance });
+                                                if (!weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesFloat.Any(y => y.Type == (ushort)STypeFloat.DAMAGE_MOD_FLOAT))
+                                                    weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesFloat.Add(new ACE.Database.Models.World.WeeniePropertiesFloat { Type = (ushort)STypeFloat.DAMAGE_MOD_FLOAT, Value = parsed.i_prof._weaponProfileTable._damage_mod });
+                                                if (!weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesFloat.Any(y => y.Type == (ushort)STypeFloat.WEAPON_LENGTH_FLOAT))
+                                                    weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesFloat.Add(new ACE.Database.Models.World.WeeniePropertiesFloat { Type = (ushort)STypeFloat.WEAPON_LENGTH_FLOAT, Value = parsed.i_prof._weaponProfileTable._weapon_length });
+                                                if (!weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesFloat.Any(y => y.Type == (ushort)STypeFloat.MAXIMUM_VELOCITY_FLOAT))
+                                                    weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesFloat.Add(new ACE.Database.Models.World.WeeniePropertiesFloat { Type = (ushort)STypeFloat.MAXIMUM_VELOCITY_FLOAT, Value = parsed.i_prof._weaponProfileTable._max_velocity });
+                                                if (!weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesFloat.Any(y => y.Type == (ushort)STypeFloat.WEAPON_OFFENSE_FLOAT))
+                                                    weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesFloat.Add(new ACE.Database.Models.World.WeeniePropertiesFloat { Type = (ushort)STypeFloat.WEAPON_OFFENSE_FLOAT, Value = parsed.i_prof._weaponProfileTable._weapon_offense });
+                                                if (!weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesInt.Any(y => y.Type == 8030))
+                                                    weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesInt.Add(new ACE.Database.Models.World.WeeniePropertiesInt { Type = 8030, Value = (int)parsed.i_prof._weaponProfileTable._max_velocity_estimated });
+                                            }
+
+                                            if ((parsed.i_prof.header & (uint)CM_Examine.AppraisalProfile.AppraisalProfilePackHeader.Packed_HookProfile) != 0)
+                                            {
+                                            }
+
+                                            if ((parsed.i_prof.header & (uint)CM_Examine.AppraisalProfile.AppraisalProfilePackHeader.Packed_ArmorLevels) != 0)
+                                            {
+                                            }
+
+                                            weenieIdObjectsStatus.Add(worldIDQueue[currentWorld][parsed.i_objid], new KeyValuePair<uint, uint>(parsed.i_prof.success_flag, parsed.i_prof.header));
+
+                                            totalHits++;
                                         }
-
-                                        if ((parsed.i_prof.header & (uint)CM_Examine.AppraisalProfile.AppraisalProfilePackHeader.Packed_ArmorLevels) != 0)
-                                        {
-                                        }
-
-                                        weenieIdObjectsStatus.Add(worldIDQueue[currentWorld][parsed.i_objid], new KeyValuePair<uint, uint>(parsed.i_prof.success_flag, parsed.i_prof.header));
-
-                                        totalHits++;
                                     }
                                 }
                             }
@@ -681,32 +924,35 @@ namespace aclogview
                                 if (worldIDQueue[currentWorld].ContainsKey(parsed.i_bookID))
                                 {
 
-                                    weenies[worldIDQueue[currentWorld][parsed.i_bookID]].WeeniePropertiesBook = new ACE.Database.Models.World.WeeniePropertiesBook();
-
-                                    weenies[worldIDQueue[currentWorld][parsed.i_bookID]].WeeniePropertiesBook.MaxNumCharsPerPage = (int)parsed.maxNumCharsPerPage;
-                                    weenies[worldIDQueue[currentWorld][parsed.i_bookID]].WeeniePropertiesBook.MaxNumPages = parsed.i_maxNumPages;
-
-                                    if (!weenies[worldIDQueue[currentWorld][parsed.i_bookID]].WeeniePropertiesIID.Any(y => y.Type == (ushort)STypeIID.SCRIBE_IID) && parsed.authorId > 0)
-                                        weenies[worldIDQueue[currentWorld][parsed.i_bookID]].WeeniePropertiesIID.Add(new ACE.Database.Models.World.WeeniePropertiesIID { Type = (ushort)STypeIID.SCRIBE_IID, Value = parsed.authorId });
-                                    if (!weenies[worldIDQueue[currentWorld][parsed.i_bookID]].WeeniePropertiesString.Any(y => y.Type == (ushort)STypeString.SCRIBE_NAME_STRING) && parsed.authorName.m_buffer != null)
-                                        weenies[worldIDQueue[currentWorld][parsed.i_bookID]].WeeniePropertiesString.Add(new ACE.Database.Models.World.WeeniePropertiesString { Type = (ushort)STypeString.SCRIBE_NAME_STRING, Value = parsed.authorName.m_buffer });
-                                    if (!weenies[worldIDQueue[currentWorld][parsed.i_bookID]].WeeniePropertiesString.Any(y => y.Type == (ushort)STypeString.INSCRIPTION_STRING) && parsed.inscription.m_buffer != null)
-                                        weenies[worldIDQueue[currentWorld][parsed.i_bookID]].WeeniePropertiesString.Add(new ACE.Database.Models.World.WeeniePropertiesString { Type = (ushort)STypeString.INSCRIPTION_STRING, Value = parsed.inscription.m_buffer });
-
-                                    var i = 0;
-                                    foreach (var page in parsed.pageData.list)
+                                    if (weenies.ContainsKey(worldIDQueue[currentWorld][parsed.i_bookID]))
                                     {
-                                        if (page.textIncluded == 0)
-                                            continue;
+                                        weenies[worldIDQueue[currentWorld][parsed.i_bookID]].WeeniePropertiesBook = new ACE.Database.Models.World.WeeniePropertiesBook();
 
-                                        if (!weenies[worldIDQueue[currentWorld][parsed.i_bookID]].WeeniePropertiesBookPageData.Any(y => y.PageId == i))
+                                        weenies[worldIDQueue[currentWorld][parsed.i_bookID]].WeeniePropertiesBook.MaxNumCharsPerPage = (int)parsed.maxNumCharsPerPage;
+                                        weenies[worldIDQueue[currentWorld][parsed.i_bookID]].WeeniePropertiesBook.MaxNumPages = parsed.i_maxNumPages;
+
+                                        if (!weenies[worldIDQueue[currentWorld][parsed.i_bookID]].WeeniePropertiesIID.Any(y => y.Type == (ushort)STypeIID.SCRIBE_IID) && parsed.authorId > 0)
+                                            weenies[worldIDQueue[currentWorld][parsed.i_bookID]].WeeniePropertiesIID.Add(new ACE.Database.Models.World.WeeniePropertiesIID { Type = (ushort)STypeIID.SCRIBE_IID, Value = parsed.authorId });
+                                        if (!weenies[worldIDQueue[currentWorld][parsed.i_bookID]].WeeniePropertiesString.Any(y => y.Type == (ushort)STypeString.SCRIBE_NAME_STRING) && parsed.authorName.m_buffer != null)
+                                            weenies[worldIDQueue[currentWorld][parsed.i_bookID]].WeeniePropertiesString.Add(new ACE.Database.Models.World.WeeniePropertiesString { Type = (ushort)STypeString.SCRIBE_NAME_STRING, Value = parsed.authorName.m_buffer });
+                                        if (!weenies[worldIDQueue[currentWorld][parsed.i_bookID]].WeeniePropertiesString.Any(y => y.Type == (ushort)STypeString.INSCRIPTION_STRING) && parsed.inscription.m_buffer != null)
+                                            weenies[worldIDQueue[currentWorld][parsed.i_bookID]].WeeniePropertiesString.Add(new ACE.Database.Models.World.WeeniePropertiesString { Type = (ushort)STypeString.INSCRIPTION_STRING, Value = parsed.inscription.m_buffer });
+
+                                        var i = 0;
+                                        foreach (var page in parsed.pageData.list)
                                         {
-                                            weenies[worldIDQueue[currentWorld][parsed.i_bookID]].WeeniePropertiesBookPageData.Add(new ACE.Database.Models.World.WeeniePropertiesBookPageData { PageId = (uint)i, AuthorAccount = page.authorAccount.m_buffer, AuthorId = page.authorID, AuthorName = page.authorName.m_buffer, IgnoreAuthor = page.ignoreAuthor == 1, PageText = page.pageText.m_buffer });
-                                        }
-                                        i++;
-                                    }
+                                            if (page.textIncluded == 0)
+                                                continue;
 
-                                    totalHits++;
+                                            if (!weenies[worldIDQueue[currentWorld][parsed.i_bookID]].WeeniePropertiesBookPageData.Any(y => y.PageId == i))
+                                            {
+                                                weenies[worldIDQueue[currentWorld][parsed.i_bookID]].WeeniePropertiesBookPageData.Add(new ACE.Database.Models.World.WeeniePropertiesBookPageData { PageId = (uint)i, AuthorAccount = page.authorAccount.m_buffer, AuthorId = page.authorID, AuthorName = page.authorName.m_buffer, IgnoreAuthor = page.ignoreAuthor == 1, PageText = page.pageText.m_buffer });
+                                            }
+                                            i++;
+                                        }
+
+                                        totalHits++;
+                                    }
                                 }
                             }
 
@@ -734,12 +980,15 @@ namespace aclogview
                                     //if (!weenies[weeniesByGUID[parsed.i_bookID].ClassId].WeeniePropertiesIID.Any(y => y.Type == (ushort)STypeString.INSCRIPTION_STRING))
                                     //    weenies[weeniesByGUID[parsed.i_bookID].ClassId].WeeniePropertiesString.Add(new ACE.Database.Models.World.WeeniePropertiesString { Type = (ushort)STypeString.INSCRIPTION_STRING, Value = parsed.inscription.m_buffer });
 
-                                    if (!weenies[worldIDQueue[currentWorld][parsed.bookID]].WeeniePropertiesBookPageData.Any(y => y.PageId == parsed.page))
+                                    if (weenies.ContainsKey(worldIDQueue[currentWorld][parsed.bookID]))
                                     {
-                                        weenies[worldIDQueue[currentWorld][parsed.bookID]].WeeniePropertiesBookPageData.Add(new ACE.Database.Models.World.WeeniePropertiesBookPageData { PageId = parsed.page, AuthorAccount = parsed.pageData.authorAccount.m_buffer, AuthorId = parsed.pageData.authorID, AuthorName = parsed.pageData.authorName.m_buffer, IgnoreAuthor = parsed.pageData.ignoreAuthor == 1, PageText = parsed.pageData.pageText.m_buffer });
-                                    }
+                                        if (!weenies[worldIDQueue[currentWorld][parsed.bookID]].WeeniePropertiesBookPageData.Any(y => y.PageId == parsed.page))
+                                        {
+                                            weenies[worldIDQueue[currentWorld][parsed.bookID]].WeeniePropertiesBookPageData.Add(new ACE.Database.Models.World.WeeniePropertiesBookPageData { PageId = parsed.page, AuthorAccount = parsed.pageData.authorAccount.m_buffer, AuthorId = parsed.pageData.authorID, AuthorName = parsed.pageData.authorName.m_buffer, IgnoreAuthor = parsed.pageData.ignoreAuthor == 1, PageText = parsed.pageData.pageText.m_buffer });
+                                        }
 
-                                    totalHits++;
+                                        totalHits++;
+                                    }
                                 }
                             }
 
@@ -759,33 +1008,36 @@ namespace aclogview
 
                                 if (worldIDQueue[currentWorld].ContainsKey(parsed.shopVendorID))
                                 {
-                                    if (!weenies[worldIDQueue[currentWorld][parsed.shopVendorID]].WeeniePropertiesFloat.Any(y => y.Type == (ushort)STypeFloat.BUY_PRICE_FLOAT))
-                                        weenies[worldIDQueue[currentWorld][parsed.shopVendorID]].WeeniePropertiesFloat.Add(new ACE.Database.Models.World.WeeniePropertiesFloat { Type = (ushort)STypeFloat.BUY_PRICE_FLOAT, Value = parsed.shopVendorProfile.buy_price });
-                                    if (!weenies[worldIDQueue[currentWorld][parsed.shopVendorID]].WeeniePropertiesFloat.Any(y => y.Type == (ushort)STypeFloat.SELL_PRICE_FLOAT))
-                                        weenies[worldIDQueue[currentWorld][parsed.shopVendorID]].WeeniePropertiesFloat.Add(new ACE.Database.Models.World.WeeniePropertiesFloat { Type = (ushort)STypeFloat.SELL_PRICE_FLOAT, Value = parsed.shopVendorProfile.sell_price });
-                                    if (!weenies[worldIDQueue[currentWorld][parsed.shopVendorID]].WeeniePropertiesInt.Any(y => y.Type == (ushort)STypeInt.MERCHANDISE_ITEM_TYPES_INT))
-                                        weenies[worldIDQueue[currentWorld][parsed.shopVendorID]].WeeniePropertiesInt.Add(new ACE.Database.Models.World.WeeniePropertiesInt { Type = (ushort)STypeInt.MERCHANDISE_ITEM_TYPES_INT, Value = (int)parsed.shopVendorProfile.item_types });
-                                    if (!weenies[worldIDQueue[currentWorld][parsed.shopVendorID]].WeeniePropertiesInt.Any(y => y.Type == (ushort)STypeInt.MERCHANDISE_MAX_VALUE_INT))
-                                        weenies[worldIDQueue[currentWorld][parsed.shopVendorID]].WeeniePropertiesInt.Add(new ACE.Database.Models.World.WeeniePropertiesInt { Type = (ushort)STypeInt.MERCHANDISE_MAX_VALUE_INT, Value = (int)parsed.shopVendorProfile.max_value });
-                                    if (!weenies[worldIDQueue[currentWorld][parsed.shopVendorID]].WeeniePropertiesInt.Any(y => y.Type == (ushort)STypeInt.MERCHANDISE_MIN_VALUE_INT))
-                                        weenies[worldIDQueue[currentWorld][parsed.shopVendorID]].WeeniePropertiesInt.Add(new ACE.Database.Models.World.WeeniePropertiesInt { Type = (ushort)STypeInt.MERCHANDISE_MIN_VALUE_INT, Value = (int)parsed.shopVendorProfile.min_value });
-                                    if (!weenies[worldIDQueue[currentWorld][parsed.shopVendorID]].WeeniePropertiesDID.Any(y => y.Type == (ushort)STypeDID.ALTERNATE_CURRENCY_DID) && parsed.shopVendorProfile.trade_id > 0)
-                                        weenies[worldIDQueue[currentWorld][parsed.shopVendorID]].WeeniePropertiesDID.Add(new ACE.Database.Models.World.WeeniePropertiesDID { Type = (ushort)STypeDID.ALTERNATE_CURRENCY_DID, Value = parsed.shopVendorProfile.trade_id });
-                                    if (!weenies[worldIDQueue[currentWorld][parsed.shopVendorID]].WeeniePropertiesBool.Any(y => y.Type == (ushort)STypeBool.DEAL_MAGICAL_ITEMS_BOOL))
-                                        weenies[worldIDQueue[currentWorld][parsed.shopVendorID]].WeeniePropertiesBool.Add(new ACE.Database.Models.World.WeeniePropertiesBool { Type = (ushort)STypeBool.DEAL_MAGICAL_ITEMS_BOOL, Value = parsed.shopVendorProfile.magic == 1 });
-
-                                    if (parsed.shopItemProfileList.list.Count > 0)
+                                    if (weenies.ContainsKey(worldIDQueue[currentWorld][parsed.shopVendorID]))
                                     {
-                                        foreach (var item in parsed.shopItemProfileList.list)
-                                        {
-                                            //if (item.pwd._wcid > 31000)
-                                            //    continue; // skip new things for now
-                                            if (!weenies[worldIDQueue[currentWorld][parsed.shopVendorID]].WeeniePropertiesCreateList.Any(y => y.DestinationType == (sbyte)ACE.Entity.Enum.DestinationType.Shop && y.WeenieClassId == item.pwd._wcid))
-                                                weenies[worldIDQueue[currentWorld][parsed.shopVendorID]].WeeniePropertiesCreateList.Add(new ACE.Database.Models.World.WeeniePropertiesCreateList { DestinationType = (sbyte)ACE.Entity.Enum.DestinationType.Shop, WeenieClassId = item.pwd._wcid, StackSize = -1, TryToBond = false });
-                                        }
-                                    }
+                                        if (!weenies[worldIDQueue[currentWorld][parsed.shopVendorID]].WeeniePropertiesFloat.Any(y => y.Type == (ushort)STypeFloat.BUY_PRICE_FLOAT))
+                                            weenies[worldIDQueue[currentWorld][parsed.shopVendorID]].WeeniePropertiesFloat.Add(new ACE.Database.Models.World.WeeniePropertiesFloat { Type = (ushort)STypeFloat.BUY_PRICE_FLOAT, Value = parsed.shopVendorProfile.buy_price });
+                                        if (!weenies[worldIDQueue[currentWorld][parsed.shopVendorID]].WeeniePropertiesFloat.Any(y => y.Type == (ushort)STypeFloat.SELL_PRICE_FLOAT))
+                                            weenies[worldIDQueue[currentWorld][parsed.shopVendorID]].WeeniePropertiesFloat.Add(new ACE.Database.Models.World.WeeniePropertiesFloat { Type = (ushort)STypeFloat.SELL_PRICE_FLOAT, Value = parsed.shopVendorProfile.sell_price });
+                                        if (!weenies[worldIDQueue[currentWorld][parsed.shopVendorID]].WeeniePropertiesInt.Any(y => y.Type == (ushort)STypeInt.MERCHANDISE_ITEM_TYPES_INT))
+                                            weenies[worldIDQueue[currentWorld][parsed.shopVendorID]].WeeniePropertiesInt.Add(new ACE.Database.Models.World.WeeniePropertiesInt { Type = (ushort)STypeInt.MERCHANDISE_ITEM_TYPES_INT, Value = (int)parsed.shopVendorProfile.item_types });
+                                        if (!weenies[worldIDQueue[currentWorld][parsed.shopVendorID]].WeeniePropertiesInt.Any(y => y.Type == (ushort)STypeInt.MERCHANDISE_MAX_VALUE_INT))
+                                            weenies[worldIDQueue[currentWorld][parsed.shopVendorID]].WeeniePropertiesInt.Add(new ACE.Database.Models.World.WeeniePropertiesInt { Type = (ushort)STypeInt.MERCHANDISE_MAX_VALUE_INT, Value = (int)parsed.shopVendorProfile.max_value });
+                                        if (!weenies[worldIDQueue[currentWorld][parsed.shopVendorID]].WeeniePropertiesInt.Any(y => y.Type == (ushort)STypeInt.MERCHANDISE_MIN_VALUE_INT))
+                                            weenies[worldIDQueue[currentWorld][parsed.shopVendorID]].WeeniePropertiesInt.Add(new ACE.Database.Models.World.WeeniePropertiesInt { Type = (ushort)STypeInt.MERCHANDISE_MIN_VALUE_INT, Value = (int)parsed.shopVendorProfile.min_value });
+                                        if (!weenies[worldIDQueue[currentWorld][parsed.shopVendorID]].WeeniePropertiesDID.Any(y => y.Type == (ushort)STypeDID.ALTERNATE_CURRENCY_DID) && parsed.shopVendorProfile.trade_id > 0)
+                                            weenies[worldIDQueue[currentWorld][parsed.shopVendorID]].WeeniePropertiesDID.Add(new ACE.Database.Models.World.WeeniePropertiesDID { Type = (ushort)STypeDID.ALTERNATE_CURRENCY_DID, Value = parsed.shopVendorProfile.trade_id });
+                                        if (!weenies[worldIDQueue[currentWorld][parsed.shopVendorID]].WeeniePropertiesBool.Any(y => y.Type == (ushort)STypeBool.DEAL_MAGICAL_ITEMS_BOOL))
+                                            weenies[worldIDQueue[currentWorld][parsed.shopVendorID]].WeeniePropertiesBool.Add(new ACE.Database.Models.World.WeeniePropertiesBool { Type = (ushort)STypeBool.DEAL_MAGICAL_ITEMS_BOOL, Value = parsed.shopVendorProfile.magic == 1 });
 
-                                    totalHits++;
+                                        if (parsed.shopItemProfileList.list.Count > 0)
+                                        {
+                                            foreach (var item in parsed.shopItemProfileList.list)
+                                            {
+                                                //if (item.pwd._wcid > 31000)
+                                                //    continue; // skip new things for now
+                                                if (!weenies[worldIDQueue[currentWorld][parsed.shopVendorID]].WeeniePropertiesCreateList.Any(y => y.DestinationType == (sbyte)ACE.Entity.Enum.DestinationType.Shop && y.WeenieClassId == item.pwd._wcid))
+                                                    weenies[worldIDQueue[currentWorld][parsed.shopVendorID]].WeeniePropertiesCreateList.Add(new ACE.Database.Models.World.WeeniePropertiesCreateList { DestinationType = (sbyte)ACE.Entity.Enum.DestinationType.Shop, WeenieClassId = item.pwd._wcid, StackSize = -1, TryToBond = false });
+                                            }
+                                        }
+
+                                        totalHits++;
+                                    }
                                 }
                             }
 
@@ -810,9 +1062,130 @@ namespace aclogview
                     }
                 }
 
+                CleanupWeenies(weenies);
+
                 WeenieSQLWriter.WriteFiles(weenies.Values, txtOutputFolder.Text + "\\9 WeenieDefaults\\SQL\\", weenieNames, null, null, weenies, true);
 
-                LandblockSQLWriter.WriteFiles(instances.Values, txtOutputFolder.Text + "\\6 LandBlockExtendedData\\SQL\\", weenieNames, false);
+                var landblocks = new List<ACE.Database.Models.World.LandblockInstance>();
+                if (!weenieNames.ContainsKey(1154))
+                    weenieNames.Add(1154, "Linkable Monster Generator");
+                if (!weenieNames.ContainsKey(1542))
+                    weenieNames.Add(1542, "Linkable Item Generator");
+                foreach (var landblock in instances.Values)
+                {
+                    var lastGuid = landblock.StaticObjects.Keys.OrderBy(x => x).LastOrDefault();
+
+                    if (landblock.LinkableMonsterObjects.Values.Count > 0)
+                    {
+                        var first = landblock.LinkableMonsterObjects.Values.FirstOrDefault();
+                        var generatorGuid = ++lastGuid;
+                        var generator = new ACE.Database.Models.World.LandblockInstance
+                        {
+                            Guid = generatorGuid,
+                            WeenieClassId = 1154,
+                            ObjCellId = first.ObjCellId,
+                            OriginX = first.OriginX,
+                            OriginY = first.OriginY,
+                            OriginZ = first.OriginZ,
+                            AnglesW = first.AnglesW,
+                            AnglesX = first.AnglesX,
+                            AnglesY = first.AnglesY,
+                            AnglesZ = first.AnglesZ,
+                            IsLinkChild = false
+                        };
+                        landblock.StaticObjects.Add(generatorGuid, generator);
+                        foreach(var item in landblock.LinkableMonsterObjects.Values)
+                        {
+                            item.IsLinkChild = true;
+                            item.Guid = ++lastGuid;
+                            generator.LandblockInstanceLink.Add(new LandblockInstanceLink { ParentGuid = generatorGuid, ChildGuid = item.Guid });
+                        }
+                    }
+
+                    if (landblock.LinkableNPCObjects.Values.Count > 0)
+                    {
+                        var first = landblock.LinkableNPCObjects.Values.FirstOrDefault();
+                        var generatorGuid = ++lastGuid;
+                        var generator = new ACE.Database.Models.World.LandblockInstance
+                        {
+                            Guid = generatorGuid,
+                            WeenieClassId = 1154,
+                            ObjCellId = first.ObjCellId,
+                            OriginX = first.OriginX,
+                            OriginY = first.OriginY,
+                            OriginZ = first.OriginZ,
+                            AnglesW = first.AnglesW,
+                            AnglesX = first.AnglesX,
+                            AnglesY = first.AnglesY,
+                            AnglesZ = first.AnglesZ,
+                            IsLinkChild = false
+                        };
+                        landblock.StaticObjects.Add(generatorGuid, generator);
+                        foreach (var item in landblock.LinkableNPCObjects.Values)
+                        {
+                            item.IsLinkChild = true;
+                            item.Guid = ++lastGuid;
+                            generator.LandblockInstanceLink.Add(new LandblockInstanceLink { ParentGuid = generatorGuid, ChildGuid = item.Guid });
+                        }
+                    }
+
+                    if (landblock.LinkableItemObjects.Values.Count > 0)
+                    {
+                        var first = landblock.LinkableItemObjects.Values.FirstOrDefault();
+                        var generatorGuid = ++lastGuid;
+                        var generator = new ACE.Database.Models.World.LandblockInstance
+                        {
+                            Guid = generatorGuid,
+                            WeenieClassId = 1542,
+                            ObjCellId = first.ObjCellId,
+                            OriginX = first.OriginX,
+                            OriginY = first.OriginY,
+                            OriginZ = first.OriginZ,
+                            AnglesW = first.AnglesW,
+                            AnglesX = first.AnglesX,
+                            AnglesY = first.AnglesY,
+                            AnglesZ = first.AnglesZ,
+                            IsLinkChild = false
+                        };
+                        landblock.StaticObjects.Add(generatorGuid, generator);
+                        foreach (var item in landblock.LinkableItemObjects.Values)
+                        {
+                            item.IsLinkChild = true;
+                            item.Guid = ++lastGuid;
+                            generator.LandblockInstanceLink.Add(new LandblockInstanceLink { ParentGuid = generatorGuid, ChildGuid = item.Guid });
+                        }
+                    }
+
+                    landblocks.AddRange(landblock.StaticObjects.Values.ToList());                    
+
+                    landblocks.AddRange(landblock.LinkableMonsterObjects.Values.ToList());
+
+                    landblocks.AddRange(landblock.LinkableNPCObjects.Values.ToList());
+
+                    landblocks.AddRange(landblock.LinkableItemObjects.Values.ToList());
+                }
+
+                CloneLandblockToAnother(landblocks, 0x8603, 0x8602);
+                CloneLandblockToAnother(landblocks, 0x8603, 0x8604);
+                CloneLandblockToAnother(landblocks, 0x8603, 0x8702);
+                CloneLandblockToAnother(landblocks, 0x8603, 0x8703);
+
+                CloneLandblockToAnother(landblocks, 0x7F03, 0x7F04);
+                CloneLandblockToAnother(landblocks, 0x7F03, 0x8002);
+                CloneLandblockToAnother(landblocks, 0x7F03, 0x8003);
+                CloneLandblockToAnother(landblocks, 0x7F03, 0x8004);
+
+                CloneLandblockToAnother(landblocks, 0x8C04, 0x8D02);
+                CloneLandblockToAnother(landblocks, 0x8C04, 0x8D03);
+                CloneLandblockToAnother(landblocks, 0x8C04, 0x8D04);
+                CloneLandblockToAnother(landblocks, 0x8C04, 0x8E02);
+
+                CloneLandblockToAnother(landblocks, 0x7203, 0x7202);
+                CloneLandblockToAnother(landblocks, 0x7203, 0x7204);
+                CloneLandblockToAnother(landblocks, 0x7203, 0x7302);
+                CloneLandblockToAnother(landblocks, 0x7203, 0x7303);
+
+                LandblockSQLWriter.WriteFiles(landblocks, txtOutputFolder.Text + "\\6 LandBlockExtendedData\\SQL\\", weenieNames, true);
 
                 MessageBox.Show($"Export started at {start.ToString()}, completed at {DateTime.Now.ToString()} and took {(DateTime.Now - start).TotalMinutes} minutes.");
             }
@@ -821,6 +1194,88 @@ namespace aclogview
                 fragDatListFile.CloseFile();
 
                 Interlocked.Increment(ref filesProcessed);
+            }
+        }
+
+        private void CloneLandblockToAnother(List<LandblockInstance> landblocks, uint landblockToCloneFrom, uint landblockToCloneTo)
+        {
+            //var newLandblock = new List<LandblockInstance>(landblocks.Where(x=>(x.ObjCellId >> 16) == landblockToCloneFrom).OrderBy(y=>y.Guid).ToList());
+
+            var newLandblock = new List<LandblockInstance>();
+
+            foreach (var instance in landblocks.Where(x => (x.ObjCellId >> 16) == landblockToCloneFrom).OrderBy(y => y.Guid))
+            {
+                var newGuid = (instance.Guid & 0xF0000FFF) | (landblockToCloneTo << 12);
+                var newObjCellId = (instance.ObjCellId & 0x0000FFFF) | (landblockToCloneTo << 16);
+
+                var newInstance = new LandblockInstance
+                {
+                    AnglesW = instance.AnglesW,
+                    AnglesX = instance.AnglesX,
+                    AnglesY = instance.AnglesY,
+                    AnglesZ = instance.AnglesZ,
+                    Guid = newGuid,
+                    IsLinkChild = instance.IsLinkChild,
+                    ObjCellId = newObjCellId,
+                    OriginX = instance.OriginX,
+                    OriginY = instance.OriginY,
+                    OriginZ = instance.OriginZ,
+                    WeenieClassId = instance.WeenieClassId
+                };
+
+                foreach(var link in instance.LandblockInstanceLink)
+                {
+                    var newChildGuid = (link.ChildGuid & 0xF0000FFF) | (landblockToCloneTo << 12);
+                    newInstance.LandblockInstanceLink.Add(new LandblockInstanceLink { ChildGuid = newChildGuid, ParentGuid = newGuid });
+                }
+
+                newLandblock.Add(newInstance);
+            }
+
+            var landblocksToRemove = landblocks.Where(x => (x.ObjCellId >> 16) == landblockToCloneTo).OrderBy(y => y.Guid).ToList();
+
+            foreach (var landblock in landblocksToRemove)
+            {
+                landblocks.Remove(landblock);
+            }
+
+            landblocks.AddRange(newLandblock);
+        }
+
+        private void CleanupWeenies(Dictionary<uint, Weenie> weenies)
+        {
+            foreach(var weenie in weenies.Values)
+            {
+                var maxStructure = weenie.WeeniePropertiesInt.FirstOrDefault(y => y.Type == (ushort)ACE.Entity.Enum.Properties.PropertyInt.MaxStructure);
+                if (maxStructure != null)
+                {
+                    var structure = weenie.WeeniePropertiesInt.FirstOrDefault(y => y.Type == (ushort)ACE.Entity.Enum.Properties.PropertyInt.Structure);
+                    structure.Value = maxStructure.Value;
+                }
+
+                var maxStackSize = weenie.WeeniePropertiesInt.FirstOrDefault(y => y.Type == (ushort)ACE.Entity.Enum.Properties.PropertyInt.MaxStackSize);
+                if (maxStackSize != null)
+                {
+                    var stackSize = weenie.WeeniePropertiesInt.FirstOrDefault(y => y.Type == (ushort)ACE.Entity.Enum.Properties.PropertyInt.StackSize);
+                    var burden = weenie.WeeniePropertiesInt.FirstOrDefault(y => y.Type == (ushort)ACE.Entity.Enum.Properties.PropertyInt.EncumbranceVal);
+                    var value = weenie.WeeniePropertiesInt.FirstOrDefault(y => y.Type == (ushort)ACE.Entity.Enum.Properties.PropertyInt.Value);
+
+                    int calcBurden = 0;
+                    int calcValue = 0;
+
+                    calcBurden = burden.Value / stackSize.Value;
+                    calcValue = value.Value / stackSize.Value;
+
+                    if (!weenie.WeeniePropertiesInt.Any(y => y.Type == (ushort)ACE.Entity.Enum.Properties.PropertyInt.StackUnitEncumbrance))
+                        weenie.WeeniePropertiesInt.Add(new ACE.Database.Models.World.WeeniePropertiesInt { Type = (ushort)ACE.Entity.Enum.Properties.PropertyInt.StackUnitEncumbrance, Value = calcBurden });
+
+                    if (!weenie.WeeniePropertiesInt.Any(y => y.Type == (ushort)ACE.Entity.Enum.Properties.PropertyInt.StackUnitValue))
+                        weenie.WeeniePropertiesInt.Add(new ACE.Database.Models.World.WeeniePropertiesInt { Type = (ushort)ACE.Entity.Enum.Properties.PropertyInt.StackUnitValue, Value = calcValue });
+
+                    burden.Value = calcBurden;
+                    value.Value = calcValue;
+                    stackSize.Value = 1;
+                }
             }
         }
 
@@ -891,6 +1346,12 @@ namespace aclogview
             else if (objectDescriptionFlag.HasFlag(ACE.Entity.Enum.ObjectDescriptionFlag.Corpse))
             {
                 wo.Type = (int)ACE.Entity.Enum.WeenieType.Corpse;
+                return;
+            }
+
+            if (wo.GetProperty(ACE.Entity.Enum.Properties.PropertyInt.ValidLocations) == (int)ACE.Entity.Enum.EquipMask.MissileAmmo)
+            {
+                wo.Type = (int)ACE.Entity.Enum.WeenieType.Ammunition;
                 return;
             }
 
