@@ -545,7 +545,7 @@ namespace aclogview
                                         totalHits++;
                                     }
 
-                                    if (parsed.wdesc._wcid != 1 && parsed.wdesc._containerID == 0 && parsed.wdesc._wielderID == 0) // Skip players and objects without 
+                                    if (parsed.wdesc._wcid != 1 && parsed.wdesc._containerID == 0 && parsed.wdesc._wielderID == 0) // Skip players and objects without
                                     {
                                         if (parsed.object_id < 0x80000000) // static objects
                                         {
@@ -1071,6 +1071,12 @@ namespace aclogview
                     weenieNames.Add(1154, "Linkable Monster Generator");
                 if (!weenieNames.ContainsKey(1542))
                     weenieNames.Add(1542, "Linkable Item Generator");
+                if (!weenieNames.ContainsKey(5085))
+                    weenieNames.Add(5085, "Linkable Item Gen - 25 seconds");
+                if (!weenieNames.ContainsKey(28282))
+                    weenieNames.Add(28282, "Linkable Monster Gen - 10 sec.");
+                if(!weenieNames.ContainsKey(15759))
+                    weenieNames.Add(15759, "Linkable Item Generator");
                 foreach (var landblock in instances.Values)
                 {
                     var lastGuid = landblock.StaticObjects.Keys.OrderBy(x => x).LastOrDefault();
@@ -1082,7 +1088,7 @@ namespace aclogview
                         var generator = new ACE.Database.Models.World.LandblockInstance
                         {
                             Guid = generatorGuid,
-                            WeenieClassId = 1154,
+                            WeenieClassId = 28282,
                             ObjCellId = first.ObjCellId,
                             OriginX = first.OriginX,
                             OriginY = first.OriginY,
@@ -1136,7 +1142,7 @@ namespace aclogview
                         var generator = new ACE.Database.Models.World.LandblockInstance
                         {
                             Guid = generatorGuid,
-                            WeenieClassId = 1542,
+                            WeenieClassId = 15759,
                             ObjCellId = first.ObjCellId,
                             OriginX = first.OriginX,
                             OriginY = first.OriginY,
@@ -1164,6 +1170,16 @@ namespace aclogview
 
                     landblocks.AddRange(landblock.LinkableItemObjects.Values.ToList());
                 }
+
+                landblocks.Where(x => (x.ObjCellId >> 16) == 0x8603 && x.WeenieClassId == 15759).FirstOrDefault().OriginZ = .005f;
+                landblocks.Where(x => (x.ObjCellId >> 16) == 0x7F03 && x.WeenieClassId == 15759).FirstOrDefault().OriginZ = .005f;
+                landblocks.Where(x => (x.ObjCellId >> 16) == 0x8C04 && x.WeenieClassId == 15759).FirstOrDefault().OriginZ = .005f;
+                landblocks.Where(x => (x.ObjCellId >> 16) == 0x7203 && x.WeenieClassId == 15759).FirstOrDefault().OriginZ = .005f;
+
+                AddObjectsToLandblock(landblocks, weenieNames, 0x8603);
+                AddObjectsToLandblock(landblocks, weenieNames, 0x7F03);
+                AddObjectsToLandblock(landblocks, weenieNames, 0x8C04);
+                AddObjectsToLandblock(landblocks, weenieNames, 0x7203);
 
                 CloneLandblockToAnother(landblocks, 0x8603, 0x8602);
                 CloneLandblockToAnother(landblocks, 0x8603, 0x8604);
@@ -1195,6 +1211,53 @@ namespace aclogview
 
                 Interlocked.Increment(ref filesProcessed);
             }
+        }
+
+        private void AddObjectsToLandblock(List<LandblockInstance> landblocks, Dictionary<uint, string> weenieNames, uint landblockToAddTo)
+        {
+            if (!weenieNames.ContainsKey(10762))
+                weenieNames.Add(10762, "Portal Linkspot");
+
+            var lastGuid = landblocks.Where(x => (x.ObjCellId >> 16) == landblockToAddTo).OrderBy(x => x.Guid).LastOrDefault().Guid;
+
+            var newGuid = ++lastGuid;
+
+            var newObjCellId = (0x8603021E & 0x0000FFFF) | (landblockToAddTo << 16);
+
+            landblocks.Add(new LandblockInstance {
+                Guid = newGuid,
+                WeenieClassId = 10762,
+                //ObjCellId = newObjCellId, OriginX = 50, OriginY = -54, OriginZ = 0.004999995f, AnglesW = 0.01f, AnglesX = 0, AnglesY = 0, AnglesZ = 0.9f,
+                ObjCellId = newObjCellId, OriginX = 50, OriginY = -54, OriginZ = 1, AnglesW = 0.01f, AnglesX = 0, AnglesY = 0, AnglesZ = -1,
+                IsLinkChild = true
+            });
+
+            var centralCourtyardPortal = landblocks.Where(x => (x.ObjCellId >> 16) == landblockToAddTo && x.WeenieClassId == 31061).FirstOrDefault();
+
+            centralCourtyardPortal.LandblockInstanceLink.Add(new LandblockInstanceLink { ParentGuid = centralCourtyardPortal.Guid, ChildGuid = newGuid });
+
+            newGuid = ++lastGuid;
+
+            newObjCellId = (0x860302C3 & 0x0000FFFF) | (landblockToAddTo << 16);
+
+            landblocks.Add(new LandblockInstance
+            {
+                Guid = newGuid,
+                WeenieClassId = 10762,
+                ObjCellId = newObjCellId,
+                OriginX = 119,
+                OriginY = -141,
+                OriginZ = 0.004999995f,
+                AnglesW = 1,
+                AnglesX = 0,
+                AnglesY = 0,
+                AnglesZ = 0,
+                IsLinkChild = true
+            });
+
+            var outerCourtyardPortal = landblocks.Where(x => (x.ObjCellId >> 16) == landblockToAddTo && x.WeenieClassId == 29334).FirstOrDefault();
+
+            outerCourtyardPortal.LandblockInstanceLink.Add(new LandblockInstanceLink { ParentGuid = outerCourtyardPortal.Guid, ChildGuid = newGuid });
         }
 
         private void CloneLandblockToAnother(List<LandblockInstance> landblocks, uint landblockToCloneFrom, uint landblockToCloneTo)
