@@ -845,7 +845,7 @@ namespace aclogview
                                             if ((parsed.i_prof.header & (uint)CM_Examine.AppraisalProfile.AppraisalProfilePackHeader.Packed_CreatureProfile) != 0)
                                             {
                                                 if (!weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesAttribute2nd.Any(y => y.Type == (ushort)ACE.Entity.Enum.Properties.PropertyAttribute2nd.MaxHealth))
-                                                    weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesAttribute2nd.Add(new ACE.Database.Models.World.WeeniePropertiesAttribute2nd { Type = (ushort)ACE.Entity.Enum.Properties.PropertyAttribute2nd.MaxHealth, CurrentLevel = parsed.i_prof._creatureProfileTable._health, InitLevel = parsed.i_prof._creatureProfileTable._max_health });
+                                                    weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesAttribute2nd.Add(new ACE.Database.Models.World.WeeniePropertiesAttribute2nd { Type = (ushort)ACE.Entity.Enum.Properties.PropertyAttribute2nd.MaxHealth, CurrentLevel = parsed.i_prof._creatureProfileTable._health, InitLevel = 10 });
 
                                                 if ((parsed.i_prof._creatureProfileTable._header & (uint)CM_Examine.CreatureAppraisalProfile.CreatureAppraisalProfilePackHeader.Packed_Attributes) != 0)
                                                 {
@@ -863,9 +863,9 @@ namespace aclogview
                                                         weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesAttribute.Add(new ACE.Database.Models.World.WeeniePropertiesAttribute { Type = (ushort)ACE.Entity.Enum.Properties.PropertyAttribute.Self, InitLevel = parsed.i_prof._creatureProfileTable._self });
 
                                                     if (!weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesAttribute2nd.Any(y => y.Type == (ushort)ACE.Entity.Enum.Properties.PropertyAttribute2nd.MaxStamina))
-                                                        weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesAttribute2nd.Add(new ACE.Database.Models.World.WeeniePropertiesAttribute2nd { Type = (ushort)ACE.Entity.Enum.Properties.PropertyAttribute2nd.MaxStamina, CurrentLevel = parsed.i_prof._creatureProfileTable._stamina, InitLevel = parsed.i_prof._creatureProfileTable._max_stamina });
+                                                        weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesAttribute2nd.Add(new ACE.Database.Models.World.WeeniePropertiesAttribute2nd { Type = (ushort)ACE.Entity.Enum.Properties.PropertyAttribute2nd.MaxStamina, CurrentLevel = parsed.i_prof._creatureProfileTable._stamina, InitLevel = 10 });
                                                     if (!weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesAttribute2nd.Any(y => y.Type == (ushort)ACE.Entity.Enum.Properties.PropertyAttribute2nd.MaxMana))
-                                                        weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesAttribute2nd.Add(new ACE.Database.Models.World.WeeniePropertiesAttribute2nd { Type = (ushort)ACE.Entity.Enum.Properties.PropertyAttribute2nd.MaxMana, CurrentLevel = parsed.i_prof._creatureProfileTable._mana, InitLevel = parsed.i_prof._creatureProfileTable._max_mana });
+                                                        weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesAttribute2nd.Add(new ACE.Database.Models.World.WeeniePropertiesAttribute2nd { Type = (ushort)ACE.Entity.Enum.Properties.PropertyAttribute2nd.MaxMana, CurrentLevel = parsed.i_prof._creatureProfileTable._mana, InitLevel = 10 });
                                                 }
                                             }
 
