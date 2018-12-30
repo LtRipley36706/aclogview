@@ -385,6 +385,8 @@ namespace aclogview
                 //Dictionary<uint, uint> weenieIdObjectsStatus = new Dictionary<uint, uint>();
                 Dictionary<uint, KeyValuePair<uint, uint>> weenieIdObjectsStatus = new Dictionary<uint, KeyValuePair<uint, uint>>();
 
+                Dictionary<string, Dictionary<uint, string>> worldCorpseInstances = new Dictionary<string, Dictionary<uint, string>>();
+
                 while (true)
                 {
                     if (searchAborted || Disposing || IsDisposed)
@@ -436,6 +438,9 @@ namespace aclogview
 
                                 if (!worldIDQueue.ContainsKey(currentWorld))
                                     worldIDQueue.Add(currentWorld, new Dictionary<uint, uint>());
+
+                                if (!worldCorpseInstances.ContainsKey(currentWorld))
+                                    worldCorpseInstances.Add(currentWorld, new Dictionary<uint, string>());
                             }
 
                             if (opCode == (uint)PacketOpcode.Evt_Physics__CreateObject_ID)
@@ -451,6 +456,12 @@ namespace aclogview
 
                                     if (addIt)
                                         worldIDQueue[currentWorld].Add(parsed.object_id, parsed.wdesc._wcid);
+
+                                    if (parsed.wdesc._wcid == 21)
+                                    {
+                                        if (!worldCorpseInstances[currentWorld].ContainsKey(parsed.object_id))
+                                            worldCorpseInstances[currentWorld].Add(parsed.object_id, parsed.wdesc._name.m_buffer);
+                                    }
                                 }
                                 else
                                 {
@@ -519,6 +530,7 @@ namespace aclogview
                                     /* || (parsed.physicsdesc.pos.objcell_id >> 16) == 0x7204
                                     || (parsed.physicsdesc.pos.objcell_id >> 16) == 0x7302
                                     || (parsed.physicsdesc.pos.objcell_id >> 16) == 0x7303 */
+                                    || parsed.physicsdesc.pos.objcell_id == 0
                                     )
                                 {
 
@@ -737,8 +749,49 @@ namespace aclogview
                                                         WhenCreate = (int)ACE.Entity.Enum.RegenerationType.PickUp,
                                                         WhereCreate = (int)ACE.Entity.Enum.RegenLocationType.Contain
                                                     });
+                                                else if (weenies[worldIDQueue[currentWorld][parsed.wdesc._containerID]].Type == (int)ACE.Entity.Enum.WeenieType.Corpse)
+                                                {
+                                                    bool corpse = false;
+                                                    bool treasure = false;
+
+                                                    if (worldCorpseInstances[currentWorld].ContainsKey(parsed.wdesc._containerID))
+                                                    {
+                                                        if (worldCorpseInstances[currentWorld][parsed.wdesc._containerID].StartsWith("Corpse of"))
+                                                            corpse = true;
+
+                                                        if (worldCorpseInstances[currentWorld][parsed.wdesc._containerID].StartsWith("Treasure of"))
+                                                            treasure = true;
+
+                                                        string nameToMatch = "";
+                                                        if (corpse)
+                                                            nameToMatch = worldCorpseInstances[currentWorld][parsed.wdesc._containerID].Replace("Corpse of ", "");
+                                                        if (treasure)
+                                                            nameToMatch = worldCorpseInstances[currentWorld][parsed.wdesc._containerID].Replace("Treasure of ", "");
+
+                                                        if (weenieNames.Values.Contains(nameToMatch))
+                                                        {
+                                                            var wcid = weenieNames.Where(i => i.Value == nameToMatch).FirstOrDefault().Key;
+                                                            if (weenies.ContainsKey(wcid))
+                                                            {
+                                                                if (!weenies[wcid].WeeniePropertiesCreateList.Any(y => y.WeenieClassId == parsed.wdesc._wcid))
+                                                                    weenies[wcid].WeeniePropertiesCreateList.Add(new WeeniePropertiesCreateList
+                                                                    {
+                                                                        DestinationType = (int)ACE.Entity.Enum.DestinationType.Contain,
+                                                                        WeenieClassId = parsed.wdesc._wcid,
+                                                                        StackSize = (parsed.wdesc._stackSize > 0) ? parsed.wdesc._stackSize : 1,
+                                                                        Palette = 0,
+                                                                        Shade = 0,
+                                                                        TryToBond = false
+                                                                    });
+
+                                                                if (treasure && !weenies[wcid].WeeniePropertiesBool.Any(y => y.Type == (ushort)ACE.Entity.Enum.Properties.PropertyBool.TreasureCorpse))
+                                                                    weenies[wcid].WeeniePropertiesBool.Add(new ACE.Database.Models.World.WeeniePropertiesBool { Type = (ushort)ACE.Entity.Enum.Properties.PropertyBool.TreasureCorpse, Value = true });
+                                                            }
+                                                        }
+                                                    }
+                                                }
                                             }
-                                        }
+                                        }                                        
                                     }
                                 }
                             }
@@ -1326,8 +1379,10 @@ namespace aclogview
                     int calcBurden = 0;
                     int calcValue = 0;
 
-                    calcBurden = burden.Value / stackSize.Value;
-                    calcValue = value.Value / stackSize.Value;
+                    if (burden != null && stackSize != null)
+                        calcBurden = burden.Value / stackSize.Value;
+                    if (value != null && stackSize != null)
+                        calcValue = value.Value / stackSize.Value;
 
                     if (!weenie.WeeniePropertiesInt.Any(y => y.Type == (ushort)ACE.Entity.Enum.Properties.PropertyInt.StackUnitEncumbrance))
                         weenie.WeeniePropertiesInt.Add(new ACE.Database.Models.World.WeeniePropertiesInt { Type = (ushort)ACE.Entity.Enum.Properties.PropertyInt.StackUnitEncumbrance, Value = calcBurden });
@@ -1335,10 +1390,21 @@ namespace aclogview
                     if (!weenie.WeeniePropertiesInt.Any(y => y.Type == (ushort)ACE.Entity.Enum.Properties.PropertyInt.StackUnitValue))
                         weenie.WeeniePropertiesInt.Add(new ACE.Database.Models.World.WeeniePropertiesInt { Type = (ushort)ACE.Entity.Enum.Properties.PropertyInt.StackUnitValue, Value = calcValue });
 
-                    burden.Value = calcBurden;
-                    value.Value = calcValue;
-                    stackSize.Value = 1;
+                    if (burden != null)
+                        burden.Value = calcBurden;
+                    if (value != null)
+                        value.Value = calcValue;
+                    if (stackSize != null)
+                        stackSize.Value = 1;
                 }
+
+                var container = weenie.WeeniePropertiesIID.FirstOrDefault(y => y.Type == (ushort)ACE.Entity.Enum.Properties.PropertyInstanceId.Container);
+                if (container != null)
+                    weenie.WeeniePropertiesIID.Remove(container);
+
+                var wielder = weenie.WeeniePropertiesIID.FirstOrDefault(y => y.Type == (ushort)ACE.Entity.Enum.Properties.PropertyInstanceId.Wielder);
+                if (wielder != null)
+                    weenie.WeeniePropertiesIID.Remove(wielder);
             }
         }
 
