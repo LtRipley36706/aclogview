@@ -557,16 +557,7 @@ namespace aclogview
                                         var remove = false;
                                         var name = wo.GetProperty(ACE.Entity.Enum.Properties.PropertyString.Name);
                                         var type = (ACE.Entity.Enum.HookType)wo.GetProperty(ACE.Entity.Enum.Properties.PropertyInt.HookType);
-                                        //if (wo.ClassId == 9686 && name != "Wall Hook")
-                                        //    remove = true;
-                                        //else if (wo.ClassId == 11697 && name != "Floor Hook")
-                                        //    remove = true;
-                                        //else if (wo.ClassId == 11698 && name != "Ceiling Hook")
-                                        //    remove = true;
-                                        //else if (wo.ClassId == 12678 && name != "Roof Hook")
-                                        //    remove = true;
-                                        //else if (wo.ClassId == 11679 && name != "Yard Hook")
-                                        //    remove = true;
+
                                         if (name != (Enum.GetName(typeof(ACE.Entity.Enum.HookType), type) + " Hook"))
                                             remove = true;
 
@@ -1563,20 +1554,15 @@ namespace aclogview
                         name.Value = "Villa";
                     else if (name.Value.EndsWith(" Mansion"))
                         name.Value = "Mansion";
-
-                    //weenie.WeeniePropertiesString.Remove(name);
-                    //weenie.WeeniePropertiesString.Add(name);
                 }
 
-                //var list = new List<WeeniePropertiesString>();
                 var list = weenie.WeeniePropertiesString.ToList();
                 foreach (var str in list)
                 {
                     if (str.Value == null)
                         weenie.WeeniePropertiesString.Remove(str);
                 }
-                //foreach (var str in list)
-                //    weenie.WeeniePropertiesString.Remove(str);
+
 
                 weenie.LastModified = DateTime.UtcNow;
             }
