@@ -1563,6 +1563,18 @@ namespace aclogview
                         weenie.WeeniePropertiesString.Remove(str);
                 }
 
+                if (weenie.Type == (int)ACE.Entity.Enum.WeenieType.Pet || weenie.Type == (int)ACE.Entity.Enum.WeenieType.CombatPet)
+                {
+                    var name = weenie.WeeniePropertiesString.FirstOrDefault(y => y.Type == (ushort)ACE.Entity.Enum.Properties.PropertyString.Name);
+
+                    int indexOfess = name.Value.LastIndexOf("'s ");
+
+                    var newName = name.Value.Substring(indexOfess + 3);
+
+                    if (indexOfess > 0)
+                        name.Value = newName;
+                }
+
 
                 weenie.LastModified = DateTime.UtcNow;
             }
@@ -1835,7 +1847,13 @@ namespace aclogview
                         goto default;
                     break;
                 case ACE.Entity.Enum.ItemType.Creature:
-                    if (
+                    var weenieHeaderFlag2 = (ACE.Entity.Enum.WeenieHeaderFlag2)(wo.GetProperty((ACE.Entity.Enum.Properties.PropertyDataId)8002) ?? (uint)ACE.Entity.Enum.WeenieHeaderFlag2.None);
+                    if (weenieHeaderFlag2.HasFlag(ACE.Entity.Enum.WeenieHeaderFlag2.PetOwner))
+                        if (wo.GetProperty(ACE.Entity.Enum.Properties.PropertyInt.RadarBlipColor).HasValue && wo.GetProperty(ACE.Entity.Enum.Properties.PropertyInt.RadarBlipColor) == (int)ACE.Entity.Enum.RadarColor.Yellow)
+                            wo.Type = (int)ACE.Entity.Enum.WeenieType.Pet;
+                        else
+                            wo.Type = (int)ACE.Entity.Enum.WeenieType.CombatPet;
+                    else if (
                         wo.GetProperty(ACE.Entity.Enum.Properties.PropertyString.Name).Contains("Pet")
                         || wo.GetProperty(ACE.Entity.Enum.Properties.PropertyString.Name).Contains("Wind-up")
                         || wo.ClassId == 48881
