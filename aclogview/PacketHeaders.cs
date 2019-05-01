@@ -342,7 +342,7 @@ public class BlobFragHeader_t {
     }
 }
 
-class OrderHdr {
+public class OrderHdr {
     public uint stamp; // Ordering number
 
     public static OrderHdr read(BinaryReader binaryReader) {
@@ -352,7 +352,7 @@ class OrderHdr {
     }
 }
 
-class WOrderHdr {
+public class WOrderHdr {
     public uint id;    // GUID of object to apply to
     public uint stamp; // Ordering number
 

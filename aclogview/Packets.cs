@@ -139,6 +139,28 @@ public class Util {
 
         return opcode;
     }
+
+    public static PacketOpcode readOpcode(BinaryReader fragDataReader, out WOrderHdr wOrderHdr, out OrderHdr orderHdr)
+    {
+        wOrderHdr = null;
+        orderHdr = null;
+        PacketOpcode opcode = 0;
+        opcode = (PacketOpcode)fragDataReader.ReadUInt32();
+        if (opcode == PacketOpcode.WEENIE_ORDERED_EVENT)
+        {
+            WOrderHdr orderHeader = WOrderHdr.read(fragDataReader);
+            opcode = (PacketOpcode)fragDataReader.ReadUInt32();
+            wOrderHdr = orderHeader;
+        }
+        if (opcode == PacketOpcode.ORDERED_EVENT)
+        {
+            OrderHdr orderHeader = OrderHdr.read(fragDataReader);
+            opcode = (PacketOpcode)fragDataReader.ReadUInt32();
+            orderHdr = orderHeader;
+        }
+
+        return opcode;
+    }
 }
 
 public class NetBlobIDUtils {

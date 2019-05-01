@@ -467,10 +467,14 @@ namespace aclogview
 
                                 using (BinaryReader fragDataReader = new BinaryReader(new MemoryStream(newFrag.dat_)))
 								{
-									PacketOpcode opcode = Util.readOpcode(fragDataReader);
+									PacketOpcode opcode = Util.readOpcode(fragDataReader, out var wOrderHdr, out var orderHdr);
 									packet.opcodes.Add(opcode);
 									packet.packetTypeStr = opcode.ToString();
-								}
+                                    if (wOrderHdr != null)
+                                        packet.extraInfo = $"wOrderHdr - ObjectId: {wOrderHdr.id} GameEventSequence: {wOrderHdr.stamp}";
+                                    if (orderHdr != null)
+                                        packet.extraInfo = $"orderHdr - GameEventSequence: {orderHdr.stamp}";
+                                }
 							}
 
 							packet.packetHeadersStr += packetHeadersStr.ToString();
