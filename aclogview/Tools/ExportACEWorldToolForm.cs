@@ -1732,8 +1732,10 @@ namespace aclogview
                 case ACE.Entity.Enum.ItemType.Caster:
                     wo.Type = (int)ACE.Entity.Enum.WeenieType.Caster;
                     break;
-                case ACE.Entity.Enum.ItemType.Armor:
                 case ACE.Entity.Enum.ItemType.Jewelry:
+                    wo.Type = (int)ACE.Entity.Enum.WeenieType.Generic;
+                    break;
+                case ACE.Entity.Enum.ItemType.Armor:                
                 case ACE.Entity.Enum.ItemType.Clothing:
                     wo.Type = (int)ACE.Entity.Enum.WeenieType.Clothing;
                     break;
