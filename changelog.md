@@ -1,3 +1,12 @@
+### 2019-05-08
+[Slushnas]
+* Fixed display grouping of Monarch/Patron/Self/Vassals in AllegianceUpdate messages.
+* Added context info to CM_Allegiance messages.
+
+### 2019-02-07
+[OptimShi]
+* Added Evt_DDD__Interrogation_ID, Evt_DDD__InterrogationResponse_ID, Evt_DDD__BeginDDD_ID, Evt_DDD__Data_ID, Evt_DDD__EndDDD_ID and Evt_DDD__RequestData_ID event handling. These are all related to patching dat files and version control.
+
 ### 2018-09-28
 [Slushnas]
 * Added context info for CM_Communication, CM_Social, CM_Character, CM_Death, CM_Misc, CM_Examine, and CM_Train.
