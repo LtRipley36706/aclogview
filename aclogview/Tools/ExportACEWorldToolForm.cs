@@ -534,6 +534,8 @@ namespace aclogview
                                 //    || (parsed.physicsdesc.pos.objcell_id >> 16) == 0x7303 */
                                 //    || parsed.physicsdesc.pos.objcell_id == 0
                                 //    )
+
+                                //if ((parsed.physicsdesc.pos.objcell_id >> 16) == 0x6146 || parsed.physicsdesc.pos.objcell_id == 0)
                                 //{
 
                                 if (!weenies.ContainsKey(parsed.wdesc._wcid))
@@ -811,8 +813,9 @@ namespace aclogview
                                         }
                                     }
                                 }
+
+                                //}
                             }
-                            //}
 
                             if (opCode == (uint)PacketOpcode.APPRAISAL_INFO_EVENT)
                             {
@@ -915,9 +918,6 @@ namespace aclogview
 
                                             if ((parsed.i_prof.header & (uint)CM_Examine.AppraisalProfile.AppraisalProfilePackHeader.Packed_CreatureProfile) != 0)
                                             {
-                                                if (!weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesAttribute2nd.Any(y => y.Type == (ushort)ACE.Entity.Enum.Properties.PropertyAttribute2nd.MaxHealth))
-                                                    weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesAttribute2nd.Add(new ACE.Database.Models.World.WeeniePropertiesAttribute2nd { Type = (ushort)ACE.Entity.Enum.Properties.PropertyAttribute2nd.MaxHealth, CurrentLevel = parsed.i_prof._creatureProfileTable._health, InitLevel = 10 });
-
                                                 if ((parsed.i_prof._creatureProfileTable._header & (uint)CM_Examine.CreatureAppraisalProfile.CreatureAppraisalProfilePackHeader.Packed_Attributes) != 0)
                                                 {
                                                     if (!weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesAttribute.Any(y => y.Type == (ushort)ACE.Entity.Enum.Properties.PropertyAttribute.Strength))
@@ -934,9 +934,24 @@ namespace aclogview
                                                         weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesAttribute.Add(new ACE.Database.Models.World.WeeniePropertiesAttribute { Type = (ushort)ACE.Entity.Enum.Properties.PropertyAttribute.Self, InitLevel = parsed.i_prof._creatureProfileTable._self });
 
                                                     if (!weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesAttribute2nd.Any(y => y.Type == (ushort)ACE.Entity.Enum.Properties.PropertyAttribute2nd.MaxStamina))
-                                                        weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesAttribute2nd.Add(new ACE.Database.Models.World.WeeniePropertiesAttribute2nd { Type = (ushort)ACE.Entity.Enum.Properties.PropertyAttribute2nd.MaxStamina, CurrentLevel = parsed.i_prof._creatureProfileTable._stamina, InitLevel = 10 });
+                                                        weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesAttribute2nd.Add(new ACE.Database.Models.World.WeeniePropertiesAttribute2nd { Type = (ushort)ACE.Entity.Enum.Properties.PropertyAttribute2nd.MaxStamina, CurrentLevel = parsed.i_prof._creatureProfileTable._max_stamina, InitLevel = parsed.i_prof._creatureProfileTable._max_stamina - parsed.i_prof._creatureProfileTable._endurance });
                                                     if (!weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesAttribute2nd.Any(y => y.Type == (ushort)ACE.Entity.Enum.Properties.PropertyAttribute2nd.MaxMana))
-                                                        weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesAttribute2nd.Add(new ACE.Database.Models.World.WeeniePropertiesAttribute2nd { Type = (ushort)ACE.Entity.Enum.Properties.PropertyAttribute2nd.MaxMana, CurrentLevel = parsed.i_prof._creatureProfileTable._mana, InitLevel = 10 });
+                                                        weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesAttribute2nd.Add(new ACE.Database.Models.World.WeeniePropertiesAttribute2nd { Type = (ushort)ACE.Entity.Enum.Properties.PropertyAttribute2nd.MaxMana, CurrentLevel = parsed.i_prof._creatureProfileTable._max_mana, InitLevel = parsed.i_prof._creatureProfileTable._max_mana - parsed.i_prof._creatureProfileTable._self });
+                                                }
+
+                                                if (!weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesAttribute2nd.Any(y => y.Type == (ushort)ACE.Entity.Enum.Properties.PropertyAttribute2nd.MaxHealth))
+                                                    if (parsed.i_prof._creatureProfileTable._endurance > 0)
+                                                        weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesAttribute2nd.Add(new ACE.Database.Models.World.WeeniePropertiesAttribute2nd { Type = (ushort)ACE.Entity.Enum.Properties.PropertyAttribute2nd.MaxHealth, CurrentLevel = parsed.i_prof._creatureProfileTable._max_health, InitLevel = parsed.i_prof._creatureProfileTable._max_health - (parsed.i_prof._creatureProfileTable._endurance / 2) });
+                                                    else
+                                                        weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesAttribute2nd.Add(new ACE.Database.Models.World.WeeniePropertiesAttribute2nd { Type = (ushort)ACE.Entity.Enum.Properties.PropertyAttribute2nd.MaxHealth, CurrentLevel = parsed.i_prof._creatureProfileTable._max_health, InitLevel = 0 });
+                                                else
+                                                {
+                                                    var health = weenies[worldIDQueue[currentWorld][parsed.i_objid]].WeeniePropertiesAttribute2nd.FirstOrDefault(y => y.Type == (ushort)ACE.Entity.Enum.Properties.PropertyAttribute2nd.MaxHealth);
+                                                    if (health != null)
+                                                    {
+                                                        if (health.InitLevel == 0 && parsed.i_prof._creatureProfileTable._endurance > 0)
+                                                            health.InitLevel = parsed.i_prof._creatureProfileTable._max_health - (parsed.i_prof._creatureProfileTable._endurance / 2);
+                                                    }
                                                 }
                                             }
 
@@ -1205,6 +1220,7 @@ namespace aclogview
                 WeenieSQLWriter.WriteFiles(weenies.Values, txtOutputFolder.Text + "\\9 WeenieDefaults\\SQL\\", weenieNames, null, null, weenies, true);
 
                 var landblocks = new List<ACE.Database.Models.World.LandblockInstance>();
+
                 //if (!weenieNames.ContainsKey(1154))
                 //    weenieNames.Add(1154, "Linkable Monster Generator");
                 //if (!weenieNames.ContainsKey(1542))
@@ -1215,6 +1231,7 @@ namespace aclogview
                 //    weenieNames.Add(28282, "Linkable Monster Gen - 10 sec.");
                 //if(!weenieNames.ContainsKey(15759))
                 //    weenieNames.Add(15759, "Linkable Item Generator");
+
                 //foreach (var landblock in instances.Values)
                 //{
                 //    var lastGuid = landblock.StaticObjects.Keys.OrderBy(x => x).LastOrDefault();
@@ -1226,7 +1243,8 @@ namespace aclogview
                 //        var generator = new ACE.Database.Models.World.LandblockInstance
                 //        {
                 //            Guid = generatorGuid,
-                //            WeenieClassId = 28282,
+                //            //WeenieClassId = 28282,
+                //            WeenieClassId = 1154,
                 //            ObjCellId = first.ObjCellId,
                 //            OriginX = first.OriginX,
                 //            OriginY = first.OriginY,
@@ -1238,7 +1256,7 @@ namespace aclogview
                 //            IsLinkChild = false
                 //        };
                 //        landblock.StaticObjects.Add(generatorGuid, generator);
-                //        foreach(var item in landblock.LinkableMonsterObjects.Values)
+                //        foreach (var item in landblock.LinkableMonsterObjects.Values)
                 //        {
                 //            item.IsLinkChild = true;
                 //            item.Guid = ++lastGuid;
@@ -1280,7 +1298,8 @@ namespace aclogview
                 //        var generator = new ACE.Database.Models.World.LandblockInstance
                 //        {
                 //            Guid = generatorGuid,
-                //            WeenieClassId = 15759,
+                //            //WeenieClassId = 15759,
+                //            WeenieClassId = 1542,
                 //            ObjCellId = first.ObjCellId,
                 //            OriginX = first.OriginX,
                 //            OriginY = first.OriginY,
@@ -1300,7 +1319,7 @@ namespace aclogview
                 //        }
                 //    }
 
-                //    landblocks.AddRange(landblock.StaticObjects.Values.ToList());                    
+                //    ////landblocks.AddRange(landblock.StaticObjects.Values.ToList());
 
                 //    landblocks.AddRange(landblock.LinkableMonsterObjects.Values.ToList());
 
@@ -1735,7 +1754,12 @@ namespace aclogview
                 case ACE.Entity.Enum.ItemType.Jewelry:
                     wo.Type = (int)ACE.Entity.Enum.WeenieType.Generic;
                     break;
-                case ACE.Entity.Enum.ItemType.Armor:                
+                case ACE.Entity.Enum.ItemType.Armor:
+                    if ((wo.GetProperty(ACE.Entity.Enum.Properties.PropertyInt.CombatUse) ?? 0) == (int)ACE.Entity.Enum.CombatUse.Shield)
+                        wo.Type = (int)ACE.Entity.Enum.WeenieType.Generic;
+                    else
+                        wo.Type = (int)ACE.Entity.Enum.WeenieType.Clothing;
+                    break;
                 case ACE.Entity.Enum.ItemType.Clothing:
                     wo.Type = (int)ACE.Entity.Enum.WeenieType.Clothing;
                     break;
@@ -1912,7 +1936,10 @@ namespace aclogview
                     wo.Type = (int)ACE.Entity.Enum.WeenieType.Coin;
                     break;
                 case ACE.Entity.Enum.ItemType.Gem:
-                    wo.Type = (int)ACE.Entity.Enum.WeenieType.Gem;
+                    if ((wo.GetProperty(ACE.Entity.Enum.Properties.PropertyInt.ItemUseable) ?? 0) == (int)ACE.Entity.Enum.Usable.SourceContainedTargetContained)
+                        wo.Type = (int)ACE.Entity.Enum.WeenieType.CraftTool;
+                    else
+                        wo.Type = (int)ACE.Entity.Enum.WeenieType.Gem;
                     break;
                 case ACE.Entity.Enum.ItemType.SpellComponents:
                     wo.Type = (int)ACE.Entity.Enum.WeenieType.SpellComponent;
