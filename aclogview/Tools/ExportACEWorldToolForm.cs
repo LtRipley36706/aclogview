@@ -1723,10 +1723,6 @@ namespace aclogview
                 if (lockpickSuccess != null)
                     weenie.WeeniePropertiesInt.Remove(lockpickSuccess);
 
-                var portalDest = weenie.WeeniePropertiesString.FirstOrDefault(y => y.Type == (ushort)ACE.Entity.Enum.Properties.PropertyString.AppraisalPortalDestination);
-                if (portalDest != null)
-                    weenie.WeeniePropertiesString.Remove(portalDest);
-
                 var openLock = weenie.WeeniePropertiesBool.Where(y => y.Type == (ushort)ACE.Entity.Enum.Properties.PropertyBool.Open || y.Type == (ushort)ACE.Entity.Enum.Properties.PropertyBool.Locked).ToList();
                 foreach (var prop in openLock)
                 {
@@ -1758,13 +1754,21 @@ namespace aclogview
                 var physicsState = weenie.WeeniePropertiesInt.FirstOrDefault(y => y.Type == (ushort)ACE.Entity.Enum.Properties.PropertyInt.PhysicsState);
                 if (physicsState != null)
                 {
-                    weenie.WeeniePropertiesInt.Remove(physicsState);
-
                     var ps = (ACE.Entity.Enum.PhysicsState)physicsState.Value;
                     ps &= ~ACE.Entity.Enum.PhysicsState.HasPhysicsBSP;
                     physicsState.Value = (int)ps;
+                }
 
-                    weenie.WeeniePropertiesInt.Add(physicsState);
+                if (weenie.Type == (int)ACE.Entity.Enum.WeenieType.Portal)
+                {
+                    var portalBitmask = weenie.WeeniePropertiesInt.FirstOrDefault(y => y.Type == (ushort)ACE.Entity.Enum.Properties.PropertyInt.PortalBitmask);
+                    var portalDest = weenie.WeeniePropertiesString.FirstOrDefault(y => y.Type == (ushort)ACE.Entity.Enum.Properties.PropertyString.AppraisalPortalDestination);
+
+                    if (portalBitmask != null && portalDest == null)
+                        weenie.WeeniePropertiesBool.Add(new WeeniePropertiesBool { Type = (ushort)ACE.Entity.Enum.Properties.PropertyBool.PortalShowDestination, Value = false });
+
+                    if (portalDest != null)
+                        weenie.WeeniePropertiesString.Remove(portalDest);
                 }
 
                 weenie.LastModified = DateTime.UtcNow;
