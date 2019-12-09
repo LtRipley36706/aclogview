@@ -1392,33 +1392,33 @@ namespace aclogview
 
                         landblocks.Add(instance);
                     }
-                    foreach (var instance in landblock.LinkableItemObjects.Values)
-                    {
-                        instance.LastModified = exportTime;
+                    //foreach (var instance in landblock.LinkableItemObjects.Values)
+                    //{
+                    //    instance.LastModified = exportTime;
 
-                        foreach (var link in instance.LandblockInstanceLink)
-                            link.LastModified = exportTime;
+                    //    foreach (var link in instance.LandblockInstanceLink)
+                    //        link.LastModified = exportTime;
 
-                        landblocks.Add(instance);
-                    }
-                    foreach (var instance in landblock.LinkableMonsterObjects.Values)
-                    {
-                        instance.LastModified = exportTime;
+                    //    landblocks.Add(instance);
+                    //}
+                    //foreach (var instance in landblock.LinkableMonsterObjects.Values)
+                    //{
+                    //    instance.LastModified = exportTime;
 
-                        foreach (var link in instance.LandblockInstanceLink)
-                            link.LastModified = exportTime;
+                    //    foreach (var link in instance.LandblockInstanceLink)
+                    //        link.LastModified = exportTime;
 
-                        landblocks.Add(instance);
-                    }
-                    foreach (var instance in landblock.LinkableNPCObjects.Values)
-                    {
-                        instance.LastModified = exportTime;
+                    //    landblocks.Add(instance);
+                    //}
+                    //foreach (var instance in landblock.LinkableNPCObjects.Values)
+                    //{
+                    //    instance.LastModified = exportTime;
 
-                        foreach (var link in instance.LandblockInstanceLink)
-                            link.LastModified = exportTime;
+                    //    foreach (var link in instance.LandblockInstanceLink)
+                    //        link.LastModified = exportTime;
 
-                        landblocks.Add(instance);
-                    }
+                    //    landblocks.Add(instance);
+                    //}
                 }
 
                 LandblockSQLWriter.WriteFiles(landblocks, txtOutputFolder.Text + "\\6 LandBlockExtendedData\\SQL\\", weenieNames, true);
