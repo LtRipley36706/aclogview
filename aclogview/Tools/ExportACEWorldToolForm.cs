@@ -639,103 +639,103 @@ namespace aclogview
                                                 }
                                             }
                                         }
-                                        //else
-                                        //{
-                                        //    if (parsed.physicsdesc.pos.objcell_id > 0 && parsed.wdesc._wielderID == 0)
-                                        //    {
-                                        //        var landblockId = parsed.physicsdesc.pos.objcell_id >> 16;
-                                        //        if (!instances.ContainsKey(landblockId))
-                                        //        {
-                                        //            instances.Add(landblockId, new Landblock());
-                                        //        }
+                                        else
+                                        {
+                                            if (parsed.physicsdesc.pos.objcell_id > 0 && parsed.wdesc._wielderID == 0)
+                                            {
+                                                var landblockId = parsed.physicsdesc.pos.objcell_id >> 16;
+                                                if (!instances.ContainsKey(landblockId))
+                                                {
+                                                    instances.Add(landblockId, new Landblock());
+                                                }
 
-                                        //        float margin = 0.02f;
+                                                float margin = 0.02f;
 
-                                        //        if (weenies[parsed.wdesc._wcid].Type == (int)ACE.Entity.Enum.WeenieType.Creature && parsed.wdesc._blipColor != (int)ACE.Entity.Enum.RadarColor.NPC)
-                                        //        {
-                                        //            //margin = 0.05f;
-                                        //            margin = 2f;
-                                        //            if (!instances[landblockId].LinkableMonsterObjects.ContainsKey(parsed.object_id)
-                                        //                && !PositionRecorded(parsed, processedWeeniePositions[parsed.wdesc._wcid], parsed.physicsdesc.pos, margin))
-                                        //            {
-                                        //                instances[landblockId].LinkableMonsterObjects.Add(parsed.object_id,
-                                        //                    new ACE.Database.Models.World.LandblockInstance
-                                        //                    {
-                                        //                        Guid = parsed.object_id,
-                                        //                        WeenieClassId = parsed.wdesc._wcid,
-                                        //                        ObjCellId = parsed.physicsdesc.pos.objcell_id,
-                                        //                        OriginX = parsed.physicsdesc.pos.frame.m_fOrigin.x,
-                                        //                        OriginY = parsed.physicsdesc.pos.frame.m_fOrigin.y,
-                                        //                        OriginZ = parsed.physicsdesc.pos.frame.m_fOrigin.z,
-                                        //                        AnglesW = parsed.physicsdesc.pos.frame.qw,
-                                        //                        AnglesX = parsed.physicsdesc.pos.frame.qx,
-                                        //                        AnglesY = parsed.physicsdesc.pos.frame.qy,
-                                        //                        AnglesZ = parsed.physicsdesc.pos.frame.qz,
-                                        //                        IsLinkChild = false
-                                        //                    });
+                                                if (weenies[parsed.wdesc._wcid].Type == (int)ACE.Entity.Enum.WeenieType.Creature && parsed.wdesc._blipColor != (int)ACE.Entity.Enum.RadarColor.NPC)
+                                                {
+                                                    //margin = 0.05f;
+                                                    margin = 2f;
+                                                    if (!instances[landblockId].LinkableMonsterObjects.ContainsKey(parsed.object_id)
+                                                        && !PositionRecorded(parsed, processedWeeniePositions[parsed.wdesc._wcid], parsed.physicsdesc.pos, margin))
+                                                    {
+                                                        instances[landblockId].LinkableMonsterObjects.Add(parsed.object_id,
+                                                            new ACE.Database.Models.World.LandblockInstance
+                                                            {
+                                                                Guid = parsed.object_id,
+                                                                WeenieClassId = parsed.wdesc._wcid,
+                                                                ObjCellId = parsed.physicsdesc.pos.objcell_id,
+                                                                OriginX = parsed.physicsdesc.pos.frame.m_fOrigin.x,
+                                                                OriginY = parsed.physicsdesc.pos.frame.m_fOrigin.y,
+                                                                OriginZ = parsed.physicsdesc.pos.frame.m_fOrigin.z,
+                                                                AnglesW = parsed.physicsdesc.pos.frame.qw,
+                                                                AnglesX = parsed.physicsdesc.pos.frame.qx,
+                                                                AnglesY = parsed.physicsdesc.pos.frame.qy,
+                                                                AnglesZ = parsed.physicsdesc.pos.frame.qz,
+                                                                IsLinkChild = false
+                                                            });
 
-                                        //                processedWeeniePositions[parsed.wdesc._wcid].Add(parsed.physicsdesc.pos);
-                                        //            }
-                                        //        }
-                                        //        else if (weenies[parsed.wdesc._wcid].Type == (int)ACE.Entity.Enum.WeenieType.Creature && parsed.wdesc._blipColor == (int)ACE.Entity.Enum.RadarColor.NPC)
-                                        //        {
-                                        //            if (!instances[landblockId].LinkableNPCObjects.ContainsKey(parsed.object_id)
-                                        //                && !PositionRecorded(parsed, processedWeeniePositions[parsed.wdesc._wcid], parsed.physicsdesc.pos, margin))
-                                        //            {
-                                        //                instances[landblockId].LinkableNPCObjects.Add(parsed.object_id,
-                                        //                    new ACE.Database.Models.World.LandblockInstance
-                                        //                    {
-                                        //                        Guid = parsed.object_id,
-                                        //                        WeenieClassId = parsed.wdesc._wcid,
-                                        //                        ObjCellId = parsed.physicsdesc.pos.objcell_id,
-                                        //                        OriginX = parsed.physicsdesc.pos.frame.m_fOrigin.x,
-                                        //                        OriginY = parsed.physicsdesc.pos.frame.m_fOrigin.y,
-                                        //                        OriginZ = parsed.physicsdesc.pos.frame.m_fOrigin.z,
-                                        //                        AnglesW = parsed.physicsdesc.pos.frame.qw,
-                                        //                        AnglesX = parsed.physicsdesc.pos.frame.qx,
-                                        //                        AnglesY = parsed.physicsdesc.pos.frame.qy,
-                                        //                        AnglesZ = parsed.physicsdesc.pos.frame.qz,
-                                        //                        IsLinkChild = false
-                                        //                    });
+                                                        processedWeeniePositions[parsed.wdesc._wcid].Add(parsed.physicsdesc.pos);
+                                                    }
+                                                }
+                                                else if (weenies[parsed.wdesc._wcid].Type == (int)ACE.Entity.Enum.WeenieType.Creature && parsed.wdesc._blipColor == (int)ACE.Entity.Enum.RadarColor.NPC)
+                                                {
+                                                    if (!instances[landblockId].LinkableNPCObjects.ContainsKey(parsed.object_id)
+                                                        && !PositionRecorded(parsed, processedWeeniePositions[parsed.wdesc._wcid], parsed.physicsdesc.pos, margin))
+                                                    {
+                                                        instances[landblockId].LinkableNPCObjects.Add(parsed.object_id,
+                                                            new ACE.Database.Models.World.LandblockInstance
+                                                            {
+                                                                Guid = parsed.object_id,
+                                                                WeenieClassId = parsed.wdesc._wcid,
+                                                                ObjCellId = parsed.physicsdesc.pos.objcell_id,
+                                                                OriginX = parsed.physicsdesc.pos.frame.m_fOrigin.x,
+                                                                OriginY = parsed.physicsdesc.pos.frame.m_fOrigin.y,
+                                                                OriginZ = parsed.physicsdesc.pos.frame.m_fOrigin.z,
+                                                                AnglesW = parsed.physicsdesc.pos.frame.qw,
+                                                                AnglesX = parsed.physicsdesc.pos.frame.qx,
+                                                                AnglesY = parsed.physicsdesc.pos.frame.qy,
+                                                                AnglesZ = parsed.physicsdesc.pos.frame.qz,
+                                                                IsLinkChild = false
+                                                            });
 
-                                        //                processedWeeniePositions[parsed.wdesc._wcid].Add(parsed.physicsdesc.pos);
-                                        //            }
-                                        //        }
-                                        //        else if (weenies[parsed.wdesc._wcid].Type != (int)ACE.Entity.Enum.WeenieType.Missile
-                                        //            && weenies[parsed.wdesc._wcid].Type != (int)ACE.Entity.Enum.WeenieType.Coin
-                                        //            && weenies[parsed.wdesc._wcid].Type != (int)ACE.Entity.Enum.WeenieType.Corpse
-                                        //            && weenies[parsed.wdesc._wcid].Type != (int)ACE.Entity.Enum.WeenieType.ProjectileSpell
-                                        //            && weenies[parsed.wdesc._wcid].Type != (int)ACE.Entity.Enum.WeenieType.Pet
-                                        //            && weenies[parsed.wdesc._wcid].Type != (int)ACE.Entity.Enum.WeenieType.PetDevice
-                                        //            && weenies[parsed.wdesc._wcid].Type != (int)ACE.Entity.Enum.WeenieType.CombatPet
-                                        //            && weenies[parsed.wdesc._wcid].Type != (int)ACE.Entity.Enum.WeenieType.Ammunition
-                                        //            )
-                                        //        {
-                                        //            margin = 2.0f;
-                                        //            if (!instances[landblockId].LinkableItemObjects.ContainsKey(parsed.object_id)
-                                        //                && !PositionRecorded(parsed, processedWeeniePositions[parsed.wdesc._wcid], parsed.physicsdesc.pos, margin))
-                                        //            {
-                                        //                instances[landblockId].LinkableItemObjects.Add(parsed.object_id,
-                                        //                    new ACE.Database.Models.World.LandblockInstance
-                                        //                    {
-                                        //                        Guid = parsed.object_id,
-                                        //                        WeenieClassId = parsed.wdesc._wcid,
-                                        //                        ObjCellId = parsed.physicsdesc.pos.objcell_id,
-                                        //                        OriginX = parsed.physicsdesc.pos.frame.m_fOrigin.x,
-                                        //                        OriginY = parsed.physicsdesc.pos.frame.m_fOrigin.y,
-                                        //                        OriginZ = parsed.physicsdesc.pos.frame.m_fOrigin.z,
-                                        //                        AnglesW = parsed.physicsdesc.pos.frame.qw,
-                                        //                        AnglesX = parsed.physicsdesc.pos.frame.qx,
-                                        //                        AnglesY = parsed.physicsdesc.pos.frame.qy,
-                                        //                        AnglesZ = parsed.physicsdesc.pos.frame.qz,
-                                        //                        IsLinkChild = false
-                                        //                    });
+                                                        processedWeeniePositions[parsed.wdesc._wcid].Add(parsed.physicsdesc.pos);
+                                                    }
+                                                }
+                                                else if (weenies[parsed.wdesc._wcid].Type != (int)ACE.Entity.Enum.WeenieType.Missile
+                                                    && weenies[parsed.wdesc._wcid].Type != (int)ACE.Entity.Enum.WeenieType.Coin
+                                                    && weenies[parsed.wdesc._wcid].Type != (int)ACE.Entity.Enum.WeenieType.Corpse
+                                                    && weenies[parsed.wdesc._wcid].Type != (int)ACE.Entity.Enum.WeenieType.ProjectileSpell
+                                                    && weenies[parsed.wdesc._wcid].Type != (int)ACE.Entity.Enum.WeenieType.Pet
+                                                    && weenies[parsed.wdesc._wcid].Type != (int)ACE.Entity.Enum.WeenieType.PetDevice
+                                                    && weenies[parsed.wdesc._wcid].Type != (int)ACE.Entity.Enum.WeenieType.CombatPet
+                                                    && weenies[parsed.wdesc._wcid].Type != (int)ACE.Entity.Enum.WeenieType.Ammunition
+                                                    )
+                                                {
+                                                    margin = 2.0f;
+                                                    if (!instances[landblockId].LinkableItemObjects.ContainsKey(parsed.object_id)
+                                                        && !PositionRecorded(parsed, processedWeeniePositions[parsed.wdesc._wcid], parsed.physicsdesc.pos, margin))
+                                                    {
+                                                        instances[landblockId].LinkableItemObjects.Add(parsed.object_id,
+                                                            new ACE.Database.Models.World.LandblockInstance
+                                                            {
+                                                                Guid = parsed.object_id,
+                                                                WeenieClassId = parsed.wdesc._wcid,
+                                                                ObjCellId = parsed.physicsdesc.pos.objcell_id,
+                                                                OriginX = parsed.physicsdesc.pos.frame.m_fOrigin.x,
+                                                                OriginY = parsed.physicsdesc.pos.frame.m_fOrigin.y,
+                                                                OriginZ = parsed.physicsdesc.pos.frame.m_fOrigin.z,
+                                                                AnglesW = parsed.physicsdesc.pos.frame.qw,
+                                                                AnglesX = parsed.physicsdesc.pos.frame.qx,
+                                                                AnglesY = parsed.physicsdesc.pos.frame.qy,
+                                                                AnglesZ = parsed.physicsdesc.pos.frame.qz,
+                                                                IsLinkChild = false
+                                                            });
 
-                                        //                processedWeeniePositions[parsed.wdesc._wcid].Add(parsed.physicsdesc.pos);
-                                        //            }
-                                        //        }
-                                        //    }
-                                        //}
+                                                        processedWeeniePositions[parsed.wdesc._wcid].Add(parsed.physicsdesc.pos);
+                                                    }
+                                                }
+                                            }
+                                        }
                                     }
 
                                     if (parsed.wdesc._wielderID > 0)
