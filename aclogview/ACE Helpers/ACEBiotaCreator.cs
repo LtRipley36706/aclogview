@@ -41,7 +41,7 @@ namespace aclogview.ACE_Helpers
             var entity = biota.GetOrAddSkill((ushort)skillType, rwLock, out _);
             entity.InitLevel = skill._init_level;
             entity.LastUsedTime = skill._last_used_time;
-            entity.LevelFromPP = (ushort)skill._level_from_pp;
+            entity.LevelFromPP = skill._level_from_pp;
             entity.PP = skill._pp;
             entity.ResistanceAtLastCheck = skill._resistance_of_last_check;
             entity.SAC = (uint)skill._sac;
