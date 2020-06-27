@@ -1712,7 +1712,7 @@ namespace aclogview
 
                 foreach (var flo in weenie.WeeniePropertiesFloat)
                 {
-                    flo.Value = Math.Round(flo.Value, 2);
+                    flo.Value = Math.Round(flo.Value, 3);
                 }
 
                 foreach (var intV in weenie.WeeniePropertiesInt)
