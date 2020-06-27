@@ -392,6 +392,10 @@ namespace aclogview
                 Dictionary<uint, CM_Physics.PublicWeenieDesc> vendorPWDs = new Dictionary<uint, CM_Physics.PublicWeenieDesc>();
                 Dictionary<int, CM_Physics.CreateObject> itemTemplates = new Dictionary<int, CM_Physics.CreateObject>();
 
+                worldIDQueue.Add(currentWorld, new Dictionary<uint, uint>());
+
+                worldCorpseInstances.Add(currentWorld, new Dictionary<uint, string>());
+
                 while (true)
                 {
                     if (searchAborted || Disposing || IsDisposed)
@@ -538,9 +542,9 @@ namespace aclogview
                                 //    || parsed.physicsdesc.pos.objcell_id == 0
                                 //    )
 
-                                //if ((parsed.physicsdesc.pos.objcell_id >> 16) == 0x00AF || (parsed.physicsdesc.pos.objcell_id >> 16) == 0x00B0)// || parsed.physicsdesc.pos.objcell_id == 0)
+                                //if ((parsed.physicsdesc.pos.objcell_id >> 16) == 0x00AF || (parsed.physicsdesc.pos.objcell_id >> 16) == 0x00B0 || (parsed.physicsdesc.pos.objcell_id >> 16) == 0x00B6)// || parsed.physicsdesc.pos.objcell_id == 0)
                                 //if ((parsed.physicsdesc.pos.objcell_id >> 16) == 0x76E9 || (parsed.physicsdesc.pos.objcell_id >> 16) == 0x77E7 || parsed.physicsdesc.pos.objcell_id == 0)
-                                //if ((parsed.physicsdesc.pos.objcell_id >> 16) == 0xA1A3 || parsed.physicsdesc.pos.objcell_id == 0)
+                                //if ((parsed.physicsdesc.pos.objcell_id >> 16) == 0x01EF || (parsed.physicsdesc.pos.objcell_id >> 16) == 0x0188 || parsed.physicsdesc.pos.objcell_id == 0)
                                 //if ((parsed.physicsdesc.pos.objcell_id >> 16) == 0xAE71 || (parsed.physicsdesc.pos.objcell_id >> 16) == 0x00AF || (((parsed.physicsdesc.pos.objcell_id >> 16) >= 0x00B0) && (parsed.physicsdesc.pos.objcell_id >> 16) <= 0x00B6) || parsed.physicsdesc.pos.objcell_id == 0)
                                 //if ((parsed.physicsdesc.pos.objcell_id >> 16) == 0xA2A1 || (parsed.physicsdesc.pos.objcell_id >> 16) == 0x9FA6 || (parsed.physicsdesc.pos.objcell_id >> 16) == 0xA4A7)
                                 //{
@@ -1717,6 +1721,11 @@ namespace aclogview
                         intV.Type = 8042;
                     if (intV.Type == (ushort)ACE.Entity.Enum.Properties.PropertyInt.AppraisalMaxPages)
                         intV.Type = 8043;
+
+                    if (intV.Type == (ushort)ACE.Entity.Enum.Properties.PropertyInt.ItemsCapacity && intV.Value == 255)
+                        intV.Value = -1;
+                    if (intV.Type == (ushort)ACE.Entity.Enum.Properties.PropertyInt.ContainersCapacity && intV.Value == 255)
+                        intV.Value = -1;
                 }
 
                 var lockpickSuccess = weenie.WeeniePropertiesInt.FirstOrDefault(y => y.Type == (ushort)ACE.Entity.Enum.Properties.PropertyInt.AppraisalLockpickSuccessPercent);
@@ -2432,7 +2441,8 @@ namespace aclogview
             }
 
             if ((message.physicsdesc.bitfield & (uint)CM_Physics.PhysicsDesc.PhysicsDescInfo.DEFAULT_SCRIPT) != 0)
-                result.WeeniePropertiesDID.Add(new ACE.Database.Models.World.WeeniePropertiesDID { Type = 8019, Value = (uint)message.physicsdesc.default_script });
+                //result.WeeniePropertiesDID.Add(new ACE.Database.Models.World.WeeniePropertiesDID { Type = 8019, Value = (uint)message.physicsdesc.default_script });
+                result.WeeniePropertiesDID.Add(new ACE.Database.Models.World.WeeniePropertiesDID { Type = (int)STypeDID.PHYSICS_SCRIPT_DID, Value = (uint)message.physicsdesc.default_script });
 
             if ((message.physicsdesc.bitfield & (uint)CM_Physics.PhysicsDesc.PhysicsDescInfo.DEFAULT_SCRIPT_INTENSITY) != 0)
                 result.WeeniePropertiesFloat.Add(new ACE.Database.Models.World.WeeniePropertiesFloat { Type = (int)STypeFloat.PHYSICS_SCRIPT_INTENSITY_FLOAT, Value = message.physicsdesc.default_script_intensity });
