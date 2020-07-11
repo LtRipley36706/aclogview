@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace aclogview.SQLWriters
@@ -34,6 +35,12 @@ namespace aclogview.SQLWriters
 
             sqlWriter.TreasureWielded = wieldedTreasure;
             sqlWriter.TreasureDeath = deathTreasure;
+
+            var spellNames = System.Enum.GetValues(typeof(ACE.Entity.Enum.SpellId))
+               .Cast<ACE.Entity.Enum.SpellId>()
+               .ToDictionary(t => (uint)t, t => t.ToString());
+
+            sqlWriter.SpellNames = spellNames;
 
             sqlWriter.Weenies = weenies;
 
