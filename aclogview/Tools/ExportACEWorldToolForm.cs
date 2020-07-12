@@ -4,12 +4,13 @@ using System.ComponentModel;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading;
 using System.Web.Script.Serialization;
 using System.Windows.Forms;
-
+using ACE.Common.Extensions;
 using ACE.Database.Models.World;
-
+using ACE.Entity.Enum.Properties;
 using aclogview.Properties;
 using aclogview.SQLWriters;
 
@@ -273,8 +274,19 @@ namespace aclogview
         {
             var records = File.ReadAllLines(fileName);
 
+            // "Timestamp","LandCell","RawCoordinates","JSON"
+            if (records.Length < 2 || records[0] != "\"Timestamp\",\"LandCell\",\"RawCoordinates\",\"JSON\"")
+            {
+                Interlocked.Increment(ref filesProcessed);
+                return;
+            }
+
             // Temperorary objects
             var aceWorldFrags = new List<FragDatListFile.FragDatInfo>();
+
+            var jsonSerializer = new JavaScriptSerializer();
+
+            var lineAppend = "";
 
             foreach (var record in records)
             {
@@ -282,20 +294,447 @@ namespace aclogview
                     return;
 
                 var rawDataHdr = "{\"RawData\":\"";
+                var idDataHdr = "{\"Id\":\"";
 
-                if (!record.Contains(rawDataHdr))
+                var rawDataStringTrimmed = "";
+
+                byte[] data = null;
+
+                if (record.Contains(idDataHdr) || lineAppend != "")
+                {
+                    var rawDataHdrPos = record.IndexOf(idDataHdr);
+                    var rawDataString = lineAppend == "" ? record.Substring(rawDataHdrPos) : record;
+
+                    if (!rawDataString.EndsWith("}\""))
+                    {
+                        lineAppend += rawDataString;
+                        continue;
+                    }
+                    else
+                    {
+                        rawDataString = lineAppend + rawDataString;
+                        lineAppend = "";
+                    }
+
+                    rawDataStringTrimmed = rawDataString.Substring(0, rawDataString.Length - 1);
+
+                    var stringsStart = ",\"StringValues\":{";
+                    var stringsStartPos = rawDataStringTrimmed.IndexOf(stringsStart);
+                    var justStrings = rawDataStringTrimmed.Substring(stringsStartPos);
+                    var stringsEnd = "},\"";
+                    var stringsEndPos = justStrings.IndexOf(stringsEnd);
+                    justStrings = justStrings.Substring(0, stringsEndPos + stringsEnd.Length);
+
+                    //Console.WriteLine(justStrings);
+
+                    justStrings = justStrings.TrimStart(stringsStart);
+                    justStrings = justStrings.TrimEnd(stringsEnd);
+
+                    //Console.WriteLine(justStrings);
+
+                    var sep1 = "\":\"";
+                    var sep2 = "\",\"";
+
+                    var justStringsTrimmed = justStrings.Replace(sep1,"{SEP1}");
+                    justStringsTrimmed = justStringsTrimmed.Replace(sep2, "{SEP2}");
+
+                    //Console.WriteLine(justStringsTrimmed);
+                    justStringsTrimmed = justStringsTrimmed.Substring(1, justStringsTrimmed.Length - 1);
+                    justStringsTrimmed = justStringsTrimmed.Substring(0, justStringsTrimmed.Length - 1);
+
+                    //Console.WriteLine(justStringsTrimmed);
+
+                    var justStringsClean = CleanForJSON(justStringsTrimmed);
+                    //Console.WriteLine(justStringsClean);
+                    justStringsClean = justStringsClean.Replace("{SEP1}", sep1);
+                    justStringsClean = justStringsClean.Replace("{SEP2}", sep2);
+                    //Console.WriteLine(justStringsClean);
+                    justStringsClean = "\"" + justStringsClean + "\"";
+                    //Console.WriteLine(justStringsClean);
+
+                    var strings1 = stringsStart + justStrings + stringsEnd;
+                    var strings2 = stringsStart + justStringsClean + stringsEnd;
+
+                    //Console.WriteLine(rawDataStringTrimmed);
+                    var stringsReplaced = rawDataStringTrimmed.Replace(strings1, strings2);
+                    //Console.WriteLine(stringsReplaced);
+                    rawDataStringTrimmed = stringsReplaced;
+
+                    var idData = (Dictionary<string, object>)jsonSerializer.DeserializeObject(rawDataStringTrimmed);
+
+                    var idpackethdr = new WOrderHdr();
+                    idpackethdr.id = 1342814975u;
+                    idpackethdr.stamp = 1u;
+
+                    var setAppraiseInfo = new CM_Examine.SetAppraiseInfo();
+                    setAppraiseInfo.i_prof = new CM_Examine.AppraisalProfile();
+
+                    foreach (var kvp in idData)
+                    {
+                        switch (kvp.Key)
+                        {
+                            case "Id":
+                                setAppraiseInfo.i_objid = (uint)int.Parse((string)kvp.Value);
+                                setAppraiseInfo.i_prof.success_flag = 1;
+                                break;
+
+                            //case "ObjectClass":
+                            //    ObjectClass = (ObjectClass)Enum.Parse(typeof(ObjectClass), (string)kvp.Value);
+                            //    break;
+
+                            case "BoolValues":
+                                {
+                                    var values = (Dictionary<string, object>)kvp.Value;
+
+                                    foreach (var kvp2 in values)
+                                    {
+                                        var key = int.Parse(kvp2.Key);
+                                        var value = bool.Parse(kvp2.Value.ToString());
+                                        //var value = int.Parse(kvp2.Value.ToString());
+
+                                        if (!Enum.IsDefined(typeof(STypeBool), key))
+                                            continue;
+
+                                        //BoolValues[key] = value;
+                                        setAppraiseInfo.i_prof._boolStatsTable.hashTable.Add((STypeBool)key, Convert.ToInt32(value));
+
+                                        setAppraiseInfo.i_prof.header |= (uint)CM_Examine.AppraisalProfile.AppraisalProfilePackHeader.Packed_BoolStats;
+                                    }
+
+                                    break;
+                                }
+
+                            case "DoubleValues":
+                                {
+                                    var values = (Dictionary<string, object>)kvp.Value;
+
+                                    foreach (var kvp2 in values)
+                                    {
+                                        var key = int.Parse(kvp2.Key);
+                                        var value = double.Parse(kvp2.Value.ToString());
+
+                                        if (!Enum.IsDefined(typeof(STypeFloat), key))
+                                            continue;
+
+                                        //DoubleValues[key] = value;
+                                        //setAppraiseInfo.i_prof._floatStatsTable.hashTable.Add((STypeFloat)key, value);
+
+                                        //setAppraiseInfo.i_prof.header |= (uint)CM_Examine.AppraisalProfile.AppraisalProfilePackHeader.Packed_FloatStats;
+                                    }
+
+                                    break;
+                                }
+
+                            case "LongValues":
+                                {
+                                    var values = (Dictionary<string, object>)kvp.Value;
+
+                                    foreach (var kvp2 in values)
+                                    {
+                                        //var key = (IntValueKey)int.Parse(kvp2.Key);
+                                        var key = int.Parse(kvp2.Key);
+                                        var value = int.Parse(kvp2.Value.ToString());
+
+                                        if (!Enum.IsDefined(typeof(STypeInt64), key))
+                                            continue;
+
+                                        //LongValues[key] = value;
+                                        //setAppraiseInfo.i_prof._int64StatsTable.hashTable.Add((STypeInt64)key, value);
+
+                                        //setAppraiseInfo.i_prof.header |= (uint)CM_Examine.AppraisalProfile.AppraisalProfilePackHeader.Packed_Int64Stats;
+                                    }
+
+                                    break;
+                                }
+
+                            case "StringValues":
+                                {
+                                    var values = (Dictionary<string, object>)kvp.Value;
+
+                                    foreach (var kvp2 in values)
+                                    {
+                                        var key = int.Parse(kvp2.Key);
+
+                                        var pStringChar = new PStringChar();
+                                        pStringChar.m_buffer = kvp2.Value.ToString();
+
+                                        if (!Enum.IsDefined(typeof(STypeString), key))
+                                            continue;
+
+                                        //StringValues[key] = kvp2.Value.ToString();
+                                        setAppraiseInfo.i_prof._strStatsTable.hashTable.Add((STypeString)key, pStringChar);
+
+                                        setAppraiseInfo.i_prof.header |= (uint)CM_Examine.AppraisalProfile.AppraisalProfilePackHeader.Packed_StringStats;
+                                    }
+
+                                    break;
+                                }
+
+                                //case "ActiveSpells":
+                                //    if (!string.IsNullOrEmpty((string)kvp.Value))
+                                //    {
+                                //        var spellsSplit = ((string)kvp.Value).Split(',');
+
+                                //        foreach (var spell in spellsSplit)
+                                //            ActiveSpells.Add(int.Parse(spell));
+                                //    }
+
+                                //    break;
+
+                                //case "Spells":
+                                //    if (!string.IsNullOrEmpty((string)kvp.Value))
+                                //    {
+                                //        var spellsSplit = ((string)kvp.Value).Split(',');
+
+                                //        foreach (var spell in spellsSplit)
+                                //            Spells.Add(int.Parse(spell));
+                                //    }
+
+                                //    break;
+
+                                //case "Attributes":
+                                //    {
+                                //        ExtendIDAttributeInfo = new ExtendIDAttributeInfo();
+
+                                //        var values = (Dictionary<string, object>)kvp.Value;
+
+                                //        foreach (var kvp2 in values)
+                                //        {
+                                //            switch (kvp2.Key)
+                                //            {
+                                //                case "healthMax":
+                                //                    ExtendIDAttributeInfo.healthMax = uint.Parse((string)kvp2.Value);
+                                //                    break;
+
+                                //                case "manaMax":
+                                //                    ExtendIDAttributeInfo.manaMax = uint.Parse((string)kvp2.Value);
+                                //                    break;
+
+                                //                case "staminaMax":
+                                //                    ExtendIDAttributeInfo.staminaMax = uint.Parse((string)kvp2.Value);
+                                //                    break;
+
+                                //                case "strength":
+                                //                    ExtendIDAttributeInfo.strength = uint.Parse((string)kvp2.Value);
+                                //                    break;
+
+                                //                case "endurance":
+                                //                    ExtendIDAttributeInfo.endurance = uint.Parse((string)kvp2.Value);
+                                //                    break;
+
+                                //                case "quickness":
+                                //                    ExtendIDAttributeInfo.quickness = uint.Parse((string)kvp2.Value);
+                                //                    break;
+
+                                //                case "coordination":
+                                //                    ExtendIDAttributeInfo.coordination = uint.Parse((string)kvp2.Value);
+                                //                    break;
+
+                                //                case "focus":
+                                //                    ExtendIDAttributeInfo.focus = uint.Parse((string)kvp2.Value);
+                                //                    break;
+
+                                //                case "self":
+                                //                    ExtendIDAttributeInfo.self = uint.Parse((string)kvp2.Value);
+                                //                    break;
+
+                                //                default:
+                                //                    throw new NotImplementedException();
+                                //            }
+                                //        }
+
+                                //        break;
+                                //    }
+
+                                //case "Resources":
+                                //    {
+                                //        var values = (Dictionary<string, object>)kvp.Value;
+
+                                //        foreach (var kvp2 in values)
+                                //        {
+                                //            var key = int.Parse(kvp2.Key);
+                                //            var value = int.Parse(kvp2.Value.ToString());
+
+                                //            Resources[key] = value;
+                                //        }
+
+                                //        break;
+                                //    }
+
+                                //default:
+                                //    throw new NotImplementedException();
+                        }
+                    }
+
+                    using (MemoryStream stream = new MemoryStream())
+                    {
+                        using (BinaryWriter writer = new BinaryWriter(stream))
+                        {
+                            writer.Write((uint)PacketOpcode.WEENIE_ORDERED_EVENT);
+
+                            writer.Write(idpackethdr.id);
+                            writer.Write(idpackethdr.stamp);
+
+                            writer.Write((uint)PacketOpcode.APPRAISAL_INFO_EVENT);
+                            writer.Write(setAppraiseInfo.i_objid);
+                            writer.Write(setAppraiseInfo.i_prof.header);
+                            writer.Write(setAppraiseInfo.i_prof.success_flag);
+
+                            //if (info.Flags.HasFlag(IdentifyResponseFlags.IntStatsTable))
+                            //    writer.Write(info.PropertiesInt);
+                            if ((setAppraiseInfo.i_prof.header & (uint)CM_Examine.AppraisalProfile.AppraisalProfilePackHeader.Packed_IntStats) != 0)
+                            {
+                                //writer.Write(info.PropertiesInt);
+                                var properties = new SortedDictionary<STypeInt, int>(setAppraiseInfo.i_prof._intStatsTable.hashTable);
+
+                                //PHashTable.WriteHeader(writer, properties.Count);
+                                // uint uint uint - packedSize - write: (buckets) | (count & 0xFFFFFF)
+                                // uint - buckets - read: 1 << (packedSize >> 24)
+                                // uint - count - read: packedSize & 0xFFFFFF
+                                //return (uint)Math.Log(num, 2) + 1;
+                                //var bucketShift = GetNumBits((uint)count)/* - 1*/;
+                                var count = properties.Count();
+                                var bucketShift = (uint)Math.Log((uint)count, 2) + 1;/* - 1*/;
+                                //var maxSize = 1 << ((int)bucketShift - 1);
+                                var packedSize = (bucketShift << 24) | ((uint)count & 0xFFFFFF);
+                                //var packedSize = ((uint)maxSize << 24) | ((uint)count & 0xFFFFFF);
+                                writer.Write(packedSize);
+                                foreach (var kvp in properties)
+                                {
+                                    writer.Write((uint)kvp.Key);
+                                    writer.Write(kvp.Value);
+                                }
+                            }
+                            //if (info.Flags.HasFlag(IdentifyResponseFlags.Int64StatsTable))
+                            //    writer.Write(info.PropertiesInt64);
+                            if ((setAppraiseInfo.i_prof.header & (uint)CM_Examine.AppraisalProfile.AppraisalProfilePackHeader.Packed_Int64Stats) != 0)
+                            {
+                                var properties = new SortedDictionary<STypeInt64, long>(setAppraiseInfo.i_prof._int64StatsTable.hashTable);
+
+                                var count = properties.Count();
+                                var bucketShift = (uint)Math.Log((uint)count, 2) + 1;/* - 1*/;
+                                var packedSize = (bucketShift << 24) | ((uint)count & 0xFFFFFF);
+                                writer.Write(packedSize);
+                                foreach (var kvp in properties)
+                                {
+                                    writer.Write((uint)kvp.Key);
+                                    writer.Write(kvp.Value);
+                                }
+                            }
+                            //if (info.Flags.HasFlag(IdentifyResponseFlags.BoolStatsTable))
+                            //    writer.Write(info.PropertiesBool);
+                            if ((setAppraiseInfo.i_prof.header & (uint)CM_Examine.AppraisalProfile.AppraisalProfilePackHeader.Packed_BoolStats) != 0)
+                            {
+                                var properties = new SortedDictionary<STypeBool, int>(setAppraiseInfo.i_prof._boolStatsTable.hashTable);
+
+                                var count = properties.Count();
+                                var bucketShift = (uint)Math.Log((uint)count, 2) + 1;/* - 1*/;
+                                var packedSize = (bucketShift << 24) | ((uint)count & 0xFFFFFF);
+                                writer.Write(packedSize);
+                                foreach (var kvp in properties)
+                                {
+                                    writer.Write((uint)kvp.Key);
+                                    writer.Write(kvp.Value);
+                                }
+                            }
+                            //if (info.Flags.HasFlag(IdentifyResponseFlags.FloatStatsTable))
+                            //    writer.Write(info.PropertiesFloat);
+                            if ((setAppraiseInfo.i_prof.header & (uint)CM_Examine.AppraisalProfile.AppraisalProfilePackHeader.Packed_FloatStats) != 0)
+                            {
+                                var properties = new SortedDictionary<STypeFloat, double>(setAppraiseInfo.i_prof._floatStatsTable.hashTable);
+
+                                var count = properties.Count();
+                                var bucketShift = (uint)Math.Log((uint)count, 2) + 1;/* - 1*/;
+                                var packedSize = (bucketShift << 24) | ((uint)count & 0xFFFFFF);
+                                writer.Write(packedSize);
+                                foreach (var kvp in properties)
+                                {
+                                    writer.Write((uint)kvp.Key);
+                                    writer.Write(kvp.Value);
+                                }
+                            }
+                            //if (info.Flags.HasFlag(IdentifyResponseFlags.StringStatsTable))
+                            //    writer.Write(info.PropertiesString);
+                            if ((setAppraiseInfo.i_prof.header & (uint)CM_Examine.AppraisalProfile.AppraisalProfilePackHeader.Packed_StringStats) != 0)
+                            {
+                                var properties = new SortedDictionary<STypeString, PStringChar>(setAppraiseInfo.i_prof._strStatsTable.hashTable);
+
+                                var count = properties.Count();
+                                var bucketShift = (uint)Math.Log((uint)count, 2) + 1;/* - 1*/;
+                                var packedSize = (bucketShift << 24) | ((uint)count & 0xFFFFFF);
+                                writer.Write(packedSize);
+                                foreach (var kvp in properties)
+                                {
+                                    writer.Write((uint)kvp.Key);
+                                    //writer.Write(kvp.Value);
+
+                                    var strValue = kvp.Value.m_buffer;
+
+                                    if (strValue == null) strValue = "";
+
+                                    writer.Write((ushort)strValue.Length);
+                                    writer.Write(System.Text.Encoding.GetEncoding(1252).GetBytes(strValue));
+
+                                    //CalculatePadMultiple(sizeof(ushort) + (uint)data.Length, 4u)
+                                    //private static uint CalculatePadMultiple(uint length, uint multiple) { return multiple * ((length + multiple - 1u) / multiple) - length; }
+                                    var length = sizeof(ushort) + (uint)strValue.Length;
+                                    var multiple = 4u;
+
+                                    writer.Write(new byte[multiple * ((length + multiple - 1u) / multiple) - length]);
+                                }
+                            }
+                            //if (info.Flags.HasFlag(IdentifyResponseFlags.DidStatsTable))
+                            //    writer.Write(info.PropertiesDID);
+                            //if (info.Flags.HasFlag(IdentifyResponseFlags.SpellBook))
+                            //    writer.Write(info.SpellBook);
+                            //if (info.Flags.HasFlag(IdentifyResponseFlags.ArmorProfile))
+                            //    writer.Write(info.ArmorProfile);
+                            //if (info.Flags.HasFlag(IdentifyResponseFlags.CreatureProfile))
+                            //    writer.Write(info.CreatureProfile);
+                            //if (info.Flags.HasFlag(IdentifyResponseFlags.WeaponProfile))
+                            //    writer.Write(info.WeaponProfile);
+                            //if (info.Flags.HasFlag(IdentifyResponseFlags.HookProfile))
+                            //    writer.Write(info.HookProfile);
+                            //if (info.Flags.HasFlag(IdentifyResponseFlags.ArmorEnchantmentBitfield))
+                            //{
+                            //    writer.Write((ushort)info.ArmorHighlight);
+                            //    writer.Write((ushort)info.ArmorColor);
+                            //}
+                            //if (info.Flags.HasFlag(IdentifyResponseFlags.WeaponEnchantmentBitfield))
+                            //{
+                            //    writer.Write((ushort)info.WeaponHighlight);
+                            //    writer.Write((ushort)info.WeaponColor);
+                            //}
+                            //if (info.Flags.HasFlag(IdentifyResponseFlags.ResistEnchantmentBitfield))
+                            //{
+                            //    writer.Write((ushort)info.ResistHighlight);
+                            //    writer.Write((ushort)info.ResistColor);
+                            //}
+                            //if (info.Flags.HasFlag(IdentifyResponseFlags.ArmorLevels))
+                            //    writer.Write(info.ArmorLevels);
+                        }
+                        stream.Flush();
+                        byte[] bytes = stream.GetBuffer();
+                        //use it
+
+                        data = bytes;
+                    }
+                }
+
+                if (!record.Contains(rawDataHdr) && data == null)
                     continue;
 
-                var rawDataHdrPos = record.IndexOf(rawDataHdr);
+                if (rawDataStringTrimmed == "")
+                {
+                    var rawDataHdrPos = record.IndexOf(rawDataHdr);
+                    var rawDataString = record.Substring(rawDataHdrPos);
 
-                var rawDataString = record.Substring(rawDataHdrPos);
-                var rawDataStringTrimmed = rawDataString.Substring(0, rawDataString.Length - 1);
-
-                var jsonSerializer = new JavaScriptSerializer();
+                    rawDataStringTrimmed = rawDataString.Substring(0, rawDataString.Length - 1);
+                }
 
                 Dictionary<string, object> result = (Dictionary<string, object>)jsonSerializer.DeserializeObject(rawDataStringTrimmed);
 
-                if (result.Count != 1)
+                if (result.Count != 1  && data == null)
                     continue;
 
                 try
@@ -304,7 +743,8 @@ namespace aclogview
 
                     FragDatListFile.PacketDirection packetDirection = FragDatListFile.PacketDirection.ServerToClient;
 
-                    var data = HexStringToByteArray((string)result.Values.FirstOrDefault());
+                    if (data == null)
+                        data = HexStringToByteArray((string)result.Values.FirstOrDefault());
 
                     BinaryReader fragDataReader = new BinaryReader(new MemoryStream(data));
 
@@ -2710,6 +3150,1369 @@ namespace aclogview
             toolStripStatusLabel3.Text = "Total Hits: " + totalHits.ToString("N0");
 
             toolStripStatusLabel4.Text = "Frag Exceptions: " + totalExceptions.ToString("N0");
+        }
+
+        public static string CleanForJSON(string s)
+        {
+            if (s == null || s.Length == 0)
+            {
+                return "";
+            }
+
+            char c = '\0';
+            int i;
+            int len = s.Length;
+            StringBuilder sb = new StringBuilder(len + 4);
+            String t;
+
+            for (i = 0; i < len; i += 1)
+            {
+                c = s[i];
+                switch (c)
+                {
+                    case '\\':
+                    case '"':
+                        sb.Append('\\');
+                        sb.Append(c);
+                        break;
+                    case '/':
+                        sb.Append('\\');
+                        sb.Append(c);
+                        break;
+                    case '\b':
+                        sb.Append("\\b");
+                        break;
+                    case '\t':
+                        sb.Append("\\t");
+                        break;
+                    case '\n':
+                        sb.Append("\\n");
+                        break;
+                    case '\f':
+                        sb.Append("\\f");
+                        break;
+                    case '\r':
+                        sb.Append("\\r");
+                        break;
+                    default:
+                        if (c < ' ')
+                        {
+                            t = "000" + String.Format("X", c);
+                            sb.Append("\\u" + t.Substring(t.Length - 4));
+                        }
+                        else
+                        {
+                            sb.Append(c);
+                        }
+                        break;
+                }
+            }
+            return sb.ToString();
+        }
+
+        // https://github.com/ACEmulator/ACE/blob/master/Source/ACE.Entity/Enum/Properties/PropertyInt.cs
+        public enum IntValueKey
+        {
+            // properties marked as ServerOnly are properties we never saw in PCAPs, from here:
+            // http://ac.yotesfan.com/ace_object/not_used_enums.php
+            // source: @OptimShi
+            // description attributes are used by the weenie editor for a cleaner display name
+
+            Undef = 0,
+            [ServerOnly]
+            ItemType = 1,
+            CreatureType = 2,
+            [ServerOnly]
+            PaletteTemplate = 3,
+            ClothingPriority = 4,
+            [SendOnLogin]
+            EncumbranceVal = 5, // ENCUMB_VAL_INT,
+            [SendOnLogin]
+            ItemsCapacity = 6,
+            [SendOnLogin]
+            ContainersCapacity = 7,
+            [ServerOnly]
+            Mass = 8,
+            [ServerOnly]
+            ValidLocations = 9, // LOCATIONS_INT
+            [ServerOnly]
+            CurrentWieldedLocation = 10,
+            [ServerOnly]
+            MaxStackSize = 11,
+            [ServerOnly]
+            StackSize = 12,
+            [ServerOnly]
+            StackUnitEncumbrance = 13,
+            [ServerOnly]
+            StackUnitMass = 14,
+            [ServerOnly]
+            StackUnitValue = 15,
+            [ServerOnly]
+            ItemUseable = 16,
+            RareId = 17,
+            [ServerOnly]
+            UiEffects = 18,
+            Value = 19,
+            [Ephemeral]
+            [SendOnLogin]
+            CoinValue = 20,
+            TotalExperience = 21,
+            AvailableCharacter = 22,
+            TotalSkillCredits = 23,
+            [SendOnLogin]
+            AvailableSkillCredits = 24,
+            [SendOnLogin]
+            Level = 25,
+            AccountRequirements = 26,
+            ArmorType = 27,
+            ArmorLevel = 28,
+            AllegianceCpPool = 29,
+            [SendOnLogin]
+            AllegianceRank = 30,
+            ChannelsAllowed = 31,
+            ChannelsActive = 32,
+            Bonded = 33,
+            MonarchsRank = 34,
+            AllegianceFollowers = 35,
+            ResistMagic = 36,
+            ResistItemAppraisal = 37,
+            ResistLockpick = 38,
+            DeprecatedResistRepair = 39,
+            [SendOnLogin]
+            CombatMode = 40,
+            CurrentAttackHeight = 41,
+            CombatCollisions = 42,
+            [SendOnLogin]
+            NumDeaths = 43,
+            Damage = 44,
+            DamageType = 45,
+            [ServerOnly]
+            DefaultCombatStyle = 46,
+            [SendOnLogin]
+            AttackType = 47,
+            WeaponSkill = 48,
+            WeaponTime = 49,
+            AmmoType = 50,
+            CombatUse = 51,
+            [ServerOnly]
+            ParentLocation = 52,
+            /// <summary>
+            /// TODO: Migrate inventory order away from this and instead use the new InventoryOrder property
+            /// TODO: PlacementPosition is used (very sparingly) in cache.bin, so it has (or had) a meaning at one point before we hijacked it
+            /// TODO: and used it for our own inventory order
+            /// </summary>
+            [ServerOnly]
+            PlacementPosition = 53,
+            WeaponEncumbrance = 54,
+            WeaponMass = 55,
+            ShieldValue = 56,
+            ShieldEncumbrance = 57,
+            MissileInventoryLocation = 58,
+            FullDamageType = 59,
+            WeaponRange = 60,
+            AttackersSkill = 61,
+            DefendersSkill = 62,
+            AttackersSkillValue = 63,
+            AttackersClass = 64,
+            [ServerOnly]
+            Placement = 65,
+            CheckpointStatus = 66,
+            Tolerance = 67,
+            TargetingTactic = 68,
+            CombatTactic = 69,
+            HomesickTargetingTactic = 70,
+            NumFollowFailures = 71,
+            FriendType = 72,
+            FoeType = 73,
+            MerchandiseItemTypes = 74,
+            MerchandiseMinValue = 75,
+            MerchandiseMaxValue = 76,
+            NumItemsSold = 77,
+            NumItemsBought = 78,
+            MoneyIncome = 79,
+            MoneyOutflow = 80,
+            [Ephemeral]
+            MaxGeneratedObjects = 81,
+            [Ephemeral]
+            InitGeneratedObjects = 82,
+            ActivationResponse = 83,
+            OriginalValue = 84,
+            NumMoveFailures = 85,
+            MinLevel = 86,
+            MaxLevel = 87,
+            LockpickMod = 88,
+            BoosterEnum = 89,
+            BoostValue = 90,
+            MaxStructure = 91,
+            Structure = 92,
+            [ServerOnly]
+            PhysicsState = 93,
+            [ServerOnly]
+            TargetType = 94,
+            RadarBlipColor = 95,
+            EncumbranceCapacity = 96,
+            LoginTimestamp = 97,
+            [SendOnLogin]
+            CreationTimestamp = 98,
+            PkLevelModifier = 99,
+            GeneratorType = 100,
+            AiAllowedCombatStyle = 101,
+            LogoffTimestamp = 102,
+            GeneratorDestructionType = 103,
+            ActivationCreateClass = 104,
+            ItemWorkmanship = 105,
+            ItemSpellcraft = 106,
+            ItemCurMana = 107,
+            ItemMaxMana = 108,
+            ItemDifficulty = 109,
+            ItemAllegianceRankLimit = 110,
+            PortalBitmask = 111,
+            AdvocateLevel = 112,
+            [SendOnLogin]
+            Gender = 113,
+            Attuned = 114,
+            ItemSkillLevelLimit = 115,
+            GateLogic = 116,
+            ItemManaCost = 117,
+            Logoff = 118,
+            Active = 119,
+            AttackHeight = 120,
+            NumAttackFailures = 121,
+            AiCpThreshold = 122,
+            AiAdvancementStrategy = 123,
+            Version = 124,
+            [SendOnLogin]
+            Age = 125,
+            VendorHappyMean = 126,
+            VendorHappyVariance = 127,
+            CloakStatus = 128,
+            [SendOnLogin]
+            VitaeCpPool = 129,
+            NumServicesSold = 130,
+            MaterialType = 131,
+            [SendOnLogin]
+            NumAllegianceBreaks = 132,
+            [Ephemeral]
+            ShowableOnRadar = 133,
+            [SendOnLogin]
+            PlayerKillerStatus = 134,
+            VendorHappyMaxItems = 135,
+            ScorePageNum = 136,
+            ScoreConfigNum = 137,
+            ScoreNumScores = 138,
+            [SendOnLogin]
+            DeathLevel = 139,
+            AiOptions = 140,
+            OpenToEveryone = 141,
+            GeneratorTimeType = 142,
+            GeneratorStartTime = 143,
+            GeneratorEndTime = 144,
+            GeneratorEndDestructionType = 145,
+            XpOverride = 146,
+            NumCrashAndTurns = 147,
+            ComponentWarningThreshold = 148,
+            HouseStatus = 149,
+            [ServerOnly]
+            HookPlacement = 150,
+            [ServerOnly]
+            HookType = 151,
+            [ServerOnly]
+            HookItemType = 152,
+            AiPpThreshold = 153,
+            GeneratorVersion = 154,
+            HouseType = 155,
+            PickupEmoteOffset = 156,
+            WeenieIteration = 157,
+            WieldRequirements = 158,
+            WieldSkillType = 159,
+            WieldDifficulty = 160,
+            HouseMaxHooksUsable = 161,
+            HouseCurrentHooksUsable = 162,
+            AllegianceMinLevel = 163,
+            AllegianceMaxLevel = 164,
+            HouseRelinkHookCount = 165,
+            SlayerCreatureType = 166,
+            ConfirmationInProgress = 167,
+            ConfirmationTypeInProgress = 168,
+            TsysMutationData = 169,
+            NumItemsInMaterial = 170,
+            NumTimesTinkered = 171,
+            AppraisalLongDescDecoration = 172,
+            AppraisalLockpickSuccessPercent = 173,
+            [Ephemeral]
+            AppraisalPages = 174,
+            [Ephemeral]
+            AppraisalMaxPages = 175,
+            AppraisalItemSkill = 176,
+            GemCount = 177,
+            GemType = 178,
+            ImbuedEffect = 179,
+            AttackersRawSkillValue = 180,
+            [SendOnLogin]
+            ChessRank = 181,
+            ChessTotalGames = 182,
+            ChessGamesWon = 183,
+            ChessGamesLost = 184,
+            TypeOfAlteration = 185,
+            SkillToBeAltered = 186,
+            SkillAlterationCount = 187,
+            [SendOnLogin]
+            HeritageGroup = 188,
+            TransferFromAttribute = 189,
+            TransferToAttribute = 190,
+            AttributeTransferCount = 191,
+            [SendOnLogin]
+            FakeFishingSkill = 192,
+            NumKeys = 193,
+            DeathTimestamp = 194,
+            PkTimestamp = 195,
+            VictimTimestamp = 196,
+            HookGroup = 197,
+            AllegianceSwearTimestamp = 198,
+            [SendOnLogin]
+            HousePurchaseTimestamp = 199,
+            RedirectableEquippedArmorCount = 200,
+            MeleeDefenseImbuedEffectTypeCache = 201,
+            MissileDefenseImbuedEffectTypeCache = 202,
+            MagicDefenseImbuedEffectTypeCache = 203,
+            ElementalDamageBonus = 204,
+            ImbueAttempts = 205,
+            ImbueSuccesses = 206,
+            CreatureKills = 207,
+            PlayerKillsPk = 208,
+            PlayerKillsPkl = 209,
+            RaresTierOne = 210,
+            RaresTierTwo = 211,
+            RaresTierThree = 212,
+            RaresTierFour = 213,
+            RaresTierFive = 214,
+            [SendOnLogin]
+            AugmentationStat = 215,
+            [SendOnLogin]
+            AugmentationFamilyStat = 216,
+            [SendOnLogin]
+            AugmentationInnateFamily = 217,
+            [SendOnLogin]
+            AugmentationInnateStrength = 218,
+            [SendOnLogin]
+            AugmentationInnateEndurance = 219,
+            [SendOnLogin]
+            AugmentationInnateCoordination = 220,
+            [SendOnLogin]
+            AugmentationInnateQuickness = 221,
+            [SendOnLogin]
+            AugmentationInnateFocus = 222,
+            [SendOnLogin]
+            AugmentationInnateSelf = 223,
+            [SendOnLogin]
+            AugmentationSpecializeSalvaging = 224,
+            [SendOnLogin]
+            AugmentationSpecializeItemTinkering = 225,
+            [SendOnLogin]
+            AugmentationSpecializeArmorTinkering = 226,
+            [SendOnLogin]
+            AugmentationSpecializeMagicItemTinkering = 227,
+            [SendOnLogin]
+            AugmentationSpecializeWeaponTinkering = 228,
+            [SendOnLogin]
+            AugmentationExtraPackSlot = 229,
+            [SendOnLogin]
+            AugmentationIncreasedCarryingCapacity = 230,
+            [SendOnLogin]
+            AugmentationLessDeathItemLoss = 231,
+            [SendOnLogin]
+            AugmentationSpellsRemainPastDeath = 232,
+            [SendOnLogin]
+            AugmentationCriticalDefense = 233,
+            [SendOnLogin]
+            AugmentationBonusXp = 234,
+            [SendOnLogin]
+            AugmentationBonusSalvage = 235,
+            [SendOnLogin]
+            AugmentationBonusImbueChance = 236,
+            [SendOnLogin]
+            AugmentationFasterRegen = 237,
+            [SendOnLogin]
+            AugmentationIncreasedSpellDuration = 238,
+            [SendOnLogin]
+            AugmentationResistanceFamily = 239,
+            [SendOnLogin]
+            AugmentationResistanceSlash = 240,
+            [SendOnLogin]
+            AugmentationResistancePierce = 241,
+            [SendOnLogin]
+            AugmentationResistanceBlunt = 242,
+            [SendOnLogin]
+            AugmentationResistanceAcid = 243,
+            [SendOnLogin]
+            AugmentationResistanceFire = 244,
+            [SendOnLogin]
+            AugmentationResistanceFrost = 245,
+            [SendOnLogin]
+            AugmentationResistanceLightning = 246,
+            RaresTierOneLogin = 247,
+            RaresTierTwoLogin = 248,
+            RaresTierThreeLogin = 249,
+            RaresTierFourLogin = 250,
+            RaresTierFiveLogin = 251,
+            RaresLoginTimestamp = 252,
+            RaresTierSix = 253,
+            RaresTierSeven = 254,
+            RaresTierSixLogin = 255,
+            RaresTierSevenLogin = 256,
+            ItemAttributeLimit = 257,
+            ItemAttributeLevelLimit = 258,
+            ItemAttribute2ndLimit = 259,
+            ItemAttribute2ndLevelLimit = 260,
+            CharacterTitleId = 261,
+            NumCharacterTitles = 262,
+            ResistanceModifierType = 263,
+            FreeTinkersBitfield = 264,
+            EquipmentSetId = 265,
+            PetClass = 266,
+            Lifespan = 267,
+            [Ephemeral]
+            RemainingLifespan = 268,
+            UseCreateQuantity = 269,
+            WieldRequirements2 = 270,
+            WieldSkillType2 = 271,
+            WieldDifficulty2 = 272,
+            WieldRequirements3 = 273,
+            WieldSkillType3 = 274,
+            WieldDifficulty3 = 275,
+            WieldRequirements4 = 276,
+            WieldSkillType4 = 277,
+            WieldDifficulty4 = 278,
+            Unique = 279,
+            SharedCooldown = 280,
+            Faction1Bits = 281,
+            Faction2Bits = 282,
+            Faction3Bits = 283,
+            Hatred1Bits = 284,
+            Hatred2Bits = 285,
+            Hatred3Bits = 286,
+            SocietyRankCelhan = 287,
+            SocietyRankEldweb = 288,
+            SocietyRankRadblo = 289,
+            HearLocalSignals = 290,
+            HearLocalSignalsRadius = 291,
+            Cleaving = 292,
+            [SendOnLogin]
+            AugmentationSpecializeGearcraft = 293,
+            [SendOnLogin]
+            AugmentationInfusedCreatureMagic = 294,
+            [SendOnLogin]
+            AugmentationInfusedItemMagic = 295,
+            [SendOnLogin]
+            AugmentationInfusedLifeMagic = 296,
+            [SendOnLogin]
+            AugmentationInfusedWarMagic = 297,
+            [SendOnLogin]
+            AugmentationCriticalExpertise = 298,
+            [SendOnLogin]
+            AugmentationCriticalPower = 299,
+            [SendOnLogin]
+            AugmentationSkilledMelee = 300,
+            [SendOnLogin]
+            AugmentationSkilledMissile = 301,
+            [SendOnLogin]
+            AugmentationSkilledMagic = 302,
+            ImbuedEffect2 = 303,
+            ImbuedEffect3 = 304,
+            ImbuedEffect4 = 305,
+            ImbuedEffect5 = 306,
+            [SendOnLogin]
+            DamageRating = 307,
+            [SendOnLogin]
+            DamageResistRating = 308,
+            [SendOnLogin]
+            AugmentationDamageBonus = 309,
+            [SendOnLogin]
+            AugmentationDamageReduction = 310,
+            ImbueStackingBits = 311,
+            [SendOnLogin]
+            HealOverTime = 312,
+            [SendOnLogin]
+            CritRating = 313,
+            [SendOnLogin]
+            CritDamageRating = 314,
+            [SendOnLogin]
+            CritResistRating = 315,
+            [SendOnLogin]
+            CritDamageResistRating = 316,
+            [SendOnLogin]
+            HealingResistRating = 317,
+            [SendOnLogin]
+            DamageOverTime = 318,
+            ItemMaxLevel = 319,
+            ItemXpStyle = 320,
+            EquipmentSetExtra = 321,
+            [SendOnLogin]
+            AetheriaBitfield = 322,
+            [SendOnLogin]
+            HealingBoostRating = 323,
+            HeritageSpecificArmor = 324,
+            AlternateRacialSkills = 325,
+            [SendOnLogin]
+            AugmentationJackOfAllTrades = 326,
+            [SendOnLogin]
+            AugmentationResistanceNether = 327,
+            [SendOnLogin]
+            AugmentationInfusedVoidMagic = 328,
+            [SendOnLogin]
+            WeaknessRating = 329,
+            [SendOnLogin]
+            NetherOverTime = 330,
+            [SendOnLogin]
+            NetherResistRating = 331,
+            LuminanceAward = 332,
+            [SendOnLogin]
+            LumAugDamageRating = 333,
+            [SendOnLogin]
+            LumAugDamageReductionRating = 334,
+            [SendOnLogin]
+            LumAugCritDamageRating = 335,
+            [SendOnLogin]
+            LumAugCritReductionRating = 336,
+            [SendOnLogin]
+            LumAugSurgeEffectRating = 337,
+            [SendOnLogin]
+            LumAugSurgeChanceRating = 338,
+            [SendOnLogin]
+            LumAugItemManaUsage = 339,
+            [SendOnLogin]
+            LumAugItemManaGain = 340,
+            [SendOnLogin]
+            LumAugVitality = 341,
+            [SendOnLogin]
+            LumAugHealingRating = 342,
+            [SendOnLogin]
+            LumAugSkilledCraft = 343,
+            [SendOnLogin]
+            LumAugSkilledSpec = 344,
+            [SendOnLogin]
+            LumAugNoDestroyCraft = 345,
+            RestrictInteraction = 346,
+            OlthoiLootTimestamp = 347,
+            OlthoiLootStep = 348,
+            UseCreatesContractId = 349,
+            [SendOnLogin]
+            DotResistRating = 350,
+            [SendOnLogin]
+            LifeResistRating = 351,
+            CloakWeaveProc = 352,
+            WeaponType = 353,
+            [SendOnLogin]
+            MeleeMastery = 354,
+            [SendOnLogin]
+            RangedMastery = 355,
+            SneakAttackRating = 356,
+            RecklessnessRating = 357,
+            DeceptionRating = 358,
+            CombatPetRange = 359,
+            [SendOnLogin]
+            WeaponAuraDamage = 360,
+            [SendOnLogin]
+            WeaponAuraSpeed = 361,
+            [SendOnLogin]
+            SummoningMastery = 362,
+            HeartbeatLifespan = 363,
+            UseLevelRequirement = 364,
+            [SendOnLogin]
+            LumAugAllSkills = 365,
+            UseRequiresSkill = 366,
+            UseRequiresSkillLevel = 367,
+            UseRequiresSkillSpec = 368,
+            UseRequiresLevel = 369,
+            [SendOnLogin]
+            GearDamage = 370,
+            [SendOnLogin]
+            GearDamageResist = 371,
+            [SendOnLogin]
+            GearCrit = 372,
+            [SendOnLogin]
+            GearCritResist = 373,
+            [SendOnLogin]
+            GearCritDamage = 374,
+            [SendOnLogin]
+            GearCritDamageResist = 375,
+            [SendOnLogin]
+            GearHealingBoost = 376,
+            [SendOnLogin]
+            GearNetherResist = 377,
+            [SendOnLogin]
+            GearLifeResist = 378,
+            [SendOnLogin]
+            GearMaxHealth = 379,
+            Unknown380 = 380,
+            [SendOnLogin]
+            PKDamageRating = 381,
+            [SendOnLogin]
+            PKDamageResistRating = 382,
+            [SendOnLogin]
+            GearPKDamageRating = 383,
+            [SendOnLogin]
+            GearPKDamageResistRating = 384,
+            Unknown385 = 385,
+            /// <summary>
+            /// Overpower chance % for endgame creatures.
+            /// </summary>
+            [SendOnLogin]
+            Overpower = 386,
+            [SendOnLogin]
+            OverpowerResist = 387,
+            // Client does not display accurately
+            [SendOnLogin]
+            GearOverpower = 388,
+            // Client does not display accurately
+            [SendOnLogin]
+            GearOverpowerResist = 389,
+            // Number of times a character has enlightened
+            [SendOnLogin]
+            Enlightenment = 390,
+
+
+            // ACE Specific
+            [ServerOnly]
+            PCAPRecordedAutonomousMovement = 8007,
+            [ServerOnly]
+            PCAPRecordedMaxVelocityEstimated = 8030,
+            [ServerOnly]
+            PCAPRecordedPlacement = 8041,
+            [ServerOnly]
+            PCAPRecordedAppraisalPages = 8042,
+            [ServerOnly]
+            PCAPRecordedAppraisalMaxPages = 8043,
+
+            //[ServerOnly]
+            //TotalLogins                              = 9001,
+            //[ServerOnly]
+            //DeletionTimestamp                        = 9002,
+            //[ServerOnly]
+            //CharacterOptions1                        = 9003,
+            //[ServerOnly]
+            //CharacterOptions2                        = 9004,
+            //[ServerOnly]
+            //LootTier                                 = 9005,
+            //[ServerOnly]
+            //GeneratorProbability                     = 9006,
+            //[ServerOnly]
+            //WeenieType                               = 9007 // I don't think this property type is needed anymore. We don't store the weenie type in the property bags, we store it as a separate field in the base objects.
+            [ServerOnly]
+            CurrentLoyaltyAtLastLogoff = 9008,
+            [ServerOnly]
+            CurrentLeadershipAtLastLogoff = 9009,
+            [ServerOnly]
+            AllegianceOfficerRank = 9010,
+            [ServerOnly]
+            HouseRentTimestamp = 9011,
+            /// <summary>
+            ///  Stores the player's selected hairstyle at creation or after a barber use. This is used only for Gear Knights and Olthoi characters who have more than a single part/texture for a "hairstyle" (BodyStyle)
+            /// </summary>
+            [ServerOnly]
+            Hairstyle = 9012,
+            /// <summary>
+            /// Used to store the calculated Clothing Priority for use with armor reduced items and items like Over-Robes.
+            /// </summary>
+            [Ephemeral]
+            [ServerOnly]
+            VisualClothingPriority = 9013,
+            [ServerOnly]
+            SquelchGlobal = 9014,
+
+            /// <summary>
+            /// TODO: This is a place holder for future use. See PlacementPosition
+            /// This is the sort order for items in a container
+            /// </summary>
+            [ServerOnly]
+            InventoryOrder = 9015,
+
+            // Decal Specific
+            WeenieClassId_Decal = 218103808,
+            Icon_Decal_DID = 218103809,
+            Container_Decal_IID = 218103810,
+            Landblock_Decal = 218103811,
+            ItemSlots_Decal = 218103812,
+            PackSlots_Decal = 218103813,
+            StackCount_Decal = 218103814,
+            StackMax_Decal = 218103815,
+            Spell_Decal_DID = 218103816,
+            SlotLegacy_Decal = 218103817,
+            Wielder_Decal_IID = 218103818,
+            WieldingSlot_Decal = 218103819,
+            Monarch_Decal_IID = 218103820,
+            Coverage_Decal = 218103821,
+            EquipableSlots_Decal = 218103822,
+            EquipType_Decal = 218103823,
+            IconOutline_Decal = 218103824,
+            MissileType_Decal = 218103825,
+            UsageMask_Decal = 218103826,
+            HouseOwner_Decal_IID = 218103827,
+            HookMask_Decal = 218103828,
+            HookType_Decal = 218103829,
+            Setup_Decal_DID = 218103830,
+            ObjectDescriptionFlags_Decal = 218103831,
+            CreateFlags1_Decal = 218103832,
+            CreateFlags2_Decal = 218103833,
+            Category_Decal = 218103834,
+            Behavior_Decal = 218103835,
+            MagicDef_Decal = 218103836,
+            SpecialProps_Decal = 218103837,
+            SpellCount_Decal = 218103838,
+            WeapSpeed_Decal = 218103839,
+            EquipSkill_Decal = 218103840,
+            DamageType_Decal = 218103841,
+            MaxDamage_Decal = 218103842,
+            Unknown10_Decal = 218103843, // CurrentWieldLocation?
+            Unknown100000_Decal = 218103844, // RadarBlipColor ???
+            Unknown800000_Decal = 218103845,
+            Unknown8000000_Decal = 218103846,
+            PhysicsDataFlags_Decal = 218103847,
+            ActiveSpellCount_Decal = 218103848,
+            IconOverlay_Decal_DID = 218103849,
+            IconUnderlay_Decal_DID = 218103850,
+            Slot_Decal = 231735296,
+        }
+
+        public static class IntValueKeyTools
+        {
+            /// <summary>
+            /// Converts a decal specific IntValueKey to the actual IntValueKey.
+            /// If this is not an IntValueKey, 0 will be returned.
+            /// </summary>
+            public static uint ConvertToInt(IntValueKey input)
+            {
+                if (input == IntValueKey.Category_Decal) return (int)IntValueKey.ItemType;
+                if (input == IntValueKey.Coverage_Decal) return (int)IntValueKey.ClothingPriority;
+                if (input == IntValueKey.ItemSlots_Decal) return (int)IntValueKey.ItemsCapacity;
+                if (input == IntValueKey.PackSlots_Decal) return (int)IntValueKey.ContainersCapacity;
+                if (input == IntValueKey.EquipableSlots_Decal) return (int)IntValueKey.ValidLocations;
+                //if (input == IntValueKey.WieldingSlot_Decal)	return (int)IntValueKey.CurrentWieldedLocation;
+                if (input == IntValueKey.StackMax_Decal) return (int)IntValueKey.MaxStackSize;
+                if (input == IntValueKey.StackCount_Decal) return (int)IntValueKey.StackSize;
+                if (input == IntValueKey.IconOutline_Decal) return (int)IntValueKey.UiEffects;
+                if (input == IntValueKey.MaxDamage_Decal) return (int)IntValueKey.Damage;
+                if (input == IntValueKey.DamageType_Decal) return (int)IntValueKey.DamageType;
+                if (input == IntValueKey.EquipSkill_Decal) return (int)IntValueKey.WeaponSkill;
+                if (input == IntValueKey.WeapSpeed_Decal) return (int)IntValueKey.WeaponTime;
+                if (input == IntValueKey.MissileType_Decal) return (int)IntValueKey.AmmoType;
+                if (input == IntValueKey.EquipType_Decal) return (int)IntValueKey.CombatUse;
+                if (input == IntValueKey.UsageMask_Decal) return (int)IntValueKey.TargetType;
+                if (input == IntValueKey.HookMask_Decal) return (int)IntValueKey.HookType;
+
+                return 0;
+            }
+
+            /// <summary>
+            /// If input is not a IID, 0 will be returned
+            /// </summary>
+            public static uint ConvertToIID(IntValueKey input)
+            {
+                if (input == IntValueKey.Container_Decal_IID) return 2;  // CONTAINER_IID
+                if (input == IntValueKey.Wielder_Decal_IID) return 3;  // WIELDER_IID
+                if (input == IntValueKey.Monarch_Decal_IID) return 26; // MONARCH_IID
+                if (input == IntValueKey.HouseOwner_Decal_IID) return 32; // HOUSE_OWNER_IID
+
+                return 0;
+            }
+
+            /// <summary>
+            /// If input is not a DID, 0 will be returned
+            /// </summary>
+            public static uint ConvertToDID(IntValueKey input)
+            {
+                if (input == IntValueKey.Setup_Decal_DID) return 1;  // SETUP_DID
+                if (input == IntValueKey.Icon_Decal_DID) return 8;  // ICON_DID
+                if (input == IntValueKey.Spell_Decal_DID) return 28; // SPELL_DID
+                if (input == IntValueKey.IconOverlay_Decal_DID) return 50; // ICON_OVERLAY_DID
+                if (input == IntValueKey.IconUnderlay_Decal_DID) return 52; // ICON_UNDERLAY_DID
+
+                return 0;
+            }
+        }
+
+        // https://github.com/ACEmulator/ACE/blob/master/Source/ACE.Entity/Enum/Properties/PropertyBool.cs
+        public enum BoolValueKey
+        {
+            // properties marked as ServerOnly are properties we never saw in PCAPs, from here:
+            // http://ac.yotesfan.com/ace_object/not_used_enums.php
+            // source: @OptimShi
+            // description attributes are used by the weenie editor for a cleaner display name
+
+            Undef = 0,
+            [Ephemeral]
+            [ServerOnly]
+            Stuck = 1,
+            [Ephemeral]
+            Open = 2,
+            Locked = 3,
+            RotProof = 4,
+            AllegianceUpdateRequest = 5,
+            AiUsesMana = 6,
+            AiUseHumanMagicAnimations = 7,
+            AllowGive = 8,
+            CurrentlyAttacking = 9,
+            AttackerAi = 10,
+            [ServerOnly]
+            IgnoreCollisions = 11,
+            [ServerOnly]
+            ReportCollisions = 12,
+            [ServerOnly]
+            Ethereal = 13,
+            [ServerOnly]
+            GravityStatus = 14,
+            [ServerOnly]
+            LightsStatus = 15,
+            [ServerOnly]
+            ScriptedCollision = 16,
+            [ServerOnly]
+            Inelastic = 17,
+            [ServerOnly]
+            [Ephemeral]
+            Visibility = 18,
+            [ServerOnly]
+            Attackable = 19,
+            SafeSpellComponents = 20,
+            AdvocateState = 21,
+            Inscribable = 22,
+            DestroyOnSell = 23,
+            UiHidden = 24,
+            IgnoreHouseBarriers = 25,
+            HiddenAdmin = 26,
+            PkWounder = 27,
+            PkKiller = 28,
+            NoCorpse = 29,
+            UnderLifestoneProtection = 30,
+            ItemManaUpdatePending = 31,
+            [Ephemeral]
+            GeneratorStatus = 32,
+            [Ephemeral]
+            ResetMessagePending = 33,
+            DefaultOpen = 34,
+            DefaultLocked = 35,
+            DefaultOn = 36,
+            OpenForBusiness = 37,
+            IsFrozen = 38,
+            DealMagicalItems = 39,
+            LogoffImDead = 40,
+            ReportCollisionsAsEnvironment = 41,
+            AllowEdgeSlide = 42,
+            AdvocateQuest = 43,
+            [Ephemeral]
+            [SendOnLogin]
+            IsAdmin = 44,
+            [Ephemeral]
+            [SendOnLogin]
+            IsArch = 45,
+            [Ephemeral]
+            [SendOnLogin]
+            IsSentinel = 46,
+            [SendOnLogin]
+            IsAdvocate = 47,
+            CurrentlyPoweringUp = 48,
+            [Ephemeral]
+            GeneratorEnteredWorld = 49,
+            NeverFailCasting = 50,
+            VendorService = 51,
+            AiImmobile = 52,
+            DamagedByCollisions = 53,
+            IsDynamic = 54,
+            IsHot = 55,
+            IsAffecting = 56,
+            AffectsAis = 57,
+            SpellQueueActive = 58,
+            [Ephemeral]
+            GeneratorDisabled = 59,
+            IsAcceptingTells = 60,
+            LoggingChannel = 61,
+            OpensAnyLock = 62,
+            UnlimitedUse = 63,
+            GeneratedTreasureItem = 64,
+            IgnoreMagicResist = 65,
+            IgnoreMagicArmor = 66,
+            AiAllowTrade = 67,
+            [SendOnLogin]
+            SpellComponentsRequired = 68,
+            IsSellable = 69,
+            IgnoreShieldsBySkill = 70,
+            NoDraw = 71,
+            ActivationUntargeted = 72,
+            HouseHasGottenPriorityBootPos = 73,
+            [Ephemeral]
+            GeneratorAutomaticDestruction = 74,
+            HouseHooksVisible = 75,
+            HouseRequiresMonarch = 76,
+            HouseHooksEnabled = 77,
+            HouseNotifiedHudOfHookCount = 78,
+            AiAcceptEverything = 79,
+            IgnorePortalRestrictions = 80,
+            RequiresBackpackSlot = 81,
+            DontTurnOrMoveWhenGiving = 82,
+            [ServerOnly]
+            NpcLooksLikeObject = 83,
+            IgnoreCloIcons = 84,
+            AppraisalHasAllowedWielder = 85,
+            ChestRegenOnClose = 86,
+            LogoffInMinigame = 87,
+            PortalShowDestination = 88,
+            PortalIgnoresPkAttackTimer = 89,
+            NpcInteractsSilently = 90,
+            Retained = 91,
+            IgnoreAuthor = 92,
+            Limbo = 93,
+            AppraisalHasAllowedActivator = 94,
+            ExistedBeforeAllegianceXpChanges = 95,
+            IsDeaf = 96,
+            [Ephemeral]
+            [SendOnLogin]
+            IsPsr = 97,
+            Invincible = 98,
+            Ivoryable = 99,
+            Dyable = 100,
+            CanGenerateRare = 101,
+            CorpseGeneratedRare = 102,
+            NonProjectileMagicImmune = 103,
+            [SendOnLogin]
+            ActdReceivedItems = 104,
+            Unknown105 = 105,
+            [Ephemeral]
+            FirstEnterWorldDone = 106,
+            RecallsDisabled = 107,
+            RareUsesTimer = 108,
+            ActdPreorderReceivedItems = 109,
+            Afk = 110,
+            IsGagged = 111,
+            ProcSpellSelfTargeted = 112,
+            IsAllegianceGagged = 113,
+            EquipmentSetTriggerPiece = 114,
+            Uninscribe = 115,
+            WieldOnUse = 116,
+            ChestClearedWhenClosed = 117,
+            NeverAttack = 118,
+            SuppressGenerateEffect = 119,
+            TreasureCorpse = 120,
+            EquipmentSetAddLevel = 121,
+            BarberActive = 122,
+            TopLayerPriority = 123,
+            NoHeldItemShown = 124,
+            LoginAtLifestone = 125,
+            OlthoiPk = 126,
+            [SendOnLogin]
+            Account15Days = 127,
+            HadNoVitae = 128,
+            NoOlthoiTalk = 129,
+            AutowieldLeft = 130,
+
+
+            // ACE Specific
+            /* custom */
+            [ServerOnly]
+            LinkedPortalOneSummon = 9001,
+            [ServerOnly]
+            LinkedPortalTwoSummon = 9002,
+            [ServerOnly]
+            HouseEvicted = 9003,
+            [ServerOnly]
+            UntrainedSkills = 9004,
+
+
+            // Decal Specific
+            Lockable_Decal = 201326592,
+            Inscribable_Decal = 201326593,
+        }
+
+        public static class BoolValueKeyTools
+        {
+            /// <summary>
+            /// Converts a decal specific IntValueKey to the actual IntValueKey.
+            /// If this is not an IntValueKey, 0 will be returned.
+            /// </summary>
+            public static uint ConvertToString(BoolValueKey input)
+            {
+                if (input == BoolValueKey.Lockable_Decal) return (int)BoolValueKey.Locked;
+                if (input == BoolValueKey.Inscribable_Decal) return (int)BoolValueKey.Inscribable;
+
+                return 0;
+            }
+        }
+
+        // https://github.com/ACEmulator/ACE/blob/master/Source/ACE.Entity/Enum/Properties/PropertyFloat.cs
+        public enum DoubleValueKey
+        {
+            // properties marked as ServerOnly are properties we never saw in PCAPs, from here:
+            // http://ac.yotesfan.com/ace_object/not_used_enums.php
+            // source: @OptimShi
+            // description attributes are used by the weenie editor for a cleaner display name
+
+            Undef = 0,
+            HeartbeatInterval = 1,
+            [Ephemeral]
+            HeartbeatTimestamp = 2,
+            HealthRate = 3,
+            StaminaRate = 4,
+            ManaRate = 5,
+            HealthUponResurrection = 6,
+            StaminaUponResurrection = 7,
+            ManaUponResurrection = 8,
+            StartTime = 9,
+            StopTime = 10,
+            ResetInterval = 11,
+            Shade = 12,
+            ArmorModVsSlash = 13,
+            ArmorModVsPierce = 14,
+            ArmorModVsBludgeon = 15,
+            ArmorModVsCold = 16,
+            ArmorModVsFire = 17,
+            ArmorModVsAcid = 18,
+            ArmorModVsElectric = 19,
+            CombatSpeed = 20,
+            WeaponLength = 21,
+            DamageVariance = 22,
+            CurrentPowerMod = 23,
+            AccuracyMod = 24,
+            StrengthMod = 25,
+            MaximumVelocity = 26,
+            RotationSpeed = 27,
+            MotionTimestamp = 28,
+            WeaponDefense = 29,
+            WimpyLevel = 30,
+            VisualAwarenessRange = 31,
+            AuralAwarenessRange = 32,
+            PerceptionLevel = 33,
+            PowerupTime = 34,
+            MaxChargeDistance = 35,
+            ChargeSpeed = 36,
+            BuyPrice = 37,
+            SellPrice = 38,
+            DefaultScale = 39,
+            LockpickMod = 40,
+            RegenerationInterval = 41,
+            RegenerationTimestamp = 42,
+            GeneratorRadius = 43,
+            TimeToRot = 44,
+            DeathTimestamp = 45,
+            PkTimestamp = 46,
+            VictimTimestamp = 47,
+            LoginTimestamp = 48,
+            CreationTimestamp = 49,
+            MinimumTimeSincePk = 50,
+            DeprecatedHousekeepingPriority = 51,
+            AbuseLoggingTimestamp = 52,
+            LastPortalTeleportTimestamp = 53,
+            UseRadius = 54,
+            HomeRadius = 55,
+            ReleasedTimestamp = 56,
+            MinHomeRadius = 57,
+            Facing = 58,
+            ResetTimestamp = 59,
+            LogoffTimestamp = 60,
+            EconRecoveryInterval = 61,
+            WeaponOffense = 62,
+            DamageMod = 63,
+            ResistSlash = 64,
+            ResistPierce = 65,
+            ResistBludgeon = 66,
+            ResistFire = 67,
+            ResistCold = 68,
+            ResistAcid = 69,
+            ResistElectric = 70,
+            ResistHealthBoost = 71,
+            ResistStaminaDrain = 72,
+            ResistStaminaBoost = 73,
+            ResistManaDrain = 74,
+            ResistManaBoost = 75,
+            [Ephemeral]
+            Translucency = 76,
+            PhysicsScriptIntensity = 77,
+            Friction = 78,
+            Elasticity = 79,
+            AiUseMagicDelay = 80,
+            ItemMinSpellcraftMod = 81,
+            ItemMaxSpellcraftMod = 82,
+            ItemRankProbability = 83,
+            Shade2 = 84,
+            Shade3 = 85,
+            Shade4 = 86,
+            ItemEfficiency = 87,
+            ItemManaUpdateTimestamp = 88,
+            SpellGestureSpeedMod = 89,
+            SpellStanceSpeedMod = 90,
+            AllegianceAppraisalTimestamp = 91,
+            PowerLevel = 92,
+            AccuracyLevel = 93,
+            AttackAngle = 94,
+            AttackTimestamp = 95,
+            CheckpointTimestamp = 96,
+            SoldTimestamp = 97,
+            UseTimestamp = 98,
+            UseLockTimestamp = 99,
+            HealkitMod = 100,
+            FrozenTimestamp = 101,
+            HealthRateMod = 102,
+            AllegianceSwearTimestamp = 103,
+            ObviousRadarRange = 104,
+            HotspotCycleTime = 105,
+            HotspotCycleTimeVariance = 106,
+            SpamTimestamp = 107,
+            SpamRate = 108,
+            BondWieldedTreasure = 109,
+            BulkMod = 110,
+            SizeMod = 111,
+            GagTimestamp = 112,
+            GeneratorUpdateTimestamp = 113,
+            DeathSpamTimestamp = 114,
+            DeathSpamRate = 115,
+            WildAttackProbability = 116,
+            FocusedProbability = 117,
+            CrashAndTurnProbability = 118,
+            CrashAndTurnRadius = 119,
+            CrashAndTurnBias = 120,
+            GeneratorInitialDelay = 121,
+            AiAcquireHealth = 122,
+            AiAcquireStamina = 123,
+            AiAcquireMana = 124,
+            /// <summary>
+            /// this had a default of "1" - leaving comment to investigate potential options for defaulting these things (125)
+            /// </summary>
+            [SendOnLogin]
+            ResistHealthDrain = 125,
+            LifestoneProtectionTimestamp = 126,
+            AiCounteractEnchantment = 127,
+            AiDispelEnchantment = 128,
+            TradeTimestamp = 129,
+            AiTargetedDetectionRadius = 130,
+            EmotePriority = 131,
+            [Ephemeral]
+            LastTeleportStartTimestamp = 132,
+            EventSpamTimestamp = 133,
+            EventSpamRate = 134,
+            InventoryOffset = 135,
+            CriticalMultiplier = 136,
+            ManaStoneDestroyChance = 137,
+            SlayerDamageBonus = 138,
+            AllegianceInfoSpamTimestamp = 139,
+            AllegianceInfoSpamRate = 140,
+            NextSpellcastTimestamp = 141,
+            [Ephemeral]
+            AppraisalRequestedTimestamp = 142,
+            AppraisalHeartbeatDueTimestamp = 143,
+            ManaConversionMod = 144,
+            LastPkAttackTimestamp = 145,
+            FellowshipUpdateTimestamp = 146,
+            CriticalFrequency = 147,
+            LimboStartTimestamp = 148,
+            WeaponMissileDefense = 149,
+            WeaponMagicDefense = 150,
+            IgnoreShield = 151,
+            ElementalDamageMod = 152,
+            StartMissileAttackTimestamp = 153,
+            LastRareUsedTimestamp = 154,
+            IgnoreArmor = 155,
+            ProcSpellRate = 156,
+            ResistanceModifier = 157,
+            AllegianceGagTimestamp = 158,
+            AbsorbMagicDamage = 159,
+            CachedMaxAbsorbMagicDamage = 160,
+            GagDuration = 161,
+            AllegianceGagDuration = 162,
+            [SendOnLogin]
+            GlobalXpMod = 163,
+            HealingModifier = 164,
+            ArmorModVsNether = 165,
+            ResistNether = 166,
+            CooldownDuration = 167,
+            [SendOnLogin]
+            WeaponAuraOffense = 168,
+            [SendOnLogin]
+            WeaponAuraDefense = 169,
+            [SendOnLogin]
+            WeaponAuraElemental = 170,
+            [SendOnLogin]
+            WeaponAuraManaConv = 171,
+
+
+            // ACE Specific
+            [ServerOnly]
+            PCAPRecordedWorkmanship = 8004,
+            [ServerOnly]
+            PCAPRecordedVelocityX = 8010,
+            [ServerOnly]
+            PCAPRecordedVelocityY = 8011,
+            [ServerOnly]
+            PCAPRecordedVelocityZ = 8012,
+            [ServerOnly]
+            PCAPRecordedAccelerationX = 8013,
+            [ServerOnly]
+            PCAPRecordedAccelerationY = 8014,
+            [ServerOnly]
+            PCAPRecordedAccelerationZ = 8015,
+            [ServerOnly]
+            PCAPRecordeOmegaX = 8016,
+            [ServerOnly]
+            PCAPRecordeOmegaY = 8017,
+            [ServerOnly]
+            PCAPRecordeOmegaZ = 8018,
+
+
+            // Decal Specific
+            SlashProt_Decal = 167772160,
+            PierceProt_Decal = 167772161,
+            BludgeonProt_Decal = 167772162,
+            AcidProt_Decal = 167772163,
+            LightningProt_Decal = 167772164,
+            FireProt_Decal = 167772165,
+            ColdProt_Decal = 167772166,
+            Heading_Decal = 167772167,
+            ApproachDistance_Decal = 167772168,
+            SalvageWorkmanship_Decal = 167772169,
+            Scale_Decal = 167772170,
+            Variance_Decal = 167772171,
+            AttackBonus_Decal = 167772172,
+            Range_Decal = 167772173,
+            DamageBonus_Decal = 167772174,
+        }
+
+        public static class DoubleValueKeyTools
+        {
+            /// <summary>
+            /// Converts a decal specific IntValueKey to the actual IntValueKey.
+            /// If this is not an IntValueKey, 0 will be returned.
+            /// </summary>
+            public static uint ConvertToDouble(DoubleValueKey input)
+            {
+                if (input == DoubleValueKey.SlashProt_Decal) return (int)DoubleValueKey.ArmorModVsSlash;
+                if (input == DoubleValueKey.PierceProt_Decal) return (int)DoubleValueKey.ArmorModVsPierce;
+                if (input == DoubleValueKey.BludgeonProt_Decal) return (int)DoubleValueKey.ArmorModVsBludgeon;
+                if (input == DoubleValueKey.AcidProt_Decal) return (int)DoubleValueKey.ArmorModVsAcid;
+                if (input == DoubleValueKey.LightningProt_Decal) return (int)DoubleValueKey.ArmorModVsElectric;
+                if (input == DoubleValueKey.FireProt_Decal) return (int)DoubleValueKey.ArmorModVsFire;
+                if (input == DoubleValueKey.ColdProt_Decal) return (int)DoubleValueKey.ArmorModVsCold;
+
+                if (input == DoubleValueKey.ApproachDistance_Decal) return (int)DoubleValueKey.UseRadius;
+                if (input == DoubleValueKey.Scale_Decal) return (int)DoubleValueKey.DefaultScale;
+                if (input == DoubleValueKey.Variance_Decal) return (int)DoubleValueKey.DamageVariance;
+                if (input == DoubleValueKey.AttackBonus_Decal) return (int)DoubleValueKey.WeaponOffense; ;
+                if (input == DoubleValueKey.Range_Decal) return (int)DoubleValueKey.MaximumVelocity;
+                if (input == DoubleValueKey.DamageBonus_Decal) return (int)DoubleValueKey.DamageMod;
+
+                return 0;
+            }
+        }
+
+        // https://github.com/ACEmulator/ACE/blob/master/Source/ACE.Entity/Enum/Properties/PropertyString.cs
+        public enum StringValueKey
+        {
+            // properties marked as ServerOnly are properties we never saw in PCAPs, from here:
+            // http://ac.yotesfan.com/ace_object/not_used_enums.php
+            // source: @OptimShi
+            // description attributes are used by the weenie editor for a cleaner display name
+            Undef = 0,
+            [SendOnLogin]
+            Name = 1,
+            /// <summary>
+            /// default "Adventurer"
+            /// </summary>
+            Title = 2,
+            Sex = 3,
+            HeritageGroup = 4,
+            Template = 5,
+            AttackersName = 6,
+            Inscription = 7,
+            [Description("Scribe Name")]
+            ScribeName = 8,
+            VendorsName = 9,
+            Fellowship = 10,
+            MonarchsName = 11,
+            [ServerOnly]
+            LockCode = 12,
+            [ServerOnly]
+            KeyCode = 13,
+            Use = 14,
+            ShortDesc = 15,
+            LongDesc = 16,
+            ActivationTalk = 17,
+            [ServerOnly]
+            UseMessage = 18,
+            ItemHeritageGroupRestriction = 19,
+            PluralName = 20,
+            MonarchsTitle = 21,
+            ActivationFailure = 22,
+            ScribeAccount = 23,
+            TownName = 24,
+            CraftsmanName = 25,
+            UsePkServerError = 26,
+            ScoreCachedText = 27,
+            ScoreDefaultEntryFormat = 28,
+            ScoreFirstEntryFormat = 29,
+            ScoreLastEntryFormat = 30,
+            ScoreOnlyEntryFormat = 31,
+            ScoreNoEntry = 32,
+            [ServerOnly]
+            Quest = 33,
+            GeneratorEvent = 34,
+            PatronsTitle = 35,
+            HouseOwnerName = 36,
+            QuestRestriction = 37,
+            AppraisalPortalDestination = 38,
+            TinkerName = 39,
+            ImbuerName = 40,
+            HouseOwnerAccount = 41,
+            DisplayName = 42,
+            DateOfBirth = 43,
+            ThirdPartyApi = 44,
+            KillQuest = 45,
+            Afk = 46,
+            AllegianceName = 47,
+            AugmentationAddQuest = 48,
+            KillQuest2 = 49,
+            KillQuest3 = 50,
+            UseSendsSignal = 51,
+
+            [Description("Gear Plating Name")]
+            GearPlatingName = 52,
+
+
+            // ACE Specific
+            [ServerOnly]
+            PCAPRecordedCurrentMotionState = 8006,
+            [ServerOnly]
+            PCAPRecordedServerName = 8031,
+            [ServerOnly]
+            PCAPRecordedCharacterName = 8032,
+
+            /* custom */
+            [ServerOnly]
+            AllegianceMotd = 9001,
+            [ServerOnly]
+            AllegianceMotdSetBy = 9002,
+            [ServerOnly]
+            AllegianceSpeakerTitle = 9003,
+            [ServerOnly]
+            AllegianceSeneschalTitle = 9004,
+            [ServerOnly]
+            AllegianceCastellanTitle = 9005,
+            [ServerOnly]
+            GodState = 9006,
+            [ServerOnly]
+            TinkerLog = 9007,
+
+
+            // Decal Specific
+            SecondaryName_Decal = 184549376,
+        }
+
+        public static class StringValueKeyTools
+        {
+            /// <summary>
+            /// Converts a decal specific IntValueKey to the actual IntValueKey.
+            /// If this is not an IntValueKey, 0 will be returned.
+            /// </summary>
+            public static uint ConvertToString(StringValueKey input)
+            {
+                if (input == StringValueKey.SecondaryName_Decal) return (int)StringValueKey.PluralName;
+
+                return 0;
+            }
         }
     }
 }
