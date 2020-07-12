@@ -4,8 +4,8 @@ using System.ComponentModel;
 using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading;
+using System.Web.Script.Serialization;
 using System.Windows.Forms;
 
 using ACE.Database.Models.World;
@@ -113,6 +113,7 @@ namespace aclogview
 
                 filesToProcess.AddRange(Directory.GetFiles(txtSearchPathRoot.Text, "*.pcap", SearchOption.AllDirectories));
                 filesToProcess.AddRange(Directory.GetFiles(txtSearchPathRoot.Text, "*.pcapng", SearchOption.AllDirectories));
+                filesToProcess.AddRange(Directory.GetFiles(txtSearchPathRoot.Text, "*.csv", SearchOption.AllDirectories));
 
                 txtSearchPathRoot.Enabled = false;
                 btnChangeSearchPathRoot.Enabled = false;
@@ -176,7 +177,10 @@ namespace aclogview
                 {
                     var fileStart = DateTime.Now;
                     System.Diagnostics.Debug.WriteLine($"Processing file {currentFile}");
-                    ProcessFileForBuild(currentFile);
+                    if (Path.GetExtension(currentFile) == ".csv")
+                        ProcessCSVFileForBuild(currentFile);
+                    else
+                        ProcessFileForBuild(currentFile);
                     System.Diagnostics.Debug.WriteLine($"File process started at {fileStart.ToString()}, completed at {DateTime.Now.ToString()} and took {(DateTime.Now - fileStart).TotalMinutes} minutes.");
                 }
                 catch (Exception ex)
@@ -265,6 +269,107 @@ namespace aclogview
             Interlocked.Increment(ref filesProcessed);
         }
 
+        private void ProcessCSVFileForBuild(string fileName)
+        {
+            var records = File.ReadAllLines(fileName);
+
+            // Temperorary objects
+            var aceWorldFrags = new List<FragDatListFile.FragDatInfo>();
+
+            foreach (var record in records)
+            {
+                if (searchAborted || Disposing || IsDisposed)
+                    return;
+
+                var rawDataHdr = "{\"RawData\":\"";
+
+                if (!record.Contains(rawDataHdr))
+                    continue;
+
+                var rawDataHdrPos = record.IndexOf(rawDataHdr);
+
+                var rawDataString = record.Substring(rawDataHdrPos);
+                var rawDataStringTrimmed = rawDataString.Substring(0, rawDataString.Length - 1);
+
+                var jsonSerializer = new JavaScriptSerializer();
+
+                Dictionary<string, object> result = (Dictionary<string, object>)jsonSerializer.DeserializeObject(rawDataStringTrimmed);
+
+                if (result.Count != 1)
+                    continue;
+
+                try
+                {
+                    Interlocked.Increment(ref fragmentsProcessed);
+
+                    FragDatListFile.PacketDirection packetDirection = FragDatListFile.PacketDirection.ServerToClient;
+
+                    var data = HexStringToByteArray((string)result.Values.FirstOrDefault());
+
+                    BinaryReader fragDataReader = new BinaryReader(new MemoryStream(data));
+
+                    var messageCode = fragDataReader.ReadUInt32();
+
+                    uint opCode = 0;
+
+                    if (messageCode == (uint)PacketOpcode.WEENIE_ORDERED_EVENT || messageCode == (uint)PacketOpcode.ORDERED_EVENT)
+                    {
+                        if (messageCode == (uint)PacketOpcode.WEENIE_ORDERED_EVENT)
+                        {
+                            WOrderHdr orderHeader = WOrderHdr.read(fragDataReader);
+                            opCode = fragDataReader.ReadUInt32();
+                        }
+                        else if (messageCode == (uint)PacketOpcode.ORDERED_EVENT)
+                        {
+                            OrderHdr orderHeader = OrderHdr.read(fragDataReader);
+                            opCode = fragDataReader.ReadUInt32();
+                        }
+                    }
+                    else
+                    {
+                        opCode = messageCode;
+                    }
+
+                    if (opCode == (uint)PacketOpcode.Evt_Physics__CreateObject_ID
+                        || opCode == (uint)PacketOpcode.APPRAISAL_INFO_EVENT
+                        || opCode == (uint)PacketOpcode.BOOK_DATA_RESPONSE_EVENT
+                        || opCode == (uint)PacketOpcode.BOOK_PAGE_DATA_RESPONSE_EVENT
+                        || opCode == (uint)PacketOpcode.Evt_Writing__BookData_ID
+                        || opCode == (uint)PacketOpcode.Evt_Writing__BookPageData_ID
+                        || opCode == (uint)PacketOpcode.VENDOR_INFO_EVENT
+                        || opCode == (uint)PacketOpcode.Evt_House__Recv_HouseProfile_ID
+                        || opCode == (uint)PacketOpcode.Evt_House__Recv_HouseData_ID
+                        || opCode == (uint)PacketOpcode.Evt_Login__WorldInfo_ID
+                        )
+                    {
+                        Interlocked.Increment(ref totalHits);
+
+                        aceWorldFrags.Add(new FragDatListFile.FragDatInfo(packetDirection, 1, data));
+                    }
+                }
+                catch
+                {
+                    // Do something with the exception maybe
+                    Interlocked.Increment(ref totalExceptions);
+                }
+            }
+
+            string outputFileName = (chkIncludeFullPathAndFileName.Checked ? fileName : (Path.GetFileName(fileName)));
+
+            aceWorldFragDatFile.Write(new KeyValuePair<string, IList<FragDatListFile.FragDatInfo>>(outputFileName, aceWorldFrags));
+
+            Interlocked.Increment(ref filesProcessed);
+        }
+
+        public static byte[] HexStringToByteArray(string hex)
+        {
+            byte[] bytes = new byte[hex.Length / 2];
+
+            for (int i = 0; i < hex.Length; i += 2)
+                bytes[i / 2] = Convert.ToByte(hex.Substring(i, 2), 16);
+
+            return bytes;
+        }
 
         private void btnStartProcess_Click(object sender, EventArgs e)
         {
@@ -1562,6 +1667,8 @@ namespace aclogview
 
                             SetWeenieType(wo);
 
+                            wo.WeeniePropertiesDID.Add(new ACE.Database.Models.World.WeeniePropertiesDID { Type = 8044, Value = itemTemplates[wo.Type].wdesc._wcid });
+
                             //if (!itemTemplates.ContainsKey(wo.Type))
                             //    itemTemplates.Add(wo.Type, parsed);
 
@@ -1728,9 +1835,21 @@ namespace aclogview
                         intV.Value = -1;
                 }
 
+                var appraisalItemSkill = weenie.WeeniePropertiesInt.FirstOrDefault(y => y.Type == (ushort)ACE.Entity.Enum.Properties.PropertyInt.AppraisalItemSkill);
+                if (appraisalItemSkill != null)
+                {
+                    weenie.WeeniePropertiesInt.Remove(appraisalItemSkill);
+
+                    weenie.WeeniePropertiesDID.Add(new WeeniePropertiesDID { Type = (ushort)ACE.Entity.Enum.Properties.PropertyDataId.ItemSkillLimit, Value = (uint)appraisalItemSkill.Value });
+                }
+
                 var lockpickSuccess = weenie.WeeniePropertiesInt.FirstOrDefault(y => y.Type == (ushort)ACE.Entity.Enum.Properties.PropertyInt.AppraisalLockpickSuccessPercent);
                 if (lockpickSuccess != null)
                     weenie.WeeniePropertiesInt.Remove(lockpickSuccess);
+
+                var appraisalLongDescDecoration = weenie.WeeniePropertiesInt.FirstOrDefault(y => y.Type == (ushort)ACE.Entity.Enum.Properties.PropertyInt.AppraisalLongDescDecoration);
+                if (appraisalLongDescDecoration != null)
+                    weenie.WeeniePropertiesInt.Remove(appraisalLongDescDecoration);
 
                 var openLock = weenie.WeeniePropertiesBool.Where(y => y.Type == (ushort)ACE.Entity.Enum.Properties.PropertyBool.Open || y.Type == (ushort)ACE.Entity.Enum.Properties.PropertyBool.Locked).ToList();
                 foreach (var prop in openLock)
@@ -1779,6 +1898,76 @@ namespace aclogview
                     if (portalDest != null)
                         weenie.WeeniePropertiesString.Remove(portalDest);
                 }
+
+                var procSpell = weenie.WeeniePropertiesDID.FirstOrDefault(y => y.Type == (ushort)ACE.Entity.Enum.Properties.PropertyDataId.ProcSpell);
+                if (procSpell != null)
+                {
+                    var spell = weenie.GetSpell((int)procSpell.Value);
+                    if (spell != null)
+                        weenie.WeeniePropertiesSpellBook.Remove(spell);
+                }
+
+                var didSpell = weenie.WeeniePropertiesDID.FirstOrDefault(y => y.Type == (ushort)ACE.Entity.Enum.Properties.PropertyDataId.Spell);
+                if (didSpell != null)
+                {
+                    var spell = weenie.GetSpell((int)didSpell.Value);
+                    if (spell != null)
+                        weenie.WeeniePropertiesSpellBook.Remove(spell);
+                }
+
+                //var pcapBools = weenie.WeeniePropertiesBool.ToList();
+                //foreach (var prop in pcapBools)
+                //{
+                //    if (prop.Type >= 8000)
+                //        weenie.WeeniePropertiesBool.Remove(prop);
+                //}
+                //var pcapDids = weenie.WeeniePropertiesDID.ToList();
+                //foreach (var prop in pcapDids)
+                //{
+                //    if (prop.Type == 8044) continue;
+
+                //    if (prop.Type >= 8000)
+                //        weenie.WeeniePropertiesDID.Remove(prop);
+                //}
+                //var pcapFloats = weenie.WeeniePropertiesFloat.ToList();
+                //foreach (var prop in pcapFloats)
+                //{
+                //    if (prop.Type >= 8000)
+                //        weenie.WeeniePropertiesFloat.Remove(prop);
+                //}
+                //var pcapIids = weenie.WeeniePropertiesIID.ToList();
+                //foreach (var prop in pcapIids)
+                //{
+                //    if (prop.Type >= 8000)
+                //        weenie.WeeniePropertiesIID.Remove(prop);
+                //}
+                //var pcapInts = weenie.WeeniePropertiesInt.ToList();
+                //foreach (var prop in pcapInts)
+                //{
+                //    if (prop.Type >= 8000)
+                //        weenie.WeeniePropertiesInt.Remove(prop);
+                //}
+                //var pcapInt64s = weenie.WeeniePropertiesInt64.ToList();
+                //foreach (var prop in pcapInt64s)
+                //{
+                //    if (prop.Type >= 8000)
+                //        weenie.WeeniePropertiesInt64.Remove(prop);
+                //}
+                ////var pcapPoss = weenie.WeeniePropertiesPosition.ToList();
+                ////foreach (var prop in pcapPoss)
+                ////{
+                ////    if (prop.PositionType >= 8000)
+                ////        weenie.WeeniePropertiesPosition.Remove(prop);
+                ////}
+                //var pcapStrs = weenie.WeeniePropertiesString.ToList();
+                //foreach (var prop in pcapStrs)
+                //{
+                //    if (prop.Type >= 8000)
+                //        weenie.WeeniePropertiesString.Remove(prop);
+                //}
+                //weenie.WeeniePropertiesAnimPart.Clear();
+                //weenie.WeeniePropertiesPalette.Clear();
+                //weenie.WeeniePropertiesTextureMap.Clear();
 
                 weenie.LastModified = DateTime.UtcNow;
             }
