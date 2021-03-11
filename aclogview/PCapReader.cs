@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Linq;
+using System.Net;
 
 namespace aclogview
 {
@@ -274,6 +275,13 @@ namespace aclogview
 
             // Skip non-UDP packets
             if (ipHeader.proto != 17)
+            {
+                throw new InvalidDataException();
+                //return (false, 0);
+            }
+
+            var isRetailIP = new IPAddress(ipHeader.dAddr.bytes).ToString().StartsWith("198.252.") || new IPAddress(ipHeader.sAddr.bytes).ToString().StartsWith("198.252.");
+            if (!isRetailIP)
             {
                 throw new InvalidDataException();
                 //return (false, 0);
