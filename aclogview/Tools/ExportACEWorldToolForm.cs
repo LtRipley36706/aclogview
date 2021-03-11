@@ -10,6 +10,7 @@ using System.Web.Script.Serialization;
 using System.Windows.Forms;
 using ACE.Common.Extensions;
 using ACE.Database.Models.World;
+using ACE.Entity.Enum;
 using ACE.Entity.Enum.Properties;
 using aclogview.Properties;
 using aclogview.SQLWriters;
@@ -1092,7 +1093,8 @@ namespace aclogview
                                 //if ((parsed.physicsdesc.pos.objcell_id >> 16) == 0x01EF || (parsed.physicsdesc.pos.objcell_id >> 16) == 0x0188 || parsed.physicsdesc.pos.objcell_id == 0)
                                 //if ((parsed.physicsdesc.pos.objcell_id >> 16) == 0xAE71 || (parsed.physicsdesc.pos.objcell_id >> 16) == 0x00AF || (((parsed.physicsdesc.pos.objcell_id >> 16) >= 0x00B0) && (parsed.physicsdesc.pos.objcell_id >> 16) <= 0x00B6) || parsed.physicsdesc.pos.objcell_id == 0)
                                 //if ((parsed.physicsdesc.pos.objcell_id >> 16) == 0xA2A1 || (parsed.physicsdesc.pos.objcell_id >> 16) == 0x9FA6 || (parsed.physicsdesc.pos.objcell_id >> 16) == 0xA4A7)
-                                //{
+                                //if ((parsed.physicsdesc.pos.objcell_id >> 16) == 0xE74D)
+                                {
 
                                     if (!weenies.ContainsKey(parsed.wdesc._wcid))
                                     {
@@ -1128,6 +1130,23 @@ namespace aclogview
                                                 weenieNames.Remove(wo.ClassId);
                                             }
                                         }
+
+                                        //if (wo.ClassId >= 38472 && wo.ClassId <= 38480)
+                                        //{
+                                        //    var remove = false;
+                                        //    var name = wo.GetProperty(ACE.Entity.Enum.Properties.PropertyString.Name);
+                                        //    //var type = (ACE.Entity.Enum.HookType)wo.GetProperty(ACE.Entity.Enum.Properties.PropertyInt.HookType);
+
+                                        //    if (!name.StartsWith("Eldrytch Web "))
+                                        //        remove = true;
+
+                                        //    if (remove)
+                                        //    {
+                                        //        weenies.Remove(wo.ClassId);
+                                        //        weenieNames.Remove(wo.ClassId);
+                                        //    }
+                                        //}
+
                                     }
 
                                     if (!weeniesByGUID.ContainsKey(parsed.object_id))
@@ -1185,6 +1204,8 @@ namespace aclogview
                                                             AnglesZ = parsed.physicsdesc.pos.frame.qz,
                                                             IsLinkChild = false
                                                         });
+
+                                                    processedWeeniePositions[parsed.wdesc._wcid].Add(parsed.physicsdesc.pos);
                                                 }
                                             }
                                         }
@@ -1350,6 +1371,13 @@ namespace aclogview
                                                         if (weenieNames.Values.Contains(nameToMatch))
                                                         {
                                                             var wcid = weenieNames.Where(i => i.Value == nameToMatch).FirstOrDefault().Key;
+
+                                                            if (weenies.TryGetValue(wcid, out var wo))
+                                                            {
+                                                                if (wo.Type != (int)WeenieType.Creature_WeenieType && wo.Type != (int)WeenieType.Cow_WeenieType && wo.Type != (int)WeenieType.Container_WeenieType && wo.Type != (int)WeenieType.Chest_WeenieType && wo.Type != (int)WeenieType.Vendor_WeenieType)
+                                                                    wcid = weenieNames.Where(i => i.Value == nameToMatch && i.Key != wcid).FirstOrDefault().Key;
+                                                            }
+
                                                             if (weenies.ContainsKey(wcid))
                                                             {
                                                                 if (!weenies[wcid].WeeniePropertiesCreateList.Any(y => y.WeenieClassId == parsed.wdesc._wcid))
@@ -1373,7 +1401,7 @@ namespace aclogview
                                         }
                                     }
 
-                                //}
+                                }
 
                             }
 
@@ -1592,7 +1620,7 @@ namespace aclogview
 
                                             if (!weenies[worldIDQueue[currentWorld][parsed.i_bookID]].WeeniePropertiesBookPageData.Any(y => y.PageId == i))
                                             {
-                                                weenies[worldIDQueue[currentWorld][parsed.i_bookID]].WeeniePropertiesBookPageData.Add(new ACE.Database.Models.World.WeeniePropertiesBookPageData { PageId = (uint)i, AuthorAccount = page.authorAccount.m_buffer, AuthorId = page.authorID, AuthorName = (page.authorName.m_buffer == null) ? "prewritten" : page.authorName.m_buffer, IgnoreAuthor = page.ignoreAuthor == 1, PageText = page.pageText.m_buffer });
+                                                weenies[worldIDQueue[currentWorld][parsed.i_bookID]].WeeniePropertiesBookPageData.Add(new ACE.Database.Models.World.WeeniePropertiesBookPageData { PageId = (uint)i, AuthorAccount = page.authorAccount.m_buffer, AuthorId = page.authorID, AuthorName = (page.authorName.m_buffer == null) ? "" : page.authorName.m_buffer, IgnoreAuthor = page.ignoreAuthor == 1, PageText = page.pageText.m_buffer });
                                             }
                                             i++;
                                         }
@@ -1630,7 +1658,7 @@ namespace aclogview
                                     {
                                         if (!weenies[worldIDQueue[currentWorld][parsed.bookID]].WeeniePropertiesBookPageData.Any(y => y.PageId == parsed.page))
                                         {
-                                            weenies[worldIDQueue[currentWorld][parsed.bookID]].WeeniePropertiesBookPageData.Add(new ACE.Database.Models.World.WeeniePropertiesBookPageData { PageId = parsed.page, AuthorAccount = parsed.pageData.authorAccount.m_buffer, AuthorId = parsed.pageData.authorID, AuthorName = (parsed.pageData.authorName.m_buffer == null) ? "prewritten" : parsed.pageData.authorName.m_buffer, IgnoreAuthor = parsed.pageData.ignoreAuthor == 1, PageText = parsed.pageData.pageText.m_buffer });
+                                            weenies[worldIDQueue[currentWorld][parsed.bookID]].WeeniePropertiesBookPageData.Add(new ACE.Database.Models.World.WeeniePropertiesBookPageData { PageId = parsed.page, AuthorAccount = parsed.pageData.authorAccount.m_buffer, AuthorId = parsed.pageData.authorID, AuthorName = (parsed.pageData.authorName.m_buffer == null) ? "" : parsed.pageData.authorName.m_buffer, IgnoreAuthor = parsed.pageData.ignoreAuthor == 1, PageText = parsed.pageData.pageText.m_buffer });
                                         }
 
                                         totalHits++;
@@ -2273,6 +2301,17 @@ namespace aclogview
                         intV.Value = -1;
                     if (intV.Type == (ushort)ACE.Entity.Enum.Properties.PropertyInt.ContainersCapacity && intV.Value == 255)
                         intV.Value = -1;
+
+                    if (intV.Type == (ushort)ACE.Entity.Enum.Properties.PropertyInt.Attuned)
+                    {                     
+                        if ((AttunedStatusEnum)intV.Value == AttunedStatusEnum.Attuned_AttunedStatus)
+                        {
+                            var destroyOnSellFoundOnWeenie = weenie.WeeniePropertiesBool.Where(y => y.Type == (ushort)ACE.Entity.Enum.Properties.PropertyBool.DestroyOnSell).Any();
+
+                            if (!destroyOnSellFoundOnWeenie)
+                                weenie.WeeniePropertiesBool.Add(new WeeniePropertiesBool { Type = (ushort)ACE.Entity.Enum.Properties.PropertyBool.DestroyOnSell, Value = true });
+                        }
+                    }
                 }
 
                 var appraisalItemSkill = weenie.WeeniePropertiesInt.FirstOrDefault(y => y.Type == (ushort)ACE.Entity.Enum.Properties.PropertyInt.AppraisalItemSkill);
@@ -2290,6 +2329,10 @@ namespace aclogview
                 var appraisalLongDescDecoration = weenie.WeeniePropertiesInt.FirstOrDefault(y => y.Type == (ushort)ACE.Entity.Enum.Properties.PropertyInt.AppraisalLongDescDecoration);
                 if (appraisalLongDescDecoration != null)
                     weenie.WeeniePropertiesInt.Remove(appraisalLongDescDecoration);
+
+                var currentWieldedLocation = weenie.WeeniePropertiesInt.FirstOrDefault(y => y.Type == (ushort)ACE.Entity.Enum.Properties.PropertyInt.CurrentWieldedLocation);
+                if (currentWieldedLocation != null)
+                    weenie.WeeniePropertiesInt.Remove(currentWieldedLocation);
 
                 var openLock = weenie.WeeniePropertiesBool.Where(y => y.Type == (ushort)ACE.Entity.Enum.Properties.PropertyBool.Open || y.Type == (ushort)ACE.Entity.Enum.Properties.PropertyBool.Locked).ToList();
                 foreach (var prop in openLock)
@@ -2316,6 +2359,40 @@ namespace aclogview
                         //    weenie.WeeniePropertiesBool.Remove(prop);
                         //}
 
+                    }
+                }
+
+                if (weenie.WeeniePropertiesCreateList.Count > 0)
+                {
+                    switch ((WeenieType)weenie.Type)
+                    {
+                        case WeenieType.Admin_WeenieType:
+                        case WeenieType.Chest_WeenieType:
+                        //case WeenieType.CombatPet_WeenieType:
+                        case WeenieType.Container_WeenieType:
+                        case WeenieType.Corpse_WeenieType:
+                        case WeenieType.Cow_WeenieType:
+                        case WeenieType.Creature_WeenieType:
+                        case WeenieType.GamePiece_WeenieType:
+                        //case WeenieType.Hook_WeenieType:
+                        //case WeenieType.Pet_WeenieType:
+                        case WeenieType.Sentinel_WeenieType:
+                        case WeenieType.SlumLord_WeenieType:
+                        //case WeenieType.Storage_WeenieType:
+                        case WeenieType.Vendor_WeenieType:
+                            // do nothing
+                            break;
+
+                        case WeenieType.CombatPet_WeenieType:
+                            if (weenie.GetProperty(PropertyString.Name) == "Zombie")
+                                break;
+                            else
+                                weenie.WeeniePropertiesCreateList.Clear();
+                            break;
+
+                        default:
+                            weenie.WeeniePropertiesCreateList.Clear();
+                            break;
                     }
                 }
 
@@ -2355,59 +2432,65 @@ namespace aclogview
                         weenie.WeeniePropertiesSpellBook.Remove(spell);
                 }
 
-                //var pcapBools = weenie.WeeniePropertiesBool.ToList();
-                //foreach (var prop in pcapBools)
-                //{
-                //    if (prop.Type >= 8000)
-                //        weenie.WeeniePropertiesBool.Remove(prop);
-                //}
-                //var pcapDids = weenie.WeeniePropertiesDID.ToList();
-                //foreach (var prop in pcapDids)
-                //{
-                //    if (prop.Type == 8044) continue;
+                foreach (var page in weenie.WeeniePropertiesBookPageData)
+                {
+                    if (page.AuthorAccount != "prewritten")
+                        page.AuthorAccount = "prewritten";
+                }
 
-                //    if (prop.Type >= 8000)
-                //        weenie.WeeniePropertiesDID.Remove(prop);
-                //}
-                //var pcapFloats = weenie.WeeniePropertiesFloat.ToList();
-                //foreach (var prop in pcapFloats)
+                var pcapBools = weenie.WeeniePropertiesBool.ToList();
+                foreach (var prop in pcapBools)
+                {
+                    if (prop.Type >= 8000)
+                        weenie.WeeniePropertiesBool.Remove(prop);
+                }
+                var pcapDids = weenie.WeeniePropertiesDID.ToList();
+                foreach (var prop in pcapDids)
+                {
+                    if (prop.Type == 8044) continue;
+
+                    if (prop.Type >= 8000)
+                        weenie.WeeniePropertiesDID.Remove(prop);
+                }
+                var pcapFloats = weenie.WeeniePropertiesFloat.ToList();
+                foreach (var prop in pcapFloats)
+                {
+                    if (prop.Type >= 8000)
+                        weenie.WeeniePropertiesFloat.Remove(prop);
+                }
+                var pcapIids = weenie.WeeniePropertiesIID.ToList();
+                foreach (var prop in pcapIids)
+                {
+                    if (prop.Type >= 8000)
+                        weenie.WeeniePropertiesIID.Remove(prop);
+                }
+                var pcapInts = weenie.WeeniePropertiesInt.ToList();
+                foreach (var prop in pcapInts)
+                {
+                    if (prop.Type >= 8000)
+                        weenie.WeeniePropertiesInt.Remove(prop);
+                }
+                var pcapInt64s = weenie.WeeniePropertiesInt64.ToList();
+                foreach (var prop in pcapInt64s)
+                {
+                    if (prop.Type >= 8000)
+                        weenie.WeeniePropertiesInt64.Remove(prop);
+                }
+                //var pcapPoss = weenie.WeeniePropertiesPosition.ToList();
+                //foreach (var prop in pcapPoss)
                 //{
-                //    if (prop.Type >= 8000)
-                //        weenie.WeeniePropertiesFloat.Remove(prop);
+                //    if (prop.PositionType >= 8000)
+                //        weenie.WeeniePropertiesPosition.Remove(prop);
                 //}
-                //var pcapIids = weenie.WeeniePropertiesIID.ToList();
-                //foreach (var prop in pcapIids)
-                //{
-                //    if (prop.Type >= 8000)
-                //        weenie.WeeniePropertiesIID.Remove(prop);
-                //}
-                //var pcapInts = weenie.WeeniePropertiesInt.ToList();
-                //foreach (var prop in pcapInts)
-                //{
-                //    if (prop.Type >= 8000)
-                //        weenie.WeeniePropertiesInt.Remove(prop);
-                //}
-                //var pcapInt64s = weenie.WeeniePropertiesInt64.ToList();
-                //foreach (var prop in pcapInt64s)
-                //{
-                //    if (prop.Type >= 8000)
-                //        weenie.WeeniePropertiesInt64.Remove(prop);
-                //}
-                ////var pcapPoss = weenie.WeeniePropertiesPosition.ToList();
-                ////foreach (var prop in pcapPoss)
-                ////{
-                ////    if (prop.PositionType >= 8000)
-                ////        weenie.WeeniePropertiesPosition.Remove(prop);
-                ////}
-                //var pcapStrs = weenie.WeeniePropertiesString.ToList();
-                //foreach (var prop in pcapStrs)
-                //{
-                //    if (prop.Type >= 8000)
-                //        weenie.WeeniePropertiesString.Remove(prop);
-                //}
-                //weenie.WeeniePropertiesAnimPart.Clear();
-                //weenie.WeeniePropertiesPalette.Clear();
-                //weenie.WeeniePropertiesTextureMap.Clear();
+                var pcapStrs = weenie.WeeniePropertiesString.ToList();
+                foreach (var prop in pcapStrs)
+                {
+                    if (prop.Type >= 8000)
+                        weenie.WeeniePropertiesString.Remove(prop);
+                }
+                weenie.WeeniePropertiesAnimPart.Clear();
+                weenie.WeeniePropertiesPalette.Clear();
+                weenie.WeeniePropertiesTextureMap.Clear();
 
                 weenie.LastModified = DateTime.UtcNow;
             }
@@ -2675,6 +2758,7 @@ namespace aclogview
                         || wo.GetProperty(ACE.Entity.Enum.Properties.PropertyString.Name).Contains("Stalactite")
                         || wo.GetProperty(ACE.Entity.Enum.Properties.PropertyString.Name).Contains("Boulder")
                         || wo.GetProperty(ACE.Entity.Enum.Properties.PropertyString.Name).Contains("Whirlwind")
+                        || ((((ACE.Entity.Enum.PhysicsState)(wo.GetProperty(ACE.Entity.Enum.Properties.PropertyInt.PhysicsState) ?? 0) & ACE.Entity.Enum.PhysicsState.Missile) != 0) && wo.GetProperty(ACE.Entity.Enum.Properties.PropertyDataId.Spell).HasValue)
                         )
                         wo.Type = (int)ACE.Entity.Enum.WeenieType.ProjectileSpell;
                     else if (
@@ -2747,7 +2831,10 @@ namespace aclogview
                         wo.Type = (int)ACE.Entity.Enum.WeenieType.Missile;
                     break;
                 case ACE.Entity.Enum.ItemType.Money:
-                    wo.Type = (int)ACE.Entity.Enum.WeenieType.Coin;
+                    if (wo.ClassName == "coinstack")
+                        wo.Type = (int)ACE.Entity.Enum.WeenieType.Coin;
+                    else
+                        wo.Type = (int)ACE.Entity.Enum.WeenieType.Stackable;
                     break;
                 case ACE.Entity.Enum.ItemType.Gem:
                     if ((wo.GetProperty(ACE.Entity.Enum.Properties.PropertyInt.ItemUseable) ?? 0) == (int)ACE.Entity.Enum.Usable.SourceContainedTargetContained)
